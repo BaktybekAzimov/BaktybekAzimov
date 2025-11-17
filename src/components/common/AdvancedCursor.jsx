@@ -8,6 +8,11 @@ export default function AdvancedCursor() {
   const [isClicking, setIsClicking] = useState(false);
 
   useEffect(() => {
+    // Hide default cursor
+    const style = document.createElement('style');
+    style.innerHTML = '* { cursor: none !important; }';
+    document.head.appendChild(style);
+
     const cursor = cursorRef.current;
     const cursorDot = cursorDotRef.current;
 
@@ -92,6 +97,9 @@ export default function AdvancedCursor() {
     animate();
 
     return () => {
+      // Remove style
+      document.head.removeChild(style);
+
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -138,13 +146,6 @@ export default function AdvancedCursor() {
           }`}
         />
       </div>
-
-      {/* Hide default cursor */}
-      <style jsx global>{`
-        * {
-          cursor: none !important;
-        }
-      `}</style>
     </>
   );
 }

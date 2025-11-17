@@ -33,69 +33,7 @@ import NumberCounter from '../components/common/NumberCounter';
 gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
-  const heroRef = useRef(null);
-  const number27Ref = useRef(null);
-  const scrollIndicatorRef = useRef(null);
-
   useEffect(() => {
-    // Hero animation with stagger
-    const tl = gsap.timeline();
-
-    tl.from('.hero-title', {
-      opacity: 0,
-      y: 100,
-      duration: 1.2,
-      ease: 'power4.out'
-    })
-    .from('.hero-subtitle', {
-      opacity: 0,
-      y: 60,
-      duration: 1,
-      ease: 'power3.out'
-    }, '-=0.6')
-    .from('.hero-description', {
-      opacity: 0,
-      y: 40,
-      duration: 0.8,
-      ease: 'power2.out'
-    }, '-=0.5')
-    .from('.hero-buttons > *', {
-      opacity: 0,
-      y: 30,
-      stagger: 0.2,
-      duration: 0.6,
-      ease: 'back.out(1.7)'
-    }, '-=0.4');
-
-    // Floating number 27 with glow
-    gsap.to(number27Ref.current, {
-      textShadow: '0 0 60px rgba(200, 16, 46, 1), 0 0 100px rgba(200, 16, 46, 0.8)',
-      duration: 2,
-      ease: 'sine.inOut',
-      repeat: -1,
-      yoyo: true
-    });
-
-    // Parallax effect for number 27
-    gsap.to(number27Ref.current, {
-      y: 100,
-      scrollTrigger: {
-        trigger: heroRef.current,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1
-      }
-    });
-
-    // Scroll indicator bounce
-    gsap.to(scrollIndicatorRef.current, {
-      y: 10,
-      duration: 0.8,
-      ease: 'power1.inOut',
-      repeat: -1,
-      yoyo: true
-    });
-
     // Brands section with advanced animation
     const brandCards = gsap.utils.toArray('.brand-card');
     brandCards.forEach((card, index) => {
@@ -129,18 +67,6 @@ const Home = () => {
         }
       });
     });
-
-    // Stats counters entrance
-    gsap.from('.stats-section', {
-      opacity: 0,
-      y: 100,
-      duration: 1,
-      scrollTrigger: {
-        trigger: '.stats-section',
-        start: 'top 80%'
-      }
-    });
-
   }, []);
 
   return (
