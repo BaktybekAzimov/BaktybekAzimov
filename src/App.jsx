@@ -4,8 +4,8 @@ import Header from './components/layout/Header';
 import PremiumFooter from './components/layout/PremiumFooter';
 import ScrollProgress from './components/common/ScrollProgress';
 import SmoothScroll from './components/common/SmoothScroll';
-import AdvancedCursor from './components/common/AdvancedCursor';
-import LoadingScreen from './components/common/LoadingScreen';
+// import AdvancedCursor from './components/common/AdvancedCursor';
+// import LoadingScreen from './components/common/LoadingScreen';
 
 // Pages
 import Home from './pages/Home';
@@ -19,17 +19,17 @@ import Partners from './pages/Partners';
 import Contacts from './pages/Contacts';
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   return (
     <Router>
-      {/* Loading Screen */}
-      {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
+      {/* Loading Screen - Temporarily disabled for debugging */}
+      {/* {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />} */}
 
       {/* Main App */}
       <SmoothScroll>
-        {/* Advanced Custom Cursor */}
-        <AdvancedCursor />
+        {/* Advanced Custom Cursor - Temporarily disabled for debugging */}
+        {/* <AdvancedCursor /> */}
 
         <div className="min-h-screen bg-white">
           <ScrollProgress />
