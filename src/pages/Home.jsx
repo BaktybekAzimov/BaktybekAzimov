@@ -5,9 +5,13 @@ import BrandCard from '../components/brands/BrandCard';
 import NumberCounter from '../components/common/NumberCounter';
 import Button from '../components/ui/Button';
 import WaterDrops from '../components/effects/WaterDrops';
-import AnimatedGradient from '../components/effects/AnimatedGradient';
 import ProductGallery from '../components/products/ProductGallery';
 import TestimonialsSection from '../components/sections/TestimonialsSection';
+import PremiumHero from '../components/hero/PremiumHero';
+import HorizontalProducts from '../components/sections/HorizontalProducts';
+import RevealMask from '../components/animations/RevealMask';
+import ParallaxImage from '../components/animations/ParallaxImage';
+import SplitText from '../components/animations/SplitText';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -123,124 +127,66 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="pt-20 relative overflow-hidden">
+    <div className="relative overflow-hidden">
       {/* Water drops effect */}
       <WaterDrops count={30} />
 
-      {/* Hero Section with Animated Gradient */}
-      <section
-        ref={heroRef}
-        className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      >
-        {/* Animated gradient background */}
-        <AnimatedGradient />
+      {/* Premium Hero Section - Awwwards Level */}
+      <PremiumHero />
 
-        {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-kelechek-primary rounded-full opacity-20 animate-float blur-xl" />
-          <div className="absolute top-20 right-20 w-48 h-48 bg-white rounded-full opacity-10 animate-float blur-xl" style={{animationDelay: '1s'}} />
-          <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-kelechek-primary rounded-full opacity-15 animate-float blur-xl" style={{animationDelay: '2s'}} />
-        </div>
-
-        {/* Content */}
-        <div className="container-custom text-center text-white z-10 relative px-4">
-          <div className="max-w-5xl mx-auto">
-            <h1 className="hero-title font-primary text-6xl md:text-8xl lg:text-9xl mb-6 leading-none">
-              30 ЛЕТ
-            </h1>
-            <h2 className="hero-subtitle font-primary text-4xl md:text-6xl lg:text-7xl mb-8 leading-none">
-              СОВЕРШЕНСТВА
-            </h2>
-            <p className="hero-description font-secondary text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed">
-              Premium Mineral Water from the mountains of Kyrgyzstan since 1991
-              <br />
-              <span className="text-kelechek-primary font-semibold">
-                Экспорт в 4 страны • 30+ продуктов • Международные стандарты
-              </span>
-            </p>
-
-            <div className="hero-buttons flex flex-col sm:flex-row gap-6 justify-center">
-              <Button size="large" variant="primary" className="text-xl px-10 py-5">
-                🛒 Купить продукцию
-              </Button>
-              <Button size="large" variant="outline" className="text-xl px-10 py-5">
-                🤝 Стать партнером
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Floating number 27 with extreme glow */}
-        <div
-          ref={number27Ref}
-          className="absolute bottom-10 right-10 font-primary text-9xl md:text-[200px] text-kelechek-primary opacity-30 pointer-events-none select-none"
-          style={{
-            textShadow: '0 0 40px rgba(200, 16, 46, 0.8)',
-            transform: 'translateZ(0)'
-          }}
-        >
-          27
-        </div>
-
-        {/* Scroll indicator */}
-        <div
-          ref={scrollIndicatorRef}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
-        >
-          <div className="flex flex-col items-center">
-            <span className="text-white text-sm mb-2 animate-pulse">Прокрутите вниз</span>
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section - NEW! */}
+      {/* Features Section with Premium Animations */}
       <section className="py-24 bg-white relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-kelechek-bg/30 to-transparent pointer-events-none" />
 
         <div className="container-custom relative z-10">
-          <h2 className="font-primary text-5xl md:text-6xl text-center text-kelechek-dark mb-20">
-            ПОЧЕМУ KELECHEK?
-          </h2>
+          <SplitText
+            text="ПОЧЕМУ KELECHEK?"
+            variant="fadeUp"
+            className="font-primary text-5xl md:text-6xl text-center text-kelechek-dark mb-20"
+          />
 
           <div className="grid md:grid-cols-3 gap-12">
-            <div className="feature-item text-center group">
-              <div className="w-24 h-24 bg-gradient-to-br from-kelechek-primary to-red-700 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <RevealMask direction="up" delay={0}>
+              <div className="feature-item text-center group">
+                <div className="w-24 h-24 bg-gradient-to-br from-kelechek-primary to-red-700 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-primary text-3xl text-kelechek-dark mb-4">КАЧЕСТВО</h3>
+                <p className="font-secondary text-lg text-gray-600 leading-relaxed">
+                  Строжайший контроль на каждом этапе производства. Международные сертификаты ISO, HACCP, Halal.
+                </p>
               </div>
-              <h3 className="font-primary text-3xl text-kelechek-dark mb-4">КАЧЕСТВО</h3>
-              <p className="font-secondary text-lg text-gray-600 leading-relaxed">
-                Строжайший контроль на каждом этапе производства. Международные сертификаты ISO, HACCP, Halal.
-              </p>
-            </div>
+            </RevealMask>
 
-            <div className="feature-item text-center group">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <RevealMask direction="up" delay={0.2}>
+              <div className="feature-item text-center group">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-primary text-3xl text-kelechek-dark mb-4">ПРИРОДА</h3>
+                <p className="font-secondary text-lg text-gray-600 leading-relaxed">
+                  Чистейшая вода из природных источников Кыргызстана. ADYGENE с высоты 4,216 метров!
+                </p>
               </div>
-              <h3 className="font-primary text-3xl text-kelechek-dark mb-4">ПРИРОДА</h3>
-              <p className="font-secondary text-lg text-gray-600 leading-relaxed">
-                Чистейшая вода из природных источников Кыргызстана. ADYGENE с высоты 4,216 метров!
-              </p>
-            </div>
+            </RevealMask>
 
-            <div className="feature-item text-center group">
-              <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+            <RevealMask direction="up" delay={0.4}>
+              <div className="feature-item text-center group">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="font-primary text-3xl text-kelechek-dark mb-4">ИННОВАЦИИ</h3>
+                <p className="font-secondary text-lg text-gray-600 leading-relaxed">
+                  Современное оборудование и технологии. 30 лет опыта и непрерывное развитие.
+                </p>
               </div>
-              <h3 className="font-primary text-3xl text-kelechek-dark mb-4">ИННОВАЦИИ</h3>
-              <p className="font-secondary text-lg text-gray-600 leading-relaxed">
-                Современное оборудование и технологии. 30 лет опыта и непрерывное развитие.
-              </p>
-            </div>
+            </RevealMask>
           </div>
         </div>
       </section>
@@ -298,6 +244,9 @@ const Home = () => {
 
       {/* Product Gallery */}
       <ProductGallery />
+
+      {/* Horizontal Products Scroll - Awwwards Style */}
+      <HorizontalProducts />
 
       {/* Key Numbers Section */}
       <section className="stats-section py-32 bg-gradient-to-br from-kelechek-dark via-kelechek-primary to-red-900 text-white relative overflow-hidden">

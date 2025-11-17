@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
+import PremiumFooter from './components/layout/PremiumFooter';
 import ScrollProgress from './components/common/ScrollProgress';
+import SmoothScroll from './components/common/SmoothScroll';
+import CustomCursor from './components/common/CustomCursor';
 
 // Pages
 import Home from './pages/Home';
@@ -17,26 +19,29 @@ import Contacts from './pages/Contacts';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-white">
-        <ScrollProgress />
-        <Header />
+      <SmoothScroll>
+        <CustomCursor />
+        <div className="min-h-screen bg-white">
+          <ScrollProgress />
+          <Header />
 
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/brands/kelechek" element={<Kelechek />} />
-            <Route path="/brands/adygene" element={<Adygene />} />
-            <Route path="/brands/gimalai" element={<Gimalai />} />
-            <Route path="/brands/lemonads" element={<Lemonads />} />
-            <Route path="/where-to-buy" element={<WhereToBuy />} />
-            <Route path="/partners" element={<Partners />} />
-            <Route path="/contacts" element={<Contacts />} />
-          </Routes>
-        </main>
+          <main>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/brands/kelechek" element={<Kelechek />} />
+              <Route path="/brands/adygene" element={<Adygene />} />
+              <Route path="/brands/gimalai" element={<Gimalai />} />
+              <Route path="/brands/lemonads" element={<Lemonads />} />
+              <Route path="/where-to-buy" element={<WhereToBuy />} />
+              <Route path="/partners" element={<Partners />} />
+              <Route path="/contacts" element={<Contacts />} />
+            </Routes>
+          </main>
 
-        <Footer />
-      </div>
+          <PremiumFooter />
+        </div>
+      </SmoothScroll>
     </Router>
   );
 }
