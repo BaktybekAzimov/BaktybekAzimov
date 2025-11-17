@@ -1,16 +1,112 @@
+import { useState } from 'react';
 import Button from '../../components/ui/Button';
+import ProductModal from '../../components/ui/ProductModal';
 
 const Gimalai = () => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const products = [
+    {
+      id: 1,
+      name: 'GIMALAI',
+      subtitle: 'Живая вода',
+      volume: '0.5л',
+      type: 'Артезианская вода первой категории',
+      description: 'GIMALAI - живая артезианская вода из глубоких подземных источников Гималайского региона. Насыщена природными минералами.',
+      characteristics: [
+        'Артезианская скважина',
+        'Глубина: 180 метров',
+        'Категория: Первая',
+        'Минерализация: 0.3-0.5 г/л',
+        'pH уровень: 7.2-7.8',
+        'Негазированная',
+        'Срок годности: 12 месяцев'
+      ],
+      benefits: [
+        'Насыщена минералами',
+        'Идеальна для активного образа жизни',
+        'Природный баланс',
+        'Артезианская чистота',
+        'Мягкий приятный вкус'
+      ]
+    },
+    {
+      id: 2,
+      name: 'GIMALAI',
+      subtitle: 'Семейная',
+      volume: '1.5л',
+      type: 'Артезианская вода первой категории',
+      description: 'Семейный формат живой воды GIMALAI для ежедневного использования всей семьёй.',
+      characteristics: [
+        'Артезианская скважина',
+        'Глубина: 180 метров',
+        'Категория: Первая',
+        'Минерализация: 0.3-0.5 г/л',
+        'pH уровень: 7.2-7.8',
+        'Негазированная',
+        'Срок годности: 12 месяцев'
+      ],
+      benefits: [
+        'Экономичный формат',
+        'Для всей семьи',
+        'Природные минералы',
+        'Универсальное использование',
+        'Доступная цена'
+      ]
+    },
+    {
+      id: 3,
+      name: 'GIMALAI',
+      subtitle: 'Офисная',
+      volume: '5л',
+      type: 'Артезианская вода первой категории',
+      description: 'Большой формат живой воды GIMALAI для офисов и коммерческого использования.',
+      characteristics: [
+        'Артезианская скважина',
+        'Глубина: 180 метров',
+        'Категория: Первая',
+        'Минерализация: 0.3-0.5 г/л',
+        'pH уровень: 7.2-7.8',
+        'Негазированная',
+        'Срок годности: 12 месяцев'
+      ],
+      benefits: [
+        'Офисное решение',
+        'Максимально выгодно',
+        'Удобная упаковка',
+        'Для больших объёмов',
+        'Природный вкус'
+      ]
+    }
+  ];
+
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="pt-32 pb-20">
-      {/* Hero */}
-      <section className="bg-gimalai-water text-white py-20 mb-20">
-        <div className="container-custom text-center">
-          <h1 className="font-primary text-hero mb-6">
+      <section className="relative bg-gradient-to-br from-green-300 via-emerald-400 to-teal-400 text-white py-32 mb-20 overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-600 rounded-full blur-[120px]" />
+        </div>
+
+        <div className="container-custom text-center relative z-10">
+          <span className="inline-block px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full text-sm font-secondary mb-8">
+            Артезианская вода
+          </span>
+          <h1 className="font-primary text-[clamp(60px,8vw,120px)] mb-6 leading-none drop-shadow-2xl">
             GIMALAI
           </h1>
-          <p className="font-secondary text-2xl mb-8 max-w-3xl mx-auto">
-            Живая вода для всей семьи
+          <p className="font-secondary text-2xl md:text-4xl mb-12 max-w-4xl mx-auto leading-relaxed drop-shadow-lg">
+            Живая артезианская вода
+            <br />
+            <span className="text-green-100 font-bold text-3xl md:text-5xl">
+              Из глубины 180 метров
+            </span>
           </p>
           <Button size="large" variant="outline">
             Где купить
@@ -19,70 +115,86 @@ const Gimalai = () => {
       </section>
 
       <div className="container-custom">
-        {/* Description */}
-        <section className="mb-20">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="font-primary text-h2 text-gimalai-dark mb-6">
-                ДЛЯ ЕЖЕДНЕВНОГО ИСПОЛЬЗОВАНИЯ
-              </h2>
-              <p className="font-secondary text-lg text-gray-700 mb-4">
-                GIMALAI - это питьевая вода для ежедневного использования. Семейная, доступная,
-                но с неизменно высоким качеством.
-              </p>
-              <p className="font-secondary text-lg text-gray-700 mb-4">
-                Идеально подходит для дома, офиса и активного образа жизни.
-                Природная чистота и семейные ценности в каждой капле.
-              </p>
-              <p className="font-secondary text-lg text-gray-700">
-                Доступна в удобных форматах от 0.5л до 19л.
-              </p>
-            </div>
-            <div className="bg-gimalai-light rounded-2xl p-8">
-              <h3 className="font-primary text-2xl text-gimalai-dark mb-6">ПРЕИМУЩЕСТВА</h3>
-              <ul className="space-y-4">
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-gimalai-aqua rounded-full mr-3"></span>
-                  <span className="font-secondary text-gray-700">Природная чистота</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-gimalai-aqua rounded-full mr-3"></span>
-                  <span className="font-secondary text-gray-700">Для всей семьи</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-gimalai-aqua rounded-full mr-3"></span>
-                  <span className="font-secondary text-gray-700">Доступная цена</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-gimalai-aqua rounded-full mr-3"></span>
-                  <span className="font-secondary text-gray-700">Разные форматы</span>
-                </li>
-              </ul>
-            </div>
+        <section className="mb-24">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-secondary mb-6">
+              Первая категория
+            </span>
+            <h2 className="font-primary text-6xl text-dark-navy mb-6">
+              ЖИВАЯ ВОДА
+            </h2>
+            <p className="font-secondary text-xl text-text-secondary max-w-3xl mx-auto">
+              Насыщена природными минералами из артезианских источников
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                onClick={() => handleProductClick(product)}
+                className="group cursor-pointer bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-green-200 hover:border-emerald-400"
+              >
+                <div className="font-primary text-7xl text-green-600 mb-4">{product.volume}</div>
+                <div className="font-secondary text-gray-600 mb-6 text-lg">{product.subtitle}</div>
+                <div className="text-green-600 font-secondary text-sm flex items-center">
+                  Подробнее
+                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Formats */}
-        <section className="mb-20 bg-gimalai-light rounded-2xl p-12">
-          <h2 className="font-primary text-h2 text-center text-gimalai-dark mb-12">
-            ФОРМАТЫ
-          </h2>
-          <div className="grid md:grid-cols-5 gap-6">
+        <section className="mb-24 bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-12 md:p-16">
+          <div className="text-center mb-12">
+            <h2 className="font-primary text-5xl text-dark-navy mb-6">
+              ПОЧЕМУ GIMALAI?
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
             {[
-              { size: '0.5л', type: 'Дом' },
-              { size: '1л', type: 'Дом' },
-              { size: '5л', type: 'Дом/Офис' },
-              { size: '10л', type: 'Офис' },
-              { size: '19л', type: 'Офис/HoReCa' },
-            ].map((format, idx) => (
-              <div key={idx} className="text-center bg-white rounded-xl p-6 shadow-md">
-                <div className="font-primary text-4xl text-gimalai-aqua mb-2">{format.size}</div>
-                <div className="font-secondary text-sm text-gray-600">{format.type}</div>
+              {
+                icon: '💧',
+                title: 'Артезианская',
+                desc: 'Из глубоких подземных источников на 180 метрах'
+              },
+              {
+                icon: '🌿',
+                title: 'Живая вода',
+                desc: 'Насыщена природными минералами и микроэлементами'
+              },
+              {
+                icon: '⚡',
+                title: 'Для активных',
+                desc: 'Идеальна для спорта и активного образа жизни'
+              }
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+              >
+                <div className="text-6xl mb-4">{item.icon}</div>
+                <h3 className="font-primary text-2xl text-dark-navy mb-4">
+                  {item.title}
+                </h3>
+                <p className="font-secondary text-gray-600 leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>
         </section>
       </div>
+
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={selectedProduct}
+      />
     </div>
   );
 };
