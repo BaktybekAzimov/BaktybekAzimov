@@ -72,12 +72,12 @@ const PremiumHero = () => {
       />
 
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-kelechek-dark via-black to-kelechek-primary opacity-60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-dark-navy via-primary-blue to-primary-cyan opacity-70" />
 
       {/* Animated mesh gradient */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-kelechek-primary rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-cyan rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary-blue rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
       {/* Main content */}
@@ -99,7 +99,7 @@ const PremiumHero = () => {
             stagger={0.02}
             trigger={false}
             delay={1.2}
-            className="font-primary text-[clamp(40px,6vw,120px)] leading-none mb-8 text-kelechek-primary"
+            className="font-primary text-[clamp(40px,6vw,120px)] leading-none mb-8 text-primary-cyan"
           >
             №27
           </SplitText>
@@ -184,7 +184,7 @@ const PremiumHero = () => {
 
           {/* Number 27 on bottle */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="font-primary text-[120px] text-kelechek-primary opacity-90 drop-shadow-2xl">
+            <div className="font-primary text-[120px] text-primary-cyan opacity-90 drop-shadow-2xl">
               27
             </div>
           </div>

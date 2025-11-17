@@ -11,8 +11,11 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.0",
     "@studio-freight/lenis": "^1.0.42",
     "clsx": "^2.0.0",
+    "framer-motion": "^12.23.24",
     "gsap": "^3.12.4",
     "i18next": "^23.7.8",
     "lottie-react": "^2.4.0",
@@ -20,7 +23,8 @@
     "react-dom": "^18.2.0",
     "react-i18next": "^13.5.0",
     "react-router-dom": "^6.20.1",
-    "split-type": "^0.3.4"
+    "split-type": "^0.3.4",
+    "three": "^0.181.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.45",
