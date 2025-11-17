@@ -1,8 +1,8 @@
-import { useEffect, useRef, Suspense } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import SplitText from '../animations/SplitText';
-import Bottle3D from '../3d/Bottle3D';
+// import Bottle3D from '../3d/Bottle3D';
 import { GlitchText } from '../animations/TextMorph';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -150,18 +150,22 @@ const PremiumHero = () => {
         </div>
       </div>
 
-      {/* 3D Bottle - центральный элемент */}
+      {/* 3D Bottle placeholder - React Three Fiber has compatibility issues */}
       <div
         ref={bottleRef}
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-[400px] h-[600px] md:w-[500px] md:h-[700px]"
       >
-        <Suspense fallback={
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="animate-pulse font-primary text-6xl text-primary-cyan">27</div>
+        <div className="w-full h-full flex items-center justify-center">
+          <div
+            className="animate-pulse font-primary text-[200px] text-primary-cyan"
+            style={{
+              textShadow: '0 0 60px rgba(0, 168, 204, 0.8), 0 0 100px rgba(0, 168, 204, 0.6), 0 0 140px rgba(0, 168, 204, 0.4)',
+              animation: 'pulse 2s ease-in-out infinite'
+            }}
+          >
+            27
           </div>
-        }>
-          <Bottle3D className="w-full h-full" />
-        </Suspense>
+        </div>
       </div>
 
       {/* Light rays */}
