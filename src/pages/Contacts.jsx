@@ -1,82 +1,300 @@
+import { useState } from 'react';
+import Button from '../components/ui/Button';
+
 const Contacts = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    message: '',
+    type: 'general'
+  });
+
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 5000);
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   return (
     <div className="pt-32 pb-20">
-      <div className="container-custom">
-        <section className="text-center mb-20">
-          <h1 className="font-primary text-h1 text-kelechek-dark mb-6">
-            КОНТАКТЫ
+      <section className="relative bg-gradient-to-br from-dark-navy via-primary-blue to-primary-cyan text-white py-32 mb-20 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-cyan rounded-full blur-[120px]" />
+        </div>
+
+        <div className="container-custom text-center relative z-10">
+          <span className="inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full text-sm font-secondary mb-8">
+            Контакты
+          </span>
+          <h1 className="font-primary text-[clamp(50px,8vw,100px)] mb-6 leading-none">
+            СВЯЖИТЕСЬ С НАМИ
           </h1>
-          <p className="font-secondary text-xl text-gray-600 max-w-3xl mx-auto">
-            Свяжитесь с нами любым удобным способом
+          <p className="font-secondary text-2xl md:text-3xl max-w-3xl mx-auto leading-relaxed">
+            Мы всегда рады ответить на ваши вопросы
           </p>
-        </section>
+        </div>
+      </section>
 
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Contact Info */}
+      <div className="container-custom">
+        <div className="grid lg:grid-cols-2 gap-16 mb-20">
           <div>
-            <div className="bg-kelechek-bg rounded-2xl p-8 mb-8">
-              <h2 className="font-primary text-h3 text-kelechek-dark mb-6">
-                ЗАО «КЕЛЕЧЕК»
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-kelechek-dark mb-2">Адрес:</h3>
-                  <p className="font-secondary text-gray-700">
-                    Жалал-Абад, Кыргызстан
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-kelechek-dark mb-2">Телефон:</h3>
-                  <p className="font-secondary text-gray-700">
-                    <a href="tel:+996XXXXXXXXX" className="hover:text-kelechek-primary transition-colors">
-                      +996 XXX XXX XXX
-                    </a>
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-kelechek-dark mb-2">Email:</h3>
-                  <p className="font-secondary text-gray-700">
-                    <a href="mailto:info@kelechek27.com" className="hover:text-kelechek-primary transition-colors">
-                      info@kelechek27.com
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </div>
+            <h2 className="font-primary text-4xl text-dark-navy mb-8">
+              Напишите нам
+            </h2>
 
-            {/* Social */}
-            <div className="bg-kelechek-subtle rounded-2xl p-8">
-              <h3 className="font-primary text-2xl text-kelechek-dark mb-6">
-                МЫ В СОЦСЕТЯХ
-              </h3>
-              <div className="flex space-x-4">
-                <a href="#" className="w-12 h-12 bg-kelechek-primary rounded-full flex items-center justify-center text-white hover:bg-opacity-90 transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            {submitted && (
+              <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6 mb-8">
+                <div className="flex items-start">
+                  <svg className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                </a>
-                <a href="#" className="w-12 h-12 bg-kelechek-primary rounded-full flex items-center justify-center text-white hover:bg-opacity-90 transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
-                  </svg>
-                </a>
+                  <div>
+                    <h3 className="font-secondary text-lg font-semibold text-green-900 mb-1">
+                      Спасибо за ваше сообщение!
+                    </h3>
+                    <p className="font-secondary text-green-700">
+                      Мы получили ваш запрос и свяжемся с вами в ближайшее время.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block font-secondary text-sm font-medium text-gray-700 mb-2">
+                  Тип обращения
+                </label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-cyan focus:outline-none transition-colors font-secondary"
+                  required
+                >
+                  <option value="general">Общий вопрос</option>
+                  <option value="b2b">B2B сотрудничество</option>
+                  <option value="export">Экспорт</option>
+                  <option value="feedback">Отзыв о продукции</option>
+                  <option value="quality">Вопрос качества</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-secondary text-sm font-medium text-gray-700 mb-2">
+                  Ваше имя *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-cyan focus:outline-none transition-colors font-secondary"
+                  placeholder="Иван Иванов"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-secondary text-sm font-medium text-gray-700 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-cyan focus:outline-none transition-colors font-secondary"
+                  placeholder="ivan@example.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-secondary text-sm font-medium text-gray-700 mb-2">
+                  Телефон
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-cyan focus:outline-none transition-colors font-secondary"
+                  placeholder="+996 XXX XXX XXX"
+                />
+              </div>
+
+              <div>
+                <label className="block font-secondary text-sm font-medium text-gray-700 mb-2">
+                  Компания (если применимо)
+                </label>
+                <input
+                  type="text"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-cyan focus:outline-none transition-colors font-secondary"
+                  placeholder="ООО 'Компания'"
+                />
+              </div>
+
+              <div>
+                <label className="block font-secondary text-sm font-medium text-gray-700 mb-2">
+                  Сообщение *
+                </label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows="6"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-primary-cyan focus:outline-none transition-colors font-secondary resize-none"
+                  placeholder="Расскажите подробнее о вашем запросе..."
+                  required
+                />
+              </div>
+
+              <Button type="submit" size="large" variant="primary" className="w-full">
+                Отправить сообщение
+              </Button>
+
+              <p className="text-sm text-gray-500 font-secondary text-center">
+                * Обязательные поля
+              </p>
+            </form>
           </div>
 
-          {/* Map Placeholder */}
-          <div className="bg-kelechek-bg rounded-2xl p-8 flex items-center justify-center">
-            <div className="text-center">
-              <svg className="w-24 h-24 text-kelechek-gray mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <p className="font-secondary text-gray-600">
-                Карта появится в ближайшее время
-              </p>
+          <div className="space-y-8">
+            <div>
+              <h2 className="font-primary text-4xl text-dark-navy mb-8">
+                Контактная информация
+              </h2>
+            </div>
+
+            <div className="bg-gradient-to-br from-primary-blue/5 to-primary-cyan/5 rounded-2xl p-8 border-2 border-primary-cyan/20">
+              <div className="flex items-start">
+                <div className="w-12 h-12 bg-primary-blue rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-primary text-xl text-dark-navy mb-2">Главный офис</h3>
+                  <p className="font-secondary text-gray-700 mb-2">
+                    ЗАО «КЕЛЕЧЕК»<br />
+                    720500, Кыргызская Республика<br />
+                    г. Жалал-Абад, ул. Ленина, 123
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-primary-cyan/5 to-primary-blue/5 rounded-2xl p-8 border-2 border-primary-blue/20">
+              <div className="flex items-start">
+                <div className="w-12 h-12 bg-primary-cyan rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-primary text-xl text-dark-navy mb-2">Телефоны</h3>
+                  <p className="font-secondary text-gray-700 mb-1">
+                    Горячая линия: <a href="tel:+996312123456" className="text-primary-blue hover:underline">+996 (312) 12-34-56</a>
+                  </p>
+                  <p className="font-secondary text-gray-700 mb-1">
+                    Отдел продаж: <a href="tel:+996555123456" className="text-primary-blue hover:underline">+996 (555) 12-34-56</a>
+                  </p>
+                  <p className="font-secondary text-gray-700">
+                    B2B отдел: <a href="tel:+996777123456" className="text-primary-blue hover:underline">+996 (777) 12-34-56</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-primary-blue/5 to-primary-cyan/5 rounded-2xl p-8 border-2 border-primary-cyan/20">
+              <div className="flex items-start">
+                <div className="w-12 h-12 bg-primary-blue rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-primary text-xl text-dark-navy mb-2">Email</h3>
+                  <p className="font-secondary text-gray-700 mb-1">
+                    Общие вопросы: <a href="mailto:info@kelechek.kg" className="text-primary-blue hover:underline">info@kelechek.kg</a>
+                  </p>
+                  <p className="font-secondary text-gray-700 mb-1">
+                    Продажи: <a href="mailto:sales@kelechek.kg" className="text-primary-blue hover:underline">sales@kelechek.kg</a>
+                  </p>
+                  <p className="font-secondary text-gray-700">
+                    Экспорт: <a href="mailto:export@kelechek.kg" className="text-primary-blue hover:underline">export@kelechek.kg</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-primary-cyan/5 to-primary-blue/5 rounded-2xl p-8 border-2 border-primary-blue/20">
+              <div className="flex items-start">
+                <div className="w-12 h-12 bg-primary-cyan rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-primary text-xl text-dark-navy mb-2">Режим работы</h3>
+                  <p className="font-secondary text-gray-700 mb-1">
+                    Пн-Пт: 9:00 - 18:00
+                  </p>
+                  <p className="font-secondary text-gray-700 mb-1">
+                    Сб: 10:00 - 15:00
+                  </p>
+                  <p className="font-secondary text-gray-700">
+                    Вс: Выходной
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        <section className="mb-20">
+          <h2 className="font-primary text-4xl text-dark-navy mb-8 text-center">
+            Как нас найти
+          </h2>
+          <div className="rounded-3xl overflow-hidden shadow-2xl border-2 border-gray-200 bg-gray-100">
+            <div className="h-96 flex items-center justify-center">
+              <div className="text-center p-8">
+                <svg className="w-24 h-24 text-primary-cyan mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 className="font-primary text-2xl text-dark-navy mb-3">
+                  ЗАО «КЕЛЕЧЕК»
+                </h3>
+                <p className="font-secondary text-lg text-gray-600">
+                  г. Жалал-Абад, Кыргызстан
+                  <br />
+                  ул. Ленина, 123
+                </p>
+                <p className="font-secondary text-sm text-gray-500 mt-4">
+                  [Здесь может быть интерактивная карта Google Maps или Яндекс.Карты]
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
