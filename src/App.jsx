@@ -4,7 +4,7 @@ import Header from './components/layout/Header';
 import PremiumFooter from './components/layout/PremiumFooter';
 import ScrollProgress from './components/common/ScrollProgress';
 import SmoothScroll from './components/common/SmoothScroll';
-import AdvancedCursor from './components/common/AdvancedCursor';
+// import AdvancedCursor from './components/common/AdvancedCursor';
 import LoadingScreen from './components/common/LoadingScreen';
 
 // Pages
@@ -28,9 +28,6 @@ function App() {
 
       {/* Main App */}
       <SmoothScroll>
-        {/* Advanced Custom Cursor */}
-        <AdvancedCursor />
-
         <div className="min-h-screen bg-white">
           <ScrollProgress />
           <Header />
