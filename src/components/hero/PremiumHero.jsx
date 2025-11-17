@@ -1,10 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import SplitText from '../animations/SplitText';
-// Temporarily disabled for debugging
-// import Bottle3D from '../3d/Bottle3D';
-// import { GlitchText } from '../animations/TextMorph';
+import Bottle3D from '../3d/Bottle3D';
+import { GlitchText } from '../animations/TextMorph';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -87,7 +86,7 @@ const PremiumHero = () => {
       <div className="hero-content relative z-10 h-full flex flex-col items-center justify-center text-white">
         <div className="text-center max-w-6xl mx-auto px-4">
           {/* Animated text */}
-          <h1 className="font-primary text-[clamp(60px,8vw,180px)] leading-none mb-6 block">
+          <GlitchText className="font-primary text-[clamp(60px,8vw,180px)] leading-none mb-6 block">
             <SplitText
               animation="fadeUp"
               stagger={0.03}
@@ -97,7 +96,7 @@ const PremiumHero = () => {
             >
               KELECHEK
             </SplitText>
-          </h1>
+          </GlitchText>
 
           <SplitText
             animation="fadeUp"
@@ -151,19 +150,18 @@ const PremiumHero = () => {
         </div>
       </div>
 
-      {/* 3D Bottle - temporarily disabled for debugging, using placeholder */}
+      {/* 3D Bottle - центральный элемент */}
       <div
         ref={bottleRef}
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-[400px] h-[600px] md:w-[500px] md:h-[700px]"
       >
-        <div className="w-full h-full flex items-center justify-center">
-          <div
-            className="animate-pulse font-primary text-[200px] text-primary-cyan"
-            style={{ textShadow: '0 0 60px rgba(0, 168, 204, 0.8), 0 0 100px rgba(0, 168, 204, 0.6)' }}
-          >
-            27
+        <Suspense fallback={
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="animate-pulse font-primary text-6xl text-primary-cyan">27</div>
           </div>
-        </div>
+        }>
+          <Bottle3D className="w-full h-full" />
+        </Suspense>
       </div>
 
       {/* Light rays */}
