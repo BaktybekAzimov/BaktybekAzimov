@@ -48,11 +48,11 @@ const NumberCounter = ({
       ref={numberRef}
       className={`text-center ${className}`}
     >
-      <div className="font-primary text-6xl text-kelechek-primary mb-2">
+      <div className={`font-primary text-6xl mb-2 ${className.includes('text-white') ? 'text-white' : 'text-kelechek-primary'}`}>
         {prefix}{formatNumber(count)}{suffix}
       </div>
       {label && (
-        <div className="font-secondary text-lg text-gray-600">
+        <div className={`font-secondary text-lg ${className.includes('text-white') ? 'text-white/80' : 'text-gray-600'}`}>
           {label}
         </div>
       )}
