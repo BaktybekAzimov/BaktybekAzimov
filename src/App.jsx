@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header';
 import PremiumFooter from './components/layout/PremiumFooter';
 import ScrollProgress from './components/common/ScrollProgress';
 import SmoothScroll from './components/common/SmoothScroll';
-import CustomCursor from './components/common/CustomCursor';
+import AdvancedCursor from './components/common/AdvancedCursor';
+import LoadingScreen from './components/common/LoadingScreen';
 
 // Pages
 import Home from './pages/Home';
@@ -17,10 +19,18 @@ import Partners from './pages/Partners';
 import Contacts from './pages/Contacts';
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <Router>
+      {/* Loading Screen */}
+      {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
+
+      {/* Main App */}
       <SmoothScroll>
-        <CustomCursor />
+        {/* Advanced Custom Cursor */}
+        <AdvancedCursor />
+
         <div className="min-h-screen bg-white">
           <ScrollProgress />
           <Header />

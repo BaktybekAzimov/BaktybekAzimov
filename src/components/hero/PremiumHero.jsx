@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import SplitText from '../animations/SplitText';
+import Bottle3D from '../3d/Bottle3D';
+import { GlitchText } from '../animations/TextMorph';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -84,15 +86,17 @@ const PremiumHero = () => {
       <div className="hero-content relative z-10 h-full flex flex-col items-center justify-center text-white">
         <div className="text-center max-w-6xl mx-auto px-4">
           {/* Animated text */}
-          <SplitText
-            animation="fadeUp"
-            stagger={0.03}
-            trigger={false}
-            delay={0.8}
-            className="font-primary text-[clamp(60px,8vw,180px)] leading-none mb-6"
-          >
-            KELECHEK
-          </SplitText>
+          <GlitchText className="font-primary text-[clamp(60px,8vw,180px)] leading-none mb-6 block">
+            <SplitText
+              animation="fadeUp"
+              stagger={0.03}
+              trigger={false}
+              delay={0.8}
+              className="inline-block"
+            >
+              KELECHEK
+            </SplitText>
+          </GlitchText>
 
           <SplitText
             animation="fadeUp"
@@ -149,46 +153,15 @@ const PremiumHero = () => {
       {/* 3D Bottle - центральный элемент */}
       <div
         ref={bottleRef}
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-[400px] h-[600px] md:w-[500px] md:h-[700px]"
       >
-        {/* Placeholder for bottle - можно заменить на реальное изображение */}
-        <div className="relative w-[300px] h-[600px] md:w-[400px] md:h-[800px]">
-          {/* Bottle silhouette */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/10 to-transparent backdrop-blur-sm rounded-[40%] shadow-2xl" />
-
-          {/* Condensation effect */}
-          <div className="absolute inset-0 rounded-[40%] overflow-hidden">
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute bg-white/30 rounded-full blur-sm"
-                style={{
-                  width: `${Math.random() * 30 + 10}px`,
-                  height: `${Math.random() * 40 + 20}px`,
-                  left: `${Math.random() * 80 + 10}%`,
-                  top: `${Math.random() * 80 + 10}%`,
-                  animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite`,
-                  animationDelay: `${Math.random() * 2}s`
-                }}
-              />
-            ))}
+        <Suspense fallback={
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="animate-pulse font-primary text-6xl text-primary-cyan">27</div>
           </div>
-
-          {/* Shine effect */}
-          <div
-            className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent rounded-[40%]"
-            style={{
-              animation: 'shine 4s ease-in-out infinite'
-            }}
-          />
-
-          {/* Number 27 on bottle */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="font-primary text-[120px] text-primary-cyan opacity-90 drop-shadow-2xl">
-              27
-            </div>
-          </div>
-        </div>
+        }>
+          <Bottle3D className="w-full h-full" />
+        </Suspense>
       </div>
 
       {/* Light rays */}
