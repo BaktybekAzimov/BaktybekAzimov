@@ -71,9 +71,25 @@ const OriginStory = () => {
         className="absolute inset-0 bg-gradient-to-br from-dark-navy via-primary-blue to-primary-cyan"
         style={{ height: '120%', top: '-10%' }}
       >
-        {/* Placeholder for actual mountain image */}
-        <div className="absolute inset-0 flex items-center justify-center text-white/10 font-primary text-6xl">
-          [ТЯНЬ-ШАНЬ ГОРЫ]
+        {/* Animated mountain scene */}
+        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+          {/* Mountain ranges */}
+          <div className="absolute bottom-0 left-0 right-0 h-2/3 flex items-end justify-around text-white/20">
+            <div className="text-[200px] leading-none translate-y-20">🏔️</div>
+            <div className="text-[250px] leading-none translate-y-16">⛰️</div>
+            <div className="text-[180px] leading-none translate-y-24">🏔️</div>
+            <div className="text-[220px] leading-none translate-y-20">⛰️</div>
+          </div>
+
+          {/* Snow/ice effect */}
+          <div className="absolute top-1/4 left-1/4 text-8xl animate-pulse opacity-30">❄️</div>
+          <div className="absolute top-1/3 right-1/4 text-7xl animate-pulse opacity-20" style={{ animationDelay: '1s' }}>❄️</div>
+          <div className="absolute bottom-1/3 left-1/3 text-6xl animate-pulse opacity-25" style={{ animationDelay: '0.5s' }}>❄️</div>
+
+          {/* Water drops flowing */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="text-6xl animate-bounce">💧</div>
+          </div>
         </div>
       </div>
 

@@ -159,9 +159,20 @@ const CompanyIntro = () => {
               className="absolute inset-0 bg-gradient-to-br from-primary-blue via-primary-cyan to-accent-ice"
               style={{ height: '120%', top: '-10%' }}
             >
-              {/* Placeholder for actual image - replace with real factory/mountain image */}
-              <div className="absolute inset-0 flex items-center justify-center text-white/20 font-primary text-6xl">
-                [ЗАВОД/ГОРЫ]
+              {/* Mountain and factory illustration with emojis */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                {/* Mountains */}
+                <div className="text-9xl mb-4 animate-pulse">🏔️</div>
+                <div className="text-7xl -mt-12 ml-20">⛰️</div>
+                <div className="text-6xl -mt-8 -ml-16">🏔️</div>
+
+                {/* Factory below mountains */}
+                <div className="text-8xl mt-8">🏭</div>
+
+                {/* Water drops */}
+                <div className="absolute top-1/4 left-1/4 text-4xl animate-bounce" style={{ animationDelay: '0s' }}>💧</div>
+                <div className="absolute top-1/3 right-1/3 text-3xl animate-bounce" style={{ animationDelay: '0.5s' }}>💧</div>
+                <div className="absolute bottom-1/3 left-1/3 text-3xl animate-bounce" style={{ animationDelay: '1s' }}>💧</div>
               </div>
 
               {/* Overlay gradient */}
@@ -169,7 +180,7 @@ const CompanyIntro = () => {
 
               {/* Decorative elements */}
               <div className="absolute bottom-8 left-8 right-8 bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <h4 className="font-primary text-2xl text-white mb-2">Жалал-Абад</h4>
+                <h4 className="font-primary text-2xl text-white mb-2">🏔️ Жалал-Абад</h4>
                 <p className="text-white/80 text-small">
                   Источник чистейшей минеральной воды в сердце Кыргызстана
                 </p>
