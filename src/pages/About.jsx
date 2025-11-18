@@ -7,39 +7,35 @@ import NumberCounter from '../components/common/NumberCounter';
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const horizontalRef = useRef(null);
-  const panelsRef = useRef([]);
-
   useEffect(() => {
-    // Horizontal scrolling timeline
-    const panels = panelsRef.current;
-    const horizontalSection = horizontalRef.current;
-
-    if (panels.length > 0 && horizontalSection) {
-      const totalWidth = panels.reduce((acc, panel) => acc + panel.offsetWidth, 0);
-
-      gsap.to(panels, {
-        xPercent: -100 * (panels.length - 1),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: horizontalSection,
-          pin: true,
-          scrub: 1,
-          snap: 1 / (panels.length - 1),
-          end: () => `+=${totalWidth}`
-        }
-      });
-    }
-
     // Fade up animations
     gsap.utils.toArray('.fade-up').forEach((element) => {
       gsap.from(element, {
         opacity: 0,
         y: 80,
         duration: 1,
+        ease: 'power3.out',
         scrollTrigger: {
           trigger: element,
           start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        }
+      });
+    });
+
+    // Timeline items animation
+    gsap.utils.toArray('.timeline-item').forEach((item, index) => {
+      const isLeft = index % 2 === 0;
+
+      gsap.from(item, {
+        opacity: 0,
+        x: isLeft ? -100 : 100,
+        scale: 0.8,
+        duration: 1,
+        ease: 'back.out(1.2)',
+        scrollTrigger: {
+          trigger: item,
+          start: 'top 80%',
           toggleActions: 'play none none reverse'
         }
       });
@@ -75,56 +71,56 @@ const About = () => {
       year: 1991,
       title: 'НАЧАЛО ИСТОРИИ',
       description: 'Основание ЗАО "КЕЛЕЧЕК" в городе Жалал-Абад. Открытие уникального источника минеральной воды №27',
-      color: 'from-blue-900 to-blue-700',
+      color: 'from-blue-500 to-cyan-500',
       icon: '🏔️'
     },
     {
       year: 1995,
       title: 'ПЕРВАЯ СЕРТИФИКАЦИЯ',
       description: 'Получение официального сертификата лечебно-столовой воды. Признание целебных свойств источника №27',
-      color: 'from-cyan-900 to-cyan-700',
+      color: 'from-cyan-500 to-teal-500',
       icon: '📜'
     },
     {
       year: 2000,
       title: 'МОДЕРНИЗАЦИЯ',
       description: 'Масштабное расширение и модернизация производственных мощностей. Внедрение современных технологий',
-      color: 'from-teal-900 to-teal-700',
+      color: 'from-teal-500 to-green-500',
       icon: '🏭'
     },
     {
       year: 2005,
       title: 'МЕЖДУНАРОДНЫЙ РЫНОК',
       description: 'Первый экспорт в Казахстан. Начало международной экспансии бренда KELECHEK',
-      color: 'from-green-900 to-green-700',
+      color: 'from-green-500 to-emerald-500',
       icon: '🌍'
     },
     {
       year: 2010,
       title: 'НОВЫЕ БРЕНДЫ',
       description: 'Запуск премиальных линеек ADYGENE (ледниковая вода) и GIMALAI (артезианская вода)',
-      color: 'from-emerald-900 to-emerald-700',
+      color: 'from-emerald-500 to-lime-500',
       icon: '💧'
     },
     {
       year: 2015,
       title: 'ISO 9001',
       description: 'Сертификация международного стандарта качества. Признание мировых экспертов',
-      color: 'from-indigo-900 to-indigo-700',
+      color: 'from-indigo-500 to-purple-500',
       icon: '⭐'
     },
     {
       year: 2020,
       title: 'ГЛОБАЛЬНАЯ ЭКСПАНСИЯ',
-      description: 'Выход на рынки США, Китая и ОАЭ. Экспорт в 8 стран мира',
-      color: 'from-purple-900 to-purple-700',
+      description: 'Выход на рынки США и расширение географии присутствия',
+      color: 'from-purple-500 to-pink-500',
       icon: '🚀'
     },
     {
       year: 2024,
       title: 'ЛИДЕРСТВО',
       description: 'Ведущий производитель премиальной минеральной воды в Центральной Азии. 33 года качества',
-      color: 'from-pink-900 to-pink-700',
+      color: 'from-pink-500 to-rose-500',
       icon: '👑'
     }
   ];
@@ -204,57 +200,64 @@ const About = () => {
         </div>
       </section>
 
-      {/* Horizontal Scrolling Timeline */}
-      <section
-        ref={horizontalRef}
-        className="relative h-screen overflow-hidden bg-black"
-      >
-        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 text-white text-center">
-          <h2 className="font-primary text-5xl md:text-7xl mb-4">НАША ИСТОРИЯ</h2>
-          <p className="font-secondary text-xl md:text-2xl text-gray-400">← Прокрутите, чтобы увидеть путь к успеху →</p>
-        </div>
+      {/* Vertical Timeline */}
+      <section className="py-32 bg-gradient-to-b from-white via-gray-50 to-white">
+        <div className="container-custom">
+          <div className="text-center mb-20 fade-up">
+            <span className="inline-block px-4 py-2 bg-primary-blue/10 text-primary-blue rounded-full text-sm font-secondary mb-6">
+              Наша история
+            </span>
+            <h2 className="font-primary text-5xl md:text-7xl text-dark-navy mb-6">
+              ПУТЬ К УСПЕХУ
+            </h2>
+            <p className="font-secondary text-xl text-text-secondary max-w-3xl mx-auto">
+              От истоков в 1991 году до лидерства в Центральной Азии
+            </p>
+          </div>
 
-        <div className="absolute inset-0 flex items-center">
-          <div className="flex">
-            {timeline.map((item, index) => (
-              <div
-                key={index}
-                ref={el => panelsRef.current[index] = el}
-                className={`min-w-screen h-screen flex items-center justify-center bg-gradient-to-br ${item.color} relative`}
-              >
-                {/* Background decoration */}
-                <div className="absolute inset-0 opacity-10">
-                  <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />
-                  <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />
-                </div>
+          {/* Timeline */}
+          <div className="relative">
+            {/* Vertical Line */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500" />
 
-                {/* Content */}
-                <div className="container-custom relative z-10 text-white">
-                  <div className="max-w-3xl mx-auto text-center">
-                    <div className="text-8xl md:text-9xl mb-8 opacity-50">{item.icon}</div>
-                    <div className="font-primary text-9xl md:text-[180px] mb-8 leading-none">
-                      {item.year}
-                    </div>
-                    <h3 className="font-primary text-4xl md:text-6xl mb-8 leading-tight">
-                      {item.title}
-                    </h3>
-                    <p className="font-secondary text-2xl md:text-3xl leading-relaxed text-white/90">
-                      {item.description}
-                    </p>
-                    <div className="mt-12 flex items-center justify-center space-x-2">
-                      {timeline.map((_, idx) => (
-                        <div
-                          key={idx}
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            idx === index ? 'w-12 bg-white' : 'w-2 bg-white/30'
-                          }`}
-                        />
-                      ))}
+            {/* Timeline Items */}
+            <div className="space-y-24">
+              {timeline.map((item, index) => {
+                const isLeft = index % 2 === 0;
+
+                return (
+                  <div key={index} className="timeline-item relative">
+                    <div className={`flex items-center ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                      {/* Content Card */}
+                      <div className={`w-5/12 ${isLeft ? 'text-right pr-12' : 'text-left pl-12'}`}>
+                        <div className={`bg-gradient-to-br ${item.color}/10 border-2 border-transparent hover:border-current rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2`}>
+                          <div className="text-6xl mb-4">{item.icon}</div>
+                          <div className={`font-primary text-2xl bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-2`}>
+                            {item.year}
+                          </div>
+                          <h3 className="font-primary text-2xl text-dark-navy mb-4">
+                            {item.title}
+                          </h3>
+                          <p className="font-secondary text-gray-600 leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Center Circle */}
+                      <div className="w-2/12 flex justify-center">
+                        <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold z-10 hover:scale-125 transition-transform duration-300`}>
+                          {index + 1}
+                        </div>
+                      </div>
+
+                      {/* Empty space on other side */}
+                      <div className="w-5/12" />
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>

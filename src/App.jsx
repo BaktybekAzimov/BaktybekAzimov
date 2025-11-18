@@ -4,7 +4,7 @@ import Header from './components/layout/Header';
 import PremiumFooter from './components/layout/PremiumFooter';
 import ScrollProgress from './components/common/ScrollProgress';
 import ScrollToTop from './components/common/ScrollToTop';
-import SmoothScroll from './components/common/SmoothScroll';
+// import SmoothScroll from './components/common/SmoothScroll'; // ОТКЛЮЧЕНО - конфликтует с GSAP
 // import AdvancedCursor from './components/common/AdvancedCursor';
 import LoadingScreen from './components/common/LoadingScreen';
 
@@ -33,29 +33,27 @@ function App() {
       {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
 
       {/* Main App */}
-      <SmoothScroll>
-        <div className="min-h-screen bg-white">
-          <ScrollProgress />
-          <ScrollToTop />
-          <Header />
+      <div className="min-h-screen bg-white">
+        <ScrollProgress />
+        <ScrollToTop />
+        <Header />
 
-          <main>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/brands/kelechek" element={<Kelechek />} />
-              <Route path="/brands/adygene" element={<Adygene />} />
-              <Route path="/brands/gimalai" element={<Gimalai />} />
-              <Route path="/brands/lemonads" element={<Lemonads />} />
-              <Route path="/where-to-buy" element={<WhereToBuy />} />
-              <Route path="/partners" element={<Partners />} />
-              <Route path="/contacts" element={<Contacts />} />
-            </Routes>
-          </main>
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/brands/kelechek" element={<Kelechek />} />
+            <Route path="/brands/adygene" element={<Adygene />} />
+            <Route path="/brands/gimalai" element={<Gimalai />} />
+            <Route path="/brands/lemonads" element={<Lemonads />} />
+            <Route path="/where-to-buy" element={<WhereToBuy />} />
+            <Route path="/partners" element={<Partners />} />
+            <Route path="/contacts" element={<Contacts />} />
+          </Routes>
+        </main>
 
-          <PremiumFooter />
-        </div>
-      </SmoothScroll>
+        <PremiumFooter />
+      </div>
     </Router>
   );
 }
