@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header';
 import PremiumFooter from './components/layout/PremiumFooter';
 import ScrollProgress from './components/common/ScrollProgress';
+import ScrollToTop from './components/common/ScrollToTop';
 import SmoothScroll from './components/common/SmoothScroll';
 // import AdvancedCursor from './components/common/AdvancedCursor';
 import LoadingScreen from './components/common/LoadingScreen';
@@ -22,7 +23,12 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
       {/* Loading Screen */}
       {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
 
@@ -30,6 +36,7 @@ function App() {
       <SmoothScroll>
         <div className="min-h-screen bg-white">
           <ScrollProgress />
+          <ScrollToTop />
           <Header />
 
           <main>

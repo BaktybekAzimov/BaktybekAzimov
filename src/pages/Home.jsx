@@ -34,39 +34,125 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
   useEffect(() => {
-    // Brands section with advanced animation
+    // Refresh ScrollTrigger
+    ScrollTrigger.refresh();
+
+    // Brands section with 3D card flip animation
     const brandCards = gsap.utils.toArray('.brand-card');
     brandCards.forEach((card, index) => {
       gsap.from(card, {
         opacity: 0,
-        y: 150,
+        y: 200,
+        rotationY: -90,
         rotationX: -30,
-        scale: 0.8,
-        duration: 1,
-        ease: 'power3.out',
+        scale: 0.7,
+        duration: 1.2,
+        ease: 'back.out(1.5)',
         scrollTrigger: {
           trigger: card,
-          start: 'top 85%',
-          end: 'top 50%',
-          toggleActions: 'play none none reverse'
+          start: 'top 90%',
+          end: 'top 40%',
+          toggleActions: 'play none none reverse',
+          scrub: false
         },
-        delay: index * 0.15
+        delay: index * 0.2
+      });
+
+      // Hover parallax effect
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left - rect.width / 2) / 10;
+        const y = (e.clientY - rect.top - rect.height / 2) / 10;
+
+        gsap.to(card, {
+          rotationY: x,
+          rotationX: -y,
+          duration: 0.5,
+          ease: 'power2.out',
+          transformPerspective: 1000
+        });
+      });
+
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
+          rotationY: 0,
+          rotationX: 0,
+          duration: 0.5,
+          ease: 'power2.out'
+        });
       });
     });
 
-    // Features section parallax
-    gsap.utils.toArray('.feature-item').forEach((item, index) => {
-      gsap.from(item, {
+    // Sections reveal with stagger
+    gsap.utils.toArray('section').forEach((section, index) => {
+      if (section.classList.contains('brands-section')) return;
+
+      const elements = section.querySelectorAll('h2, h3, p, .feature-item, img');
+
+      gsap.from(elements, {
         opacity: 0,
-        x: index % 2 === 0 ? -100 : 100,
+        y: 80,
+        stagger: 0.1,
         duration: 1,
+        ease: 'power3.out',
         scrollTrigger: {
-          trigger: item,
-          start: 'top 80%',
+          trigger: section,
+          start: 'top 75%',
+          end: 'top 25%',
           toggleActions: 'play none none reverse'
         }
       });
     });
+
+    // Parallax backgrounds
+    gsap.utils.toArray('.parallax-bg').forEach(bg => {
+      gsap.to(bg, {
+        y: '30%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: bg,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1
+        }
+      });
+    });
+
+    // Number counters animation
+    gsap.utils.toArray('.number-counter').forEach(counter => {
+      ScrollTrigger.create({
+        trigger: counter,
+        start: 'top 80%',
+        onEnter: () => {
+          const target = parseInt(counter.getAttribute('data-target'));
+          gsap.to(counter, {
+            innerText: target,
+            duration: 2,
+            ease: 'power1.out',
+            snap: { innerText: 1 },
+            onUpdate: function() {
+              counter.innerText = Math.ceil(counter.innerText);
+            }
+          });
+        }
+      });
+    });
+
+    // Pin and fade sections
+    gsap.utils.toArray('.pin-section').forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top top',
+        end: '+=500',
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1
+      });
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
   }, []);
 
   return (

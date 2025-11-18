@@ -2,18 +2,28 @@ import Button from '../components/ui/Button';
 
 const Partners = () => {
   const partners = [
-    { name: 'Bishkek Park Mall', category: 'Розничные сети', country: 'Кыргызстан' },
-    { name: 'Globus Hypermarket', category: 'Гипермаркеты', country: 'Кыргызстан' },
-    { name: 'Dostuk Market', category: 'Супермаркеты', country: 'Кыргызстан' },
-    { name: 'Magnum Kazakhstan', category: 'Розничные сети', country: 'Казахстан' },
+    // Казахстан
+    { name: 'Magnum Cash & Carry', category: 'Гипермаркеты', country: 'Казахстан' },
+    { name: 'Small', category: 'Супермаркеты', country: 'Казахстан' },
+    { name: 'Interfood', category: 'Розничные сети', country: 'Казахстан' },
+
+    // Узбекистан
     { name: 'Ramstore', category: 'Гипермаркеты', country: 'Узбекистан' },
-    { name: 'Carrefour Russia', category: 'Международные сети', country: 'Россия' },
-    { name: 'Metro Cash & Carry', category: 'Опт', country: 'Россия' },
-    { name: 'Lenta', category: 'Гипермаркеты', country: 'Россия' },
-    { name: 'Perekrestok', category: 'Супермаркеты', country: 'Россия' },
-    { name: 'Pyaterochka', category: 'Магазины у дома', country: 'Россия' },
-    { name: 'Vkusville', category: 'Супермаркеты', country: 'Россия' },
-    { name: 'Turkish Airlines Catering', category: 'HoReCa', country: 'Турция' }
+    { name: 'Korzinka', category: 'Супермаркеты', country: 'Узбекистан' },
+    { name: 'Havas', category: 'Розничные сети', country: 'Узбекистан' },
+
+    // Россия
+    { name: 'Лента', category: 'Гипермаркеты', country: 'Россия' },
+    { name: 'Перекрёсток', category: 'Супермаркеты', country: 'Россия' },
+    { name: 'Пятёрочка', category: 'Магазины у дома', country: 'Россия' },
+    { name: 'Metro Cash & Carry', category: 'Опт и розница', country: 'Россия' },
+    { name: 'Вкусвилл', category: 'Супермаркеты', country: 'Россия' },
+    { name: 'Ашан', category: 'Гипермаркеты', country: 'Россия' },
+
+    // США
+    { name: 'Russian Gourmet', category: 'Этнические магазины', country: 'США' },
+    { name: 'Tashkent Supermarket', category: 'Супермаркеты', country: 'США' },
+    { name: 'Euro Market', category: 'Розничные сети', country: 'США' }
   ];
 
   return (
@@ -44,26 +54,22 @@ const Partners = () => {
               ГЕОГРАФИЯ СОТРУДНИЧЕСТВА
             </h2>
             <p className="font-secondary text-xl text-text-secondary max-w-3xl mx-auto">
-              Наша продукция представлена в крупнейших торговых сетях 8 стран
+              Наша продукция представлена в крупнейших торговых сетях 4 стран
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             {[
-              { country: 'Кыргызстан', stores: '150+', emoji: '🇰🇬' },
               { country: 'Казахстан', stores: '80+', emoji: '🇰🇿' },
               { country: 'Узбекистан', stores: '60+', emoji: '🇺🇿' },
               { country: 'Россия', stores: '200+', emoji: '🇷🇺' },
-              { country: 'США', stores: '15+', emoji: '🇺🇸' },
-              { country: 'Турция', stores: '25+', emoji: '🇹🇷' },
-              { country: 'ОАЭ', stores: '10+', emoji: '🇦🇪' },
-              { country: 'Китай', stores: '30+', emoji: '🇨🇳' }
+              { country: 'США', stores: '15+', emoji: '🇺🇸' }
             ].map((item, idx) => (
-              <div key={idx} className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 text-center border-2 border-purple-200 hover:border-purple-400 transition-all duration-300 hover:-translate-y-2">
-                <div className="text-6xl mb-3">{item.emoji}</div>
-                <h3 className="font-primary text-2xl text-dark-navy mb-2">{item.country}</h3>
-                <p className="font-secondary text-purple-600 font-bold text-xl">{item.stores}</p>
-                <p className="font-secondary text-gray-600 text-sm">точек продаж</p>
+              <div key={idx} className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 text-center border-2 border-purple-200 hover:border-purple-400 transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl">
+                <div className="text-7xl mb-4">{item.emoji}</div>
+                <h3 className="font-primary text-3xl text-dark-navy mb-3">{item.country}</h3>
+                <p className="font-secondary text-purple-600 font-bold text-2xl">{item.stores}</p>
+                <p className="font-secondary text-gray-600 text-sm mt-1">точек продаж</p>
               </div>
             ))}
           </div>
