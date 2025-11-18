@@ -3,6 +3,8 @@ import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import Button from '../components/ui/Button';
 import NumberCounter from '../components/common/NumberCounter';
+import WaterDrops from '../components/effects/WaterDrops';
+import FloatingElements from '../components/effects/FloatingElements';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -126,7 +128,13 @@ const About = () => {
   ];
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden relative">
+      {/* Water drops effect */}
+      <WaterDrops count={40} />
+
+      {/* Floating decorative elements */}
+      <FloatingElements count={15} color="rgba(0, 168, 204, 0.1)" />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-dark-navy via-primary-blue to-primary-cyan text-white pt-32 pb-24 overflow-hidden">
         <div className="absolute inset-0 opacity-10">

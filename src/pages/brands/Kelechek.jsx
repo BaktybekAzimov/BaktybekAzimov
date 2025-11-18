@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Button from '../../components/ui/Button';
 import ProductModal from '../../components/ui/ProductModal';
+import WaterDrops from '../../components/effects/WaterDrops';
 
 const Kelechek = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -112,7 +113,10 @@ const Kelechek = () => {
   };
 
   return (
-    <div className="pt-32 pb-20">
+    <div className="pt-32 pb-20 relative">
+      {/* Water drops effect */}
+      <WaterDrops count={40} color="rgba(0, 168, 204, 0.5)" />
+
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-dark-navy via-primary-blue to-primary-cyan text-white py-32 mb-20 overflow-hidden">
         {/* Background effects */}

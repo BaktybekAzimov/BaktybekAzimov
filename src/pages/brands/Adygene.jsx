@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Button from '../../components/ui/Button';
 import ProductModal from '../../components/ui/ProductModal';
+import WaterDrops from '../../components/effects/WaterDrops';
 
 const Adygene = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -87,7 +88,10 @@ const Adygene = () => {
   };
 
   return (
-    <div className="pt-32 pb-20">
+    <div className="pt-32 pb-20 relative">
+      {/* Water drops effect */}
+      <WaterDrops count={40} color="rgba(100, 200, 255, 0.4)" />
+
       <section className="relative bg-gradient-to-br from-blue-200 via-blue-300 to-cyan-300 text-dark-navy py-32 mb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Button from '../components/ui/Button';
+import WaterDrops from '../components/effects/WaterDrops';
+import FloatingElements from '../components/effects/FloatingElements';
 
 const Contacts = () => {
   const [formData, setFormData] = useState({
@@ -28,7 +30,13 @@ const Contacts = () => {
   };
 
   return (
-    <div className="pt-32 pb-20">
+    <div className="pt-32 pb-20 relative">
+      {/* Water drops effect */}
+      <WaterDrops count={35} />
+
+      {/* Floating decorative elements */}
+      <FloatingElements count={12} color="rgba(0, 168, 204, 0.08)" />
+
       <section className="relative bg-gradient-to-br from-dark-navy via-primary-blue to-primary-cyan text-white py-32 mb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />

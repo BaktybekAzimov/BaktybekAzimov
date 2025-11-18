@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Button from '../../components/ui/Button';
 import ProductModal from '../../components/ui/ProductModal';
+import WaterDrops from '../../components/effects/WaterDrops';
 
 const Lemonads = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -216,7 +217,10 @@ const Lemonads = () => {
   };
 
   return (
-    <div className="pt-32 pb-20">
+    <div className="pt-32 pb-20 relative">
+      {/* Water drops effect */}
+      <WaterDrops count={35} color="rgba(255, 200, 0, 0.4)" />
+
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-yellow-300 via-green-400 to-orange-400 text-white py-32 mb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-20">

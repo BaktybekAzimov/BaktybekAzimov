@@ -4,6 +4,7 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 
 // Layout and Effects
 import WaterDrops from '../components/effects/WaterDrops';
+import FloatingElements from '../components/effects/FloatingElements';
 
 // Hero
 import PremiumHero from '../components/hero/PremiumHero';
@@ -104,7 +105,7 @@ const Home = () => {
       });
     });
 
-    // Parallax backgrounds
+    // Multi-layer parallax backgrounds with different speeds
     gsap.utils.toArray('.parallax-bg').forEach(bg => {
       gsap.to(bg, {
         y: '30%',
@@ -116,6 +117,65 @@ const Home = () => {
           scrub: 1
         }
       });
+    });
+
+    // Slow parallax for sections (subtle movement)
+    gsap.utils.toArray('.parallax-slow').forEach(el => {
+      gsap.to(el, {
+        y: '15%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 2
+        }
+      });
+    });
+
+    // Fast parallax for floating elements
+    gsap.utils.toArray('.parallax-fast').forEach(el => {
+      gsap.to(el, {
+        y: '-50%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.5
+        }
+      });
+    });
+
+    // Rotation on scroll
+    gsap.utils.toArray('.parallax-rotate').forEach(el => {
+      gsap.to(el, {
+        rotation: 360,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1
+        }
+      });
+    });
+
+    // Scale on scroll
+    gsap.utils.toArray('.parallax-scale').forEach(el => {
+      gsap.fromTo(el,
+        { scale: 0.8 },
+        {
+          scale: 1.2,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1
+          }
+        }
+      );
     });
 
     // Number counters animation
@@ -159,6 +219,9 @@ const Home = () => {
     <div className="relative overflow-hidden">
       {/* Water drops effect */}
       <WaterDrops count={30} />
+
+      {/* Floating decorative elements */}
+      <FloatingElements count={20} color="rgba(0, 168, 204, 0.08)" />
 
       {/* 1. HERO SECTION */}
       <PremiumHero />

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Button from '../components/ui/Button';
+import WaterDrops from '../components/effects/WaterDrops';
+import FloatingElements from '../components/effects/FloatingElements';
 
 const WhereToBuy = () => {
   const [selectedCity, setSelectedCity] = useState('all');
@@ -50,7 +52,13 @@ const WhereToBuy = () => {
   });
 
   return (
-    <div className="pt-32 pb-20">
+    <div className="pt-32 pb-20 relative">
+      {/* Water drops effect */}
+      <WaterDrops count={35} />
+
+      {/* Floating decorative elements */}
+      <FloatingElements count={12} color="rgba(0, 168, 204, 0.08)" />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary-cyan via-primary-blue to-dark-navy text-white py-32 mb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
