@@ -7,14 +7,35 @@ import NumberCounter from '../components/common/NumberCounter';
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const timelineRef = useRef(null);
+  const horizontalRef = useRef(null);
+  const panelsRef = useRef([]);
 
   useEffect(() => {
-    // Animate sections on scroll
+    // Horizontal scrolling timeline
+    const panels = panelsRef.current;
+    const horizontalSection = horizontalRef.current;
+
+    if (panels.length > 0 && horizontalSection) {
+      const totalWidth = panels.reduce((acc, panel) => acc + panel.offsetWidth, 0);
+
+      gsap.to(panels, {
+        xPercent: -100 * (panels.length - 1),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: horizontalSection,
+          pin: true,
+          scrub: 1,
+          snap: 1 / (panels.length - 1),
+          end: () => `+=${totalWidth}`
+        }
+      });
+    }
+
+    // Fade up animations
     gsap.utils.toArray('.fade-up').forEach((element) => {
       gsap.from(element, {
         opacity: 0,
-        y: 60,
+        y: 80,
         duration: 1,
         scrollTrigger: {
           trigger: element,
@@ -23,343 +44,364 @@ const About = () => {
         }
       });
     });
+
+    // Stats counter animation
+    gsap.utils.toArray('.stat-number').forEach((stat) => {
+      ScrollTrigger.create({
+        trigger: stat,
+        start: 'top 80%',
+        onEnter: () => {
+          const target = parseInt(stat.getAttribute('data-value'));
+          gsap.to(stat, {
+            innerText: target,
+            duration: 2.5,
+            ease: 'power2.out',
+            snap: { innerText: 1 },
+            onUpdate: function() {
+              stat.innerText = Math.ceil(stat.innerText);
+            }
+          });
+        }
+      });
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
   }, []);
 
   const timeline = [
-    { year: 1991, event: 'Основание компании KELECHEK', desc: 'Начало производства минеральной воды №27' },
-    { year: 1995, event: 'Первая сертификация', desc: 'Получение сертификата лечебно-столовой воды' },
-    { year: 2000, event: 'Расширение производства', desc: 'Модернизация завода и увеличение мощностей' },
-    { year: 2005, event: 'Экспорт в Казахстан', desc: 'Выход на международный рынок' },
-    { year: 2010, event: 'Новые бренды', desc: 'Запуск линеек ADYGENE и GIMALAI' },
-    { year: 2015, event: 'ISO 9001', desc: 'Сертификация международного стандарта качества' },
-    { year: 2020, event: 'Экспорт в США', desc: 'Выход на рынок Северной Америки' },
-    { year: 2024, event: 'Современность', desc: 'Лидер рынка минеральных вод Центральной Азии' }
+    {
+      year: 1991,
+      title: 'НАЧАЛО ИСТОРИИ',
+      description: 'Основание ЗАО "КЕЛЕЧЕК" в городе Жалал-Абад. Открытие уникального источника минеральной воды №27',
+      color: 'from-blue-900 to-blue-700',
+      icon: '🏔️'
+    },
+    {
+      year: 1995,
+      title: 'ПЕРВАЯ СЕРТИФИКАЦИЯ',
+      description: 'Получение официального сертификата лечебно-столовой воды. Признание целебных свойств источника №27',
+      color: 'from-cyan-900 to-cyan-700',
+      icon: '📜'
+    },
+    {
+      year: 2000,
+      title: 'МОДЕРНИЗАЦИЯ',
+      description: 'Масштабное расширение и модернизация производственных мощностей. Внедрение современных технологий',
+      color: 'from-teal-900 to-teal-700',
+      icon: '🏭'
+    },
+    {
+      year: 2005,
+      title: 'МЕЖДУНАРОДНЫЙ РЫНОК',
+      description: 'Первый экспорт в Казахстан. Начало международной экспансии бренда KELECHEK',
+      color: 'from-green-900 to-green-700',
+      icon: '🌍'
+    },
+    {
+      year: 2010,
+      title: 'НОВЫЕ БРЕНДЫ',
+      description: 'Запуск премиальных линеек ADYGENE (ледниковая вода) и GIMALAI (артезианская вода)',
+      color: 'from-emerald-900 to-emerald-700',
+      icon: '💧'
+    },
+    {
+      year: 2015,
+      title: 'ISO 9001',
+      description: 'Сертификация международного стандарта качества. Признание мировых экспертов',
+      color: 'from-indigo-900 to-indigo-700',
+      icon: '⭐'
+    },
+    {
+      year: 2020,
+      title: 'ГЛОБАЛЬНАЯ ЭКСПАНСИЯ',
+      description: 'Выход на рынки США, Китая и ОАЭ. Экспорт в 8 стран мира',
+      color: 'from-purple-900 to-purple-700',
+      icon: '🚀'
+    },
+    {
+      year: 2024,
+      title: 'ЛИДЕРСТВО',
+      description: 'Ведущий производитель премиальной минеральной воды в Центральной Азии. 33 года качества',
+      color: 'from-pink-900 to-pink-700',
+      icon: '👑'
+    }
   ];
 
   return (
-    <div className="pt-32 pb-20 overflow-hidden">
+    <div className="overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-dark-navy via-primary-blue to-primary-cyan text-white py-32 mb-20">
+      <section className="relative bg-gradient-to-br from-dark-navy via-primary-blue to-primary-cyan text-white pt-32 pb-24 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-cyan rounded-full blur-[120px]" />
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute bg-white rounded-full"
+              style={{
+                width: `${Math.random() * 100 + 20}px`,
+                height: `${Math.random() * 100 + 20}px`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float ${5 + Math.random() * 10}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 5}s`,
+                filter: 'blur(40px)'
+              }}
+            />
+          ))}
         </div>
 
         <div className="container-custom text-center relative z-10">
-          <span className="inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full text-sm font-secondary mb-8">
-            О компании
-          </span>
-          <h1 className="font-primary text-[clamp(50px,8vw,100px)] mb-6 leading-none">
-            KELECHEK
-          </h1>
-          <p className="font-secondary text-2xl md:text-4xl max-w-4xl mx-auto leading-relaxed">
-            30 лет создаем продукты премиум-класса
-            <br />
-            <span className="text-primary-cyan">
-              для здоровья и удовольствия миллионов людей
+          <div className="animate-fade-in">
+            <span className="inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full text-sm font-secondary mb-8">
+              О компании
             </span>
-          </p>
+            <h1 className="font-primary text-[clamp(50px,10vw,120px)] mb-6 leading-none drop-shadow-2xl">
+              KELECHEK
+            </h1>
+            <p className="font-secondary text-2xl md:text-4xl max-w-4xl mx-auto leading-relaxed">
+              <span className="font-bold">33 года</span> создаем продукты премиум-класса
+              <br />
+              <span className="text-primary-cyan text-3xl md:text-5xl font-bold mt-4 block">
+                для здоровья миллионов людей
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/70 flex flex-col items-center animate-bounce">
+          <span className="text-sm mb-2">Прокрутите вниз</span>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
         </div>
       </section>
 
-      <div className="container-custom">
-        {/* Stats Section */}
-        <section className="mb-32 fade-up">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      {/* Stats Section */}
+      <section className="py-24 bg-white fade-up">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {[
-              { value: 33, suffix: '+', label: 'Лет на рынке', desc: 'С 1991 года' },
-              { value: 8, suffix: '', label: 'Стран экспорта', desc: 'По всему миру' },
-              { value: 150, suffix: '+', label: 'Сотрудников', desc: 'Профессиональная команда' },
-              { value: 4, suffix: '', label: 'Бренда', desc: 'В портфеле продуктов' }
+              { value: 33, suffix: '+', label: 'Лет на рынке', desc: 'С 1991 года', color: 'from-blue-500 to-cyan-500' },
+              { value: 4, suffix: '', label: 'Страны экспорта', desc: 'По всему миру', color: 'from-cyan-500 to-teal-500' },
+              { value: 150, suffix: '+', label: 'Сотрудников', desc: 'Команда профессионалов', color: 'from-teal-500 to-green-500' },
+              { value: 4, suffix: '', label: 'Бренда', desc: 'В портфеле', color: 'from-green-500 to-emerald-500' }
             ].map((stat, idx) => (
               <div
                 key={idx}
-                className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary-blue/5 to-primary-cyan/5 border-2 border-primary-cyan/20 hover:border-primary-cyan/40 transition-all duration-300 group"
+                className={`text-center p-6 md:p-8 rounded-3xl bg-gradient-to-br ${stat.color}/5 border-2 border-transparent hover:border-current transition-all duration-500 group hover:shadow-2xl hover:-translate-y-3`}
               >
-                <div className="font-primary text-6xl text-primary-blue mb-2 group-hover:scale-110 transition-transform">
-                  <NumberCounter end={stat.value} duration={2000} />
+                <div className={`font-primary text-5xl md:text-7xl bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-3 group-hover:scale-110 transition-transform duration-500`}>
+                  <span className="stat-number" data-value={stat.value}>0</span>
                   {stat.suffix}
                 </div>
-                <div className="font-secondary text-lg text-dark-navy mb-2">{stat.label}</div>
-                <div className="font-secondary text-sm text-text-secondary">{stat.desc}</div>
+                <div className="font-secondary text-base md:text-lg text-dark-navy mb-2 font-semibold">{stat.label}</div>
+                <div className="font-secondary text-xs md:text-sm text-text-secondary">{stat.desc}</div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* History */}
-        <section className="mb-32 fade-up">
+      {/* Horizontal Scrolling Timeline */}
+      <section
+        ref={horizontalRef}
+        className="relative h-screen overflow-hidden bg-black"
+      >
+        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 text-white text-center">
+          <h2 className="font-primary text-5xl md:text-7xl mb-4">НАША ИСТОРИЯ</h2>
+          <p className="font-secondary text-xl md:text-2xl text-gray-400">← Прокрутите, чтобы увидеть путь к успеху →</p>
+        </div>
+
+        <div className="absolute inset-0 flex items-center">
+          <div className="flex">
+            {timeline.map((item, index) => (
+              <div
+                key={index}
+                ref={el => panelsRef.current[index] = el}
+                className={`min-w-screen h-screen flex items-center justify-center bg-gradient-to-br ${item.color} relative`}
+              >
+                {/* Background decoration */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />
+                  <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white rounded-full blur-[120px]" />
+                </div>
+
+                {/* Content */}
+                <div className="container-custom relative z-10 text-white">
+                  <div className="max-w-3xl mx-auto text-center">
+                    <div className="text-8xl md:text-9xl mb-8 opacity-50">{item.icon}</div>
+                    <div className="font-primary text-9xl md:text-[180px] mb-8 leading-none">
+                      {item.year}
+                    </div>
+                    <h3 className="font-primary text-4xl md:text-6xl mb-8 leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="font-secondary text-2xl md:text-3xl leading-relaxed text-white/90">
+                      {item.description}
+                    </p>
+                    <div className="mt-12 flex items-center justify-center space-x-2">
+                      {timeline.map((_, idx) => (
+                        <div
+                          key={idx}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            idx === index ? 'w-12 bg-white' : 'w-2 bg-white/30'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section */}
+      <section className="py-32 bg-gradient-to-br from-gray-50 to-white fade-up">
+        <div className="container-custom">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
               <span className="inline-block px-4 py-2 bg-primary-cyan/10 text-primary-cyan rounded-full text-sm font-secondary mb-6">
-                История успеха
+                Наша миссия
               </span>
-              <h2 className="font-primary text-6xl text-dark-navy mb-8">
-                ОТ ИСТОЧНИКА К ЛИДЕРСТВУ
+              <h2 className="font-primary text-5xl md:text-6xl text-dark-navy mb-8 leading-tight">
+                КАЧЕСТВО, ПРОВЕРЕННОЕ ВРЕМЕНЕМ
               </h2>
               <p className="font-secondary text-xl text-gray-700 mb-6 leading-relaxed">
                 ЗАО «КЕЛЕЧЕК» основано в 1991 году в городе Жалал-Абад, Кыргызстан.
                 За более чем 30 лет работы мы стали крупнейшим производителем премиальной
                 минеральной воды в регионе Центральной Азии.
               </p>
-              <p className="font-secondary text-xl text-gray-700 mb-6 leading-relaxed">
+              <p className="font-secondary text-xl text-gray-700 mb-8 leading-relaxed">
                 Наш флагманский продукт - лечебно-столовая минеральная вода из источника №27 -
-                сертифицирована для лечения заболеваний желудочно-кишечного тракта и завоевала
-                доверие миллионов потребителей.
+                сертифицирована для лечения заболеваний ЖКТ и завоевала доверие миллионов потребителей.
               </p>
-              <p className="font-secondary text-xl text-gray-700 leading-relaxed">
-                Сегодня продукция KELECHEK экспортируется в Казахстан, Узбекистан, Россию,
-                США, Китай, ОАЭ, Турцию и Южную Корею.
-              </p>
+              <Button
+                size="large"
+                onClick={() => window.location.href = '/brands/kelechek'}
+              >
+                Узнать о продукции
+              </Button>
             </div>
 
             <div className="space-y-6">
-              <div className="bg-gradient-to-br from-dark-navy to-primary-blue text-white rounded-3xl p-10">
-                <div className="font-primary text-8xl mb-4">27</div>
-                <div className="font-secondary text-2xl mb-2">Источник №27</div>
-                <div className="font-secondary text-gray-300">
-                  Уникальный источник в Жалал-Абаде с целебными свойствами
+              <div className="bg-gradient-to-br from-dark-navy to-primary-blue text-white rounded-3xl p-10 hover:scale-105 transition-transform duration-500 shadow-2xl">
+                <div className="font-primary text-9xl mb-4 drop-shadow-2xl">27</div>
+                <div className="font-secondary text-3xl mb-3 font-bold">Источник №27</div>
+                <div className="font-secondary text-lg text-gray-300 leading-relaxed">
+                  Уникальный источник в Жалал-Абаде с подтвержденными целебными свойствами
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
-                  <div className="font-primary text-5xl text-green-600 mb-2">ISO</div>
-                  <div className="font-secondary text-sm text-gray-700">Международный стандарт</div>
+                <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200 hover:border-green-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <div className="font-primary text-6xl text-green-600 mb-3">ISO</div>
+                  <div className="font-secondary text-sm text-gray-700 font-semibold">Международный<br/>стандарт</div>
                 </div>
-                <div className="bg-blue-50 rounded-2xl p-6 border-2 border-blue-200">
-                  <div className="font-primary text-5xl text-blue-600 mb-2">24/7</div>
-                  <div className="font-secondary text-sm text-gray-700">Контроль качества</div>
+                <div className="bg-blue-50 rounded-2xl p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <div className="font-primary text-6xl text-blue-600 mb-3">24/7</div>
+                  <div className="font-secondary text-sm text-gray-700 font-semibold">Контроль<br/>качества</div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Timeline */}
-        <section className="mb-32 fade-up">
-          <div className="text-center mb-16">
+      {/* Team Section */}
+      <section className="py-32 bg-white fade-up">
+        <div className="container-custom">
+          <div className="text-center mb-20">
             <span className="inline-block px-4 py-2 bg-primary-blue/10 text-primary-blue rounded-full text-sm font-secondary mb-6">
-              Наша история
+              Наша команда
             </span>
-            <h2 className="font-primary text-6xl text-dark-navy mb-6">
-              ПУТЬ К УСПЕХУ
+            <h2 className="font-primary text-5xl md:text-6xl text-dark-navy mb-6">
+              ПРОФЕССИОНАЛЫ СВОЕГО ДЕЛА
             </h2>
             <p className="font-secondary text-xl text-text-secondary max-w-3xl mx-auto">
-              Основные вехи развития компании KELECHEK
+              Более 150 специалистов работают ежедневно для создания продуктов высочайшего качества
             </p>
           </div>
 
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-blue via-primary-cyan to-primary-blue hidden md:block" />
-
-            <div className="space-y-12">
-              {timeline.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`relative grid md:grid-cols-2 gap-8 items-center ${
-                    idx % 2 === 0 ? '' : 'md:flex-row-reverse'
-                  }`}
-                >
-                  {/* Left/Right content */}
-                  <div className={idx % 2 === 0 ? 'md:text-right' : 'md:col-start-2'}>
-                    <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-primary-cyan/20 hover:border-primary-cyan">
-                      <div className="font-primary text-5xl text-primary-blue mb-3">
-                        {item.year}
-                      </div>
-                      <h3 className="font-primary text-2xl text-dark-navy mb-3">
-                        {item.event}
-                      </h3>
-                      <p className="font-secondary text-gray-600">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Center dot */}
-                  <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden md:block">
-                    <div className="w-6 h-6 bg-primary-cyan rounded-full border-4 border-white shadow-lg" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Values */}
-        <section className="mb-32 fade-up">
-          <div className="bg-gradient-to-br from-primary-blue/5 via-primary-cyan/5 to-primary-blue/5 rounded-3xl p-12 md:p-16">
-            <div className="text-center mb-16">
-              <h2 className="font-primary text-6xl text-dark-navy mb-6">
-                НАШИ ЦЕННОСТИ
-              </h2>
-              <p className="font-secondary text-xl text-text-secondary max-w-3xl mx-auto">
-                Принципы, которыми мы руководствуемся в работе
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: (
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ),
-                  title: 'КАЧЕСТВО',
-                  desc: 'Строгий многоступенчатый контроль на каждом этапе производства. Используем только современное европейское оборудование.'
-                },
-                {
-                  icon: (
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ),
-                  title: 'ПРИРОДА',
-                  desc: 'Чистая вода из природных источников горного Кыргызстана. Бережное отношение к экологии и устойчивое развитие.'
-                },
-                {
-                  icon: (
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  ),
-                  title: 'ЛЮДИ',
-                  desc: 'Забота о здоровье потребителей и благополучии сотрудников. Социальная ответственность и развитие сообщества.'
-                },
-                {
-                  icon: (
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  ),
-                  title: 'ИННОВАЦИИ',
-                  desc: 'Постоянное совершенствование технологий и процессов. Инвестиции в развитие и модернизацию производства.'
-                },
-                {
-                  icon: (
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                  ),
-                  title: 'МЕЖДУНАРОДНОСТЬ',
-                  desc: 'Соответствие международным стандартам качества. Экспорт продукции в 8 стран мира.'
-                },
-                {
-                  icon: (
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ),
-                  title: 'ДОСТУПНОСТЬ',
-                  desc: 'Премиум качество по справедливым ценам. Продукция доступна во всех регионах присутствия.'
-                }
-              ].map((value, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group"
-                >
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary-blue to-primary-cyan rounded-2xl flex items-center justify-center text-white mx-auto mb-6 group-hover:scale-110 transition-transform">
-                    {value.icon}
-                  </div>
-                  <h3 className="font-primary text-2xl text-dark-navy mb-4 text-center">
-                    {value.title}
-                  </h3>
-                  <p className="font-secondary text-gray-600 leading-relaxed text-center">
-                    {value.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Production */}
-        <section className="mb-32 fade-up">
-          <div className="bg-dark-navy text-white rounded-3xl p-12 md:p-16 relative overflow-hidden">
-            <div className="absolute top-0 right-0 opacity-5 font-primary text-[300px] leading-none">27</div>
-
-            <div className="relative z-10">
-              <h2 className="font-primary text-6xl mb-8">
-                ПРОИЗВОДСТВО
-              </h2>
-
-              <div className="grid md:grid-cols-2 gap-12 mb-12">
-                <div>
-                  <p className="font-secondary text-xl mb-6 leading-relaxed text-gray-300">
-                    Наш производственный комплекс оснащен современным европейским оборудованием
-                    и соответствует международным стандартам качества ISO 9001.
-                  </p>
-                  <p className="font-secondary text-xl leading-relaxed text-gray-300">
-                    Полный производственный цикл - от добычи воды из источника до упаковки
-                    готовой продукции - находится под строгим контролем качества.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    'Автоматизированные линии розлива',
-                    'Лаборатория контроля качества',
-                    'Система фильтрации и очистки',
-                    'Современный складской комплекс',
-                    'Логистический центр',
-                    'Экологическая безопасность'
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center text-lg">
-                      <div className="w-2 h-2 bg-primary-cyan rounded-full mr-4" />
-                      <span className="text-gray-300">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {[
-                  { value: '50K', label: 'Бутылок в день' },
-                  { value: '100%', label: 'Автоматизация' },
-                  { value: '24/7', label: 'Контроль качества' },
-                  { value: '3', label: 'Производственные линии' }
-                ].map((item, idx) => (
-                  <div key={idx} className="text-center p-6 bg-white/10 backdrop-blur-sm rounded-xl">
-                    <div className="font-primary text-4xl text-primary-cyan mb-2">{item.value}</div>
-                    <div className="font-secondary text-sm text-gray-400">{item.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="text-center fade-up">
-          <div className="bg-gradient-to-br from-primary-blue/10 to-primary-cyan/10 rounded-3xl p-12 md:p-16 border-2 border-primary-cyan/20">
-            <h2 className="font-primary text-5xl md:text-6xl text-dark-navy mb-6">
-              ХОТИТЕ УЗНАТЬ БОЛЬШЕ?
-            </h2>
-            <p className="font-secondary text-xl text-text-secondary mb-10 max-w-3xl mx-auto leading-relaxed">
-              Свяжитесь с нами для получения дополнительной информации о компании,
-              продукции или возможностях сотрудничества
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="large"
-                variant="primary"
-                onClick={() => window.location.href = '/contacts'}
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { title: 'Производство', desc: 'Современное оборудование и технологии', icon: '🏭', color: 'from-blue-500 to-cyan-500' },
+              { title: 'Контроль качества', desc: 'Многоступенчатая система проверки', icon: '🔬', color: 'from-cyan-500 to-teal-500' },
+              { title: 'Логистика', desc: 'Доставка в 4 страны мира', icon: '🚛', color: 'from-teal-500 to-green-500' }
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className={`bg-gradient-to-br ${item.color}/5 rounded-3xl p-10 border-2 border-transparent hover:border-current transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 group`}
               >
-                Связаться с нами
-              </Button>
-              <Button
-                size="large"
-                variant="secondary"
-                onClick={() => window.location.href = '/'}
-              >
-                Наша продукция
-              </Button>
-            </div>
+                <div className="text-7xl mb-6 group-hover:scale-110 transition-transform duration-500">{item.icon}</div>
+                <h3 className={`font-primary text-3xl bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-4`}>
+                  {item.title}
+                </h3>
+                <p className="font-secondary text-lg text-gray-700 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-gradient-to-br from-primary-blue to-primary-cyan text-white fade-up">
+        <div className="container-custom text-center">
+          <h2 className="font-primary text-5xl md:text-7xl mb-8">
+            СТАНЬТЕ ЧАСТЬЮ ИСТОРИИ KELECHEK
+          </h2>
+          <p className="font-secondary text-2xl md:text-3xl mb-12 max-w-4xl mx-auto leading-relaxed opacity-90">
+            Присоединяйтесь к миллионам людей, выбирающих качество и здоровье
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Button
+              size="large"
+              variant="secondary"
+              onClick={() => window.location.href = '/where-to-buy'}
+            >
+              Где купить
+            </Button>
+            <Button
+              size="large"
+              variant="outline"
+              onClick={() => window.location.href = '/partners'}
+            >
+              Стать партнером
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0) translateX(0);
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+          }
+        }
+
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

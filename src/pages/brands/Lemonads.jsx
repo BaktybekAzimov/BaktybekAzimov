@@ -14,6 +14,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-yellow-300 to-yellow-500',
+      modalColor: 'from-yellow-400 via-yellow-500 to-yellow-600',
       textColor: 'text-yellow-900',
       description: 'Классический лимонад с натуральным вкусом лимона. Освежающий напиток для жаркого дня.',
       characteristics: [
@@ -38,6 +39,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-orange-400 to-orange-600',
+      modalColor: 'from-orange-500 via-orange-600 to-orange-700',
       textColor: 'text-orange-900',
       description: 'Яркий апельсиновый напиток с насыщенным цитрусовым вкусом. Любимец детей и взрослых!',
       characteristics: [
@@ -62,6 +64,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-green-400 to-green-600',
+      modalColor: 'from-green-500 via-green-600 to-green-700',
       textColor: 'text-green-900',
       description: 'Легендарный зелёный напиток с экстрактом эстрагона. Уникальный травянистый вкус!',
       characteristics: [
@@ -86,6 +89,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-amber-300 to-amber-500',
+      modalColor: 'from-amber-400 via-amber-500 to-amber-600',
       textColor: 'text-amber-900',
       description: 'Нежный грушевый напиток с натуральным фруктовым вкусом. Любимая классика!',
       characteristics: [
@@ -110,6 +114,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-lime-400 to-lime-600',
+      modalColor: 'from-lime-500 via-lime-600 to-green-600',
       textColor: 'text-lime-900',
       description: 'Энергетический напиток с витаминами и вкусом лайма-лимона. Идеален для мохито!',
       characteristics: [
@@ -135,6 +140,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-gray-800 to-gray-900',
+      modalColor: 'from-gray-800 via-gray-900 to-black',
       textColor: 'text-white',
       description: 'Классический вкус колы от Азии! Насыщенный темный напиток с характерным вкусом.',
       characteristics: [
@@ -159,6 +165,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-red-600 to-red-800',
+      modalColor: 'from-red-600 via-red-700 to-red-900',
       textColor: 'text-red-100',
       description: 'Насыщенный гранатовый напиток с богатым фруктовым вкусом и ярким цветом.',
       characteristics: [
@@ -183,6 +190,7 @@ const Lemonads = () => {
       volume: '0.5л',
       type: 'Газированный напиток',
       color: 'bg-gradient-to-br from-yellow-400 to-orange-400',
+      modalColor: 'from-yellow-500 via-orange-500 to-orange-600',
       textColor: 'text-yellow-900',
       description: 'Освежающий цитрусовый напиток с нотками лимона и апельсина. Летний хит!',
       characteristics: [
