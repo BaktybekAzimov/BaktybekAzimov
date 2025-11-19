@@ -5,6 +5,7 @@ const ProductCard3D = ({
   subtitle,
   price,
   image,
+  icon,
   bgColor = 'bg-white'
 }) => {
   const cardRef = useRef(null);
@@ -55,20 +56,28 @@ const ProductCard3D = ({
 
       {/* Content */}
       <div style={{ transform: 'translateZ(50px)' }}>
-        {image && (
+        {/* Icon or Image */}
+        {icon && (
+          <div className="w-full h-48 mb-6 flex items-center justify-center">
+            <div className="text-9xl opacity-30 group-hover:scale-110 transition-transform duration-300">
+              {icon}
+            </div>
+          </div>
+        )}
+        {!icon && image && (
           <div className="w-full h-48 mb-6 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
             <img src={image} alt={title} className="w-full h-full object-contain" />
           </div>
         )}
 
-        <h3 className="font-primary text-3xl mb-2 text-kelechek-dark">
+        <h3 className="font-primary text-3xl mb-2 text-white">
           {title}
         </h3>
-        <p className="font-secondary text-gray-600 mb-4">
+        <p className="font-secondary text-white/90 mb-4">
           {subtitle}
         </p>
         {price && (
-          <div className="font-primary text-2xl text-kelechek-primary">
+          <div className="font-primary text-2xl text-white font-bold">
             {price}
           </div>
         )}

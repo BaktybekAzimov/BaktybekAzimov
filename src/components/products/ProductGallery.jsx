@@ -14,49 +14,57 @@ const ProductGallery = () => {
       title: 'KELECHEK №27',
       subtitle: '0.5л Премиум',
       price: '50 сом',
-      bgColor: 'bg-gradient-to-br from-red-50 to-red-100'
+      bgColor: 'bg-gradient-to-br from-red-400 to-red-600',
+      icon: '🏔️'
     },
     {
       title: 'KELECHEK №27',
       subtitle: '1.5л Семейная',
       price: '80 сом',
-      bgColor: 'bg-gradient-to-br from-red-50 to-red-100'
+      bgColor: 'bg-gradient-to-br from-red-500 to-orange-600',
+      icon: '💧'
     },
     {
       title: 'ADYGENE',
       subtitle: '0.5л Ледниковая',
       price: '60 сом',
-      bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100'
+      bgColor: 'bg-gradient-to-br from-blue-400 to-cyan-500',
+      icon: '❄️'
     },
     {
       title: 'ADYGENE Лимон',
       subtitle: '0.5л С лимоном',
       price: '65 сом',
-      bgColor: 'bg-gradient-to-br from-yellow-50 to-blue-100'
+      bgColor: 'bg-gradient-to-br from-yellow-400 to-blue-500',
+      icon: '🍋'
     },
     {
       title: 'GIMALAI',
       subtitle: '1л Питьевая',
       price: '40 сом',
-      bgColor: 'bg-gradient-to-br from-cyan-50 to-cyan-100'
+      bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-500',
+      icon: '⛰️'
     },
     {
       title: 'GIMALAI',
       subtitle: '5л Семейная',
       price: '150 сом',
-      bgColor: 'bg-gradient-to-br from-cyan-50 to-cyan-100'
+      bgColor: 'bg-gradient-to-br from-cyan-500 to-teal-600',
+      icon: '💦'
     },
     {
       title: 'К+ Витамины',
       subtitle: '0.5л Для мохито!',
       price: '55 сом',
-      bgColor: 'bg-gradient-to-br from-green-50 to-green-200'
+      bgColor: 'bg-gradient-to-br from-green-400 to-lime-500',
+      icon: '🍹'
     },
     {
       title: 'Тархун',
       subtitle: '0.5л Классика',
       price: '45 сом',
-      bgColor: 'bg-gradient-to-br from-green-100 to-green-200'
+      bgColor: 'bg-gradient-to-br from-green-500 to-emerald-600',
+      icon: '🌿'
     },
   ];
 
