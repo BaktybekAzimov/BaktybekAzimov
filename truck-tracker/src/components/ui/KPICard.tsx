@@ -1,12 +1,11 @@
 import React from 'react';
 import { Card } from './Card';
 import { cn } from '../../lib/utils';
-import { LucideIcon } from 'lucide-react';
 
 interface KPICardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon: React.ComponentType<any>;
   iconColor?: string;
   iconBgColor?: string;
   trend?: {
