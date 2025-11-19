@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { User } from '../types';
 
 interface AuthContextType {
   user: User | null;
-  supabaseUser: SupabaseUser | null;
+  supabaseUser: any | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -17,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<any | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
