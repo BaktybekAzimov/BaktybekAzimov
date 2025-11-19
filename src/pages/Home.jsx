@@ -42,21 +42,17 @@ const Home = () => {
     const brandCards = gsap.utils.toArray('.brand-card');
     brandCards.forEach((card, index) => {
       gsap.from(card, {
-        opacity: 0,
-        y: 200,
-        rotationY: -90,
-        rotationX: -30,
-        scale: 0.7,
-        duration: 1.2,
-        ease: 'back.out(1.5)',
+        y: 60,
+        scale: 0.95,
+        duration: 0.8,
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: card,
           start: 'top 90%',
-          end: 'top 40%',
-          toggleActions: 'play none none reverse',
+          toggleActions: 'play none none none',
           scrub: false
         },
-        delay: index * 0.2
+        delay: index * 0.15
       });
 
       // Hover parallax effect
@@ -84,23 +80,21 @@ const Home = () => {
       });
     });
 
-    // Sections reveal with stagger
+    // Sections reveal with stagger - simplified to not hide content
     gsap.utils.toArray('section').forEach((section, index) => {
       if (section.classList.contains('brands-section')) return;
 
       const elements = section.querySelectorAll('h2, h3, p, .feature-item, img');
 
       gsap.from(elements, {
-        opacity: 0,
-        y: 80,
-        stagger: 0.1,
-        duration: 1,
-        ease: 'power3.out',
+        y: 40,
+        stagger: 0.05,
+        duration: 0.6,
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: section,
-          start: 'top 75%',
-          end: 'top 25%',
-          toggleActions: 'play none none reverse'
+          start: 'top 80%',
+          toggleActions: 'play none none none'
         }
       });
     });

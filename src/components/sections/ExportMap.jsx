@@ -26,30 +26,30 @@ const ExportMap = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Countries appear one by one
+      // Countries appear one by one - simplified to not hide content
       gsap.from('.country-item', {
-        opacity: 0,
-        scale: 0.8,
+        scale: 0.9,
+        y: 30,
         duration: 0.4,
-        stagger: 0.08,
-        ease: 'back.out(1.7)',
+        stagger: 0.06,
+        ease: 'back.out(1.5)',
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 70%',
-          toggleActions: 'play none none reverse'
+          start: 'top 75%',
+          toggleActions: 'play none none none'
         }
       });
 
-      // Stats reveal
+      // Stats reveal - simplified to not hide content
       gsap.from('.stat-counter', {
-        opacity: 0,
         y: 30,
-        duration: 0.6,
+        duration: 0.5,
         stagger: 0.1,
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: '.stats-bar',
           start: 'top 80%',
-          toggleActions: 'play none none reverse'
+          toggleActions: 'play none none none'
         }
       });
 
@@ -163,15 +163,6 @@ const ExportMap = () => {
           </div>
         </div>
 
-        {/* Interactive world map SVG placeholder */}
-        <div className="mt-16 text-center opacity-30">
-          <svg viewBox="0 0 800 400" className="w-full max-w-4xl mx-auto">
-            {/* Simplified world map outline */}
-            <text x="400" y="200" textAnchor="middle" className="font-primary text-6xl fill-primary-blue/20">
-              [WORLD MAP]
-            </text>
-          </svg>
-        </div>
       </div>
     </section>
   );

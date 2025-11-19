@@ -68,18 +68,17 @@ const HorizontalProducts = () => {
   ];
 
   useEffect(() => {
-    // Cards stagger animation
+    // Cards stagger animation - simplified to not hide content
     gsap.from('.product-card', {
-      opacity: 0,
-      y: 80,
-      scale: 0.9,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'back.out(1.7)',
+      y: 50,
+      scale: 0.95,
+      duration: 0.5,
+      stagger: 0.08,
+      ease: 'back.out(1.5)',
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 70%',
-        toggleActions: 'play none none reverse'
+        start: 'top 75%',
+        toggleActions: 'play none none none'
       }
     });
   }, []);

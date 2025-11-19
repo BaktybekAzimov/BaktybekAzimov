@@ -9,32 +9,29 @@ const HealthBenefits = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Benefit cards reveal with stagger
+      // Benefit cards reveal with stagger - simplified to not hide content
       gsap.from('.benefit-card', {
-        opacity: 0,
-        y: 80,
-        rotationX: -15,
-        duration: 0.8,
-        stagger: 0.12,
-        ease: 'power3.out',
+        y: 50,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 70%',
-          toggleActions: 'play none none reverse'
+          start: 'top 75%',
+          toggleActions: 'play none none none'
         }
       });
 
       // Icon animation on scroll in view
       gsap.from('.benefit-icon', {
-        scale: 0,
-        rotation: -180,
-        duration: 0.8,
-        stagger: 0.12,
-        ease: 'back.out(1.7)',
+        scale: 0.8,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'back.out(1.5)',
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 70%',
-          toggleActions: 'play none none reverse'
+          start: 'top 75%',
+          toggleActions: 'play none none none'
         }
       });
 

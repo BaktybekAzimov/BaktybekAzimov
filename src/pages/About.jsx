@@ -224,43 +224,54 @@ const About = () => {
           </div>
 
           {/* Timeline */}
-          <div className="relative">
-            {/* Vertical Line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500" />
+          <div className="relative max-w-6xl mx-auto">
+            {/* Vertical Line - thicker and more visible */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-2 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 shadow-lg" />
 
             {/* Timeline Items */}
-            <div className="space-y-24">
+            <div className="space-y-16">
               {timeline.map((item, index) => {
                 const isLeft = index % 2 === 0;
 
                 return (
                   <div key={index} className="timeline-item relative">
-                    <div className={`flex items-center ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
-                      {/* Content Card */}
-                      <div className={`w-5/12 ${isLeft ? 'text-right pr-12' : 'text-left pl-12'}`}>
-                        <div className={`bg-gradient-to-br ${item.color}/10 border-2 border-transparent hover:border-current rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2`}>
-                          <div className="text-6xl mb-4">{item.icon}</div>
-                          <div className={`font-primary text-2xl bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-2`}>
-                            {item.year}
+                    <div className={`flex items-center gap-8 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                      {/* Content Card - wider */}
+                      <div className="flex-1 max-w-lg">
+                        <div className={`bg-white border-2 border-gray-200 hover:border-current rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden`}>
+                          {/* Background gradient */}
+                          <div className={`absolute top-0 ${isLeft ? 'right-0' : 'left-0'} w-32 h-32 bg-gradient-to-br ${item.color} opacity-10 rounded-full blur-3xl`} />
+
+                          <div className="relative z-10">
+                            <div className="text-7xl mb-6 drop-shadow-lg">{item.icon}</div>
+                            <div className={`font-primary text-3xl bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-3 font-bold`}>
+                              {item.year}
+                            </div>
+                            <h3 className="font-primary text-2xl text-dark-navy mb-4 font-bold">
+                              {item.title}
+                            </h3>
+                            <p className="font-secondary text-lg text-gray-700 leading-relaxed">
+                              {item.description}
+                            </p>
                           </div>
-                          <h3 className="font-primary text-2xl text-dark-navy mb-4">
-                            {item.title}
-                          </h3>
-                          <p className="font-secondary text-gray-600 leading-relaxed">
-                            {item.description}
-                          </p>
                         </div>
                       </div>
 
-                      {/* Center Circle */}
-                      <div className="w-2/12 flex justify-center">
-                        <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold z-10 hover:scale-125 transition-transform duration-300`}>
+                      {/* Center Circle - larger */}
+                      <div className="flex-shrink-0">
+                        <div className={`w-20 h-20 bg-gradient-to-br ${item.color} rounded-full border-6 border-white shadow-2xl flex items-center justify-center text-white font-bold text-xl z-10 hover:scale-125 transition-transform duration-300`}>
                           {index + 1}
                         </div>
                       </div>
 
-                      {/* Empty space on other side */}
-                      <div className="w-5/12" />
+                      {/* Other side - decorative content instead of empty */}
+                      <div className="flex-1 max-w-lg">
+                        <div className={`h-full flex items-center justify-center ${isLeft ? 'justify-start' : 'justify-end'}`}>
+                          <div className="text-9xl opacity-5 select-none">
+                            {item.icon}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );

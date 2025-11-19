@@ -71,25 +71,18 @@ const ProductGallery = () => {
   useEffect(() => {
     const cards = cardsRef.current;
 
-    gsap.fromTo(
+    gsap.from(
       cards,
       {
-        opacity: 0,
-        y: 100,
-        scale: 0.8
-      },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        stagger: 0.1,
-        duration: 0.8,
-        ease: 'power3.out',
+        y: 60,
+        scale: 0.95,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: galleryRef.current,
           start: 'top 80%',
-          end: 'bottom 20%',
-          toggleActions: 'play none none reverse'
+          toggleActions: 'play none none none'
         }
       }
     );
