@@ -11,7 +11,31 @@ import { Input } from '../components/ui/Input';
 import { Plus, Edit, Trash2, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency } from '../lib/utils';
-import { Route, RouteFormData, RouteStats } from '../types';
+
+interface Route {
+  id: string;
+  name: string;
+  distance_km: number;
+  avg_cost: number;
+  created_at?: string;
+}
+
+interface RouteFormData {
+  name: string;
+  distance_km: number;
+  avg_cost: number;
+}
+
+interface RouteStats {
+  id: string;
+  name: string;
+  distance_km: number;
+  avg_cost: number;
+  trip_count: number;
+  total_revenue: number;
+  avg_revenue: number;
+  created_at?: string;
+}
 
 export const Routes: React.FC = () => {
   const [loading, setLoading] = useState(true);

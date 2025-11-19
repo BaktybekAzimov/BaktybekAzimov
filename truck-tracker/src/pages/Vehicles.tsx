@@ -13,7 +13,43 @@ import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, Truck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
-import { Vehicle, VehicleFormData, VehicleStats } from '../types';
+
+interface Vehicle {
+  id: string;
+  brand: string;
+  model: string;
+  license_plate: string;
+  year: number;
+  status: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface VehicleFormData {
+  brand: string;
+  model: string;
+  license_plate: string;
+  year: number;
+  status: string;
+  notes?: string;
+}
+
+interface VehicleStats {
+  id: string;
+  brand: string;
+  model: string;
+  license_plate: string;
+  year: number;
+  status: string;
+  notes?: string;
+  total_trips: number;
+  total_revenue: number;
+  avg_profit_per_trip: number;
+  last_trip_date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export const Vehicles: React.FC = () => {
   const [loading, setLoading] = useState(true);

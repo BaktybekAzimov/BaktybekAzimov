@@ -8,7 +8,25 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { CheckCircle, Truck, DollarSign } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, calculateTripFinancials } from '../lib/utils';
-import { Driver, Route } from '../types';
+
+interface Driver {
+  id: string;
+  full_name: string;
+  phone: string;
+  hire_date: string;
+  status: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Route {
+  id: string;
+  name: string;
+  distance_km: number;
+  avg_cost: number;
+  created_at?: string;
+}
 
 interface DriverTripFormData {
   driver_name: string;

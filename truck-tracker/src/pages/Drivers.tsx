@@ -13,8 +13,40 @@ import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
-import { Driver, DriverFormData, DriverStats } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+interface Driver {
+  id: string;
+  full_name: string;
+  phone: string;
+  hire_date: string;
+  status: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface DriverFormData {
+  full_name: string;
+  phone: string;
+  hire_date: string;
+  status: string;
+  notes?: string;
+}
+
+interface DriverStats {
+  id: string;
+  full_name: string;
+  phone: string;
+  hire_date: string;
+  status: string;
+  notes?: string;
+  total_trips: number;
+  total_payment: number;
+  avg_profit_per_trip: number;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export const Drivers: React.FC = () => {
   const [loading, setLoading] = useState(true);

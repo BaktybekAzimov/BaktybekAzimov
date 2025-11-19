@@ -10,8 +10,39 @@ import { Button } from '../components/ui/Button';
 import { TrendingUp, Truck, DollarSign, TrendingDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel } from '../lib/utils';
-import { Trip, DashboardStats, DateFilter, ChartDataPoint, RouteChartData } from '../types';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+// Local type definitions
+type DateFilter = 'today' | 'week' | 'month' | 'all';
+
+interface DashboardStats {
+  totalRevenue: number;
+  totalTrips: number;
+  netProfit: number;
+  avgProfitPerTrip: number;
+}
+
+interface ChartDataPoint {
+  date: string;
+  revenue: number;
+  profit: number;
+}
+
+interface RouteChartData {
+  name: string;
+  trips: number;
+}
+
+interface Trip {
+  id: string;
+  trip_date: string;
+  revenue: number;
+  net_profit: number;
+  status: string;
+  driver?: { full_name: string };
+  vehicle?: { brand: string; model: string };
+  route?: { name: string };
+}
 
 export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);

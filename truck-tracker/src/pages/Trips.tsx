@@ -19,7 +19,73 @@ import {
   getStatusLabel,
   calculateTripFinancials,
 } from '../lib/utils';
-import { Trip, TripFormData, Driver, Vehicle, Route } from '../types';
+
+interface Driver {
+  id: string;
+  full_name: string;
+  phone: string;
+  hire_date: string;
+  status: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Vehicle {
+  id: string;
+  brand: string;
+  model: string;
+  license_plate: string;
+  year: number;
+  status: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Route {
+  id: string;
+  name: string;
+  distance_km: number;
+  avg_cost: number;
+  created_at?: string;
+}
+
+interface Trip {
+  id: string;
+  trip_date: string;
+  driver_id: string;
+  vehicle_id: string;
+  route_id: string;
+  revenue: number;
+  fuel_cost: number;
+  maintenance_cost: number;
+  other_costs: number;
+  total_costs: number;
+  net_profit: number;
+  driver_payment: number;
+  owner_payment: number;
+  status: string;
+  comment?: string;
+  created_at?: string;
+  updated_at?: string;
+  driver?: Driver;
+  vehicle?: Vehicle;
+  route?: Route;
+}
+
+interface TripFormData {
+  trip_date: string;
+  driver_id: string;
+  vehicle_id: string;
+  route_id: string;
+  revenue: number;
+  fuel_cost: number;
+  maintenance_cost: number;
+  other_costs: number;
+  status: string;
+  comment?: string;
+}
 
 export const Trips: React.FC = () => {
   const [loading, setLoading] = useState(true);
