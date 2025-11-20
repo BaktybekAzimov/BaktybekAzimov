@@ -2,7 +2,7 @@ import React from 'react';
 import { Notifications } from '../ui/Notifications';
 
 interface HeaderProps {
-  title: string;
+  title: string | React.ReactNode;
   subtitle?: string;
   actions?: React.ReactNode;
   icon?: React.ComponentType<any>;
