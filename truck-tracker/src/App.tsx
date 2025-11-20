@@ -82,6 +82,7 @@ function App() {
           </Routes>
         </SidebarProvider>
       </AuthProvider>
+    </LanguageProvider>
     </BrowserRouter>
   );
 }
