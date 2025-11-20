@@ -54,7 +54,7 @@ export const Sidebar: React.FC = () => {
           {/* Toggle button inside sidebar */}
           <button
             onClick={toggle}
-            className="p-2 rounded-lg hover:bg-secondary-100 transition-colors lg:hidden"
+            className="p-2 rounded-lg hover:bg-secondary-100 transition-colors"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5 text-secondary-600" />

@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS settings (
 
   -- Метаданные
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_by UUID REFERENCES auth.users(id)
+  updated_by UUID
 );
 
 -- 2. Вставить дефолтные настройки (если таблица пустая)
@@ -109,17 +109,13 @@ ON settings FOR SELECT
 TO public
 USING (true);
 
--- Только админы могут изменять
-CREATE POLICY "Allow update settings to admins only"
+-- Только аутентифицированные пользователи могут изменять (для безопасности настройте отдельно)
+CREATE POLICY "Allow update settings to authenticated"
 ON settings FOR UPDATE
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM users
-    WHERE users.id = auth.uid()
-    AND users.role = 'admin'
-  )
-);
+USING (true);
+-- ВАЖНО: После создания таблицы users с полем role, замените политику на:
+-- USING (EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin'));
 
 -- 7. Создать таблицу типов расходов (управляемая через админ панель)
 CREATE TABLE IF NOT EXISTS expense_types (
@@ -148,16 +144,12 @@ ON expense_types FOR SELECT
 TO public
 USING (is_active = true);
 
-CREATE POLICY "Allow manage expense_types to admins"
+CREATE POLICY "Allow manage expense_types to authenticated"
 ON expense_types FOR ALL
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM users
-    WHERE users.id = auth.uid()
-    AND users.role = 'admin'
-  )
-);
+USING (true);
+-- ВАЖНО: После создания таблицы users с полем role, замените политику на:
+-- USING (EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin'));
 
 -- ===================================================
 -- КАК ИСПОЛЬЗОВАТЬ:

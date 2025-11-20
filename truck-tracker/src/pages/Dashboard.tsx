@@ -3,7 +3,6 @@ import { MainLayout } from '../components/layout/MainLayout';
 import { Header } from '../components/layout/Header';
 import { KPICard } from '../components/ui/KPICard';
 import { Card } from '../components/ui/Card';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
@@ -11,7 +10,7 @@ import { Select } from '../components/ui/Select';
 import { TrendingUp, Truck, DollarSign, TrendingDown, Calendar } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel } from '../lib/utils';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -36,6 +35,7 @@ interface RouteChartData {
   name: string;
   trips: number;
   revenue?: number;
+  [key: string]: string | number | undefined;
 }
 
 interface Trip {
@@ -255,9 +255,9 @@ export const Dashboard: React.FC = () => {
         }
       />
 
-      <div className="p-8 space-y-6">
+      <div className="p-6 space-y-4">
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard
             title="Общая выручка"
             value={formatCurrency(stats.totalRevenue)}
@@ -288,151 +288,170 @@ export const Dashboard: React.FC = () => {
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Revenue Over Time */}
-          <Card>
-            <h3 className="text-lg font-semibold text-secondary-900 mb-4">
-              Выручка по дням
+        {/* Charts - Компактная аналитика */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Прибыль по дням - компактный bar chart */}
+          <Card className="lg:col-span-2">
+            <h3 className="text-base font-semibold text-secondary-900 mb-3">
+              Прибыль за период
             </h3>
             {revenueData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={revenueData.slice(-10)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis
                     dataKey="date"
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
+                    stroke="#94a3b8"
+                    style={{ fontSize: '10px' }}
+                    tick={{ fill: '#64748b' }}
                   />
                   <YAxis
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
+                    stroke="#94a3b8"
+                    style={{ fontSize: '10px' }}
+                    tick={{ fill: '#64748b' }}
                   />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
                     }}
                   />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#1e3a8a"
-                    strokeWidth={2}
-                    name="Выручка"
-                    dot={{ fill: '#1e3a8a' }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="profit"
-                    stroke="#059669"
-                    strokeWidth={2}
-                    name="Прибыль"
-                    dot={{ fill: '#059669' }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-secondary-500">
-                Нет данных для отображения
-              </div>
-            )}
-          </Card>
-
-          {/* Trips by Route */}
-          <Card>
-            <h3 className="text-lg font-semibold text-secondary-900 mb-4">
-              Рейсы по маршрутам (Топ 10)
-            </h3>
-            {routeData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={routeData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis
-                    dataKey="name"
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Legend />
                   <Bar
-                    dataKey="trips"
-                    fill="#1e3a8a"
-                    name="Кол-во рейсов"
-                    radius={[8, 8, 0, 0]}
+                    dataKey="profit"
+                    fill="#10b981"
+                    name="Прибыль"
+                    radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-secondary-500">
-                Нет данных для отображения
+              <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400">
+                Нет данных
+              </div>
+            )}
+          </Card>
+
+          {/* Рейсы по маршрутам - круговой график */}
+          <Card>
+            <h3 className="text-base font-semibold text-secondary-900 mb-3">
+              Распределение рейсов
+            </h3>
+            {routeData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={routeData.slice(0, 5)}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={70}
+                    paddingAngle={3}
+                    dataKey="trips"
+                    label={({ percent }: { percent?: number }) =>
+                      percent ? `${(percent * 100).toFixed(0)}%` : ''
+                    }
+                    labelLine={false}
+                  >
+                    {routeData.slice(0, 5).map((_route, index) => {
+                      const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                      return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                    })}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400">
+                Нет данных
+              </div>
+            )}
+            {/* Легенда для круговой диаграммы */}
+            {routeData.length > 0 && (
+              <div className="mt-3 space-y-1">
+                {routeData.slice(0, 5).map((route, index) => {
+                  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                  return (
+                    <div key={index} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="text-secondary-600 truncate max-w-[120px]">
+                          {route.name}
+                        </span>
+                      </div>
+                      <span className="font-medium text-secondary-900">{route.trips}</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </Card>
         </div>
 
-        {/* Recent Trips Table */}
+        {/* Recent Trips Table - Компактная версия */}
         <Card>
-          <h3 className="text-lg font-semibold text-secondary-900 mb-4">
-            Последние 10 рейсов
-          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-secondary-900">
+              Последние рейсы
+            </h3>
+            <a
+              href="/trips"
+              className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Все рейсы →
+            </a>
+          </div>
           {recentTrips.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Дата</TableHead>
-                  <TableHead>Водитель</TableHead>
-                  <TableHead>Маршрут</TableHead>
-                  <TableHead>Автомобиль</TableHead>
-                  <TableHead>Выручка</TableHead>
-                  <TableHead>Прибыль</TableHead>
-                  <TableHead>Статус</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentTrips.map((trip) => (
-                  <TableRow key={trip.id}>
-                    <TableCell>{formatDate(trip.trip_date)}</TableCell>
-                    <TableCell className="font-medium">
-                      {trip.driver?.full_name || 'N/A'}
-                    </TableCell>
-                    <TableCell>{trip.route?.name || 'N/A'}</TableCell>
-                    <TableCell>
-                      {trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model}` : 'N/A'}
-                    </TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
-                      {formatCurrency(trip.revenue)}
-                    </TableCell>
-                    <TableCell className="font-mono font-semibold text-primary-700">
-                      {formatCurrency(trip.net_profit)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(trip.status)}>
-                        {getStatusLabel(trip.status)}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-secondary-200">
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600">Дата</th>
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600">Водитель</th>
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600">Маршрут</th>
+                    <th className="text-right py-2 px-3 text-xs font-semibold text-secondary-600">Прибыль</th>
+                    <th className="text-center py-2 px-3 text-xs font-semibold text-secondary-600">Статус</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentTrips.slice(0, 5).map((trip) => (
+                    <tr key={trip.id} className="border-b border-secondary-100 hover:bg-secondary-50">
+                      <td className="py-2 px-3 text-xs text-secondary-700">
+                        {formatDate(trip.trip_date)}
+                      </td>
+                      <td className="py-2 px-3 text-xs font-medium text-secondary-900">
+                        {trip.driver?.full_name || 'N/A'}
+                      </td>
+                      <td className="py-2 px-3 text-xs text-secondary-700">
+                        {trip.route?.name || 'N/A'}
+                      </td>
+                      <td className="py-2 px-3 text-xs text-right font-semibold text-success-600">
+                        {formatCurrency(trip.net_profit)}
+                      </td>
+                      <td className="py-2 px-3 text-center">
+                        <Badge className={`text-xs ${getStatusColor(trip.status)}`}>
+                          {getStatusLabel(trip.status)}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <div className="py-12 text-center text-secondary-500">
-              Нет рейсов для отображения
+            <div className="py-8 text-center text-sm text-secondary-400">
+              Нет рейсов
             </div>
           )}
         </Card>

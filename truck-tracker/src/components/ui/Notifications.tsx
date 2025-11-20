@@ -187,7 +187,13 @@ export const Notifications: React.FC = () => {
           {/* Footer */}
           {notifications.length > 0 && (
             <div className="px-4 py-2 border-t border-secondary-200">
-              <button className="text-xs text-primary-600 hover:text-primary-700 font-medium">
+              <button
+                onClick={() => {
+                  markAllAsRead();
+                  setIsOpen(false);
+                }}
+                className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+              >
                 {t('notifications.view_all')} →
               </button>
             </div>
