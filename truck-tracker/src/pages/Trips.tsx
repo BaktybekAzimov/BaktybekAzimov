@@ -10,8 +10,9 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import * as XLSX from 'xlsx';
 import {
   formatCurrency,
   formatDate,
@@ -210,6 +211,50 @@ export const Trips: React.FC = () => {
     }
   };
 
+  const exportToExcel = () => {
+    // Подготовка данных для экспорта
+    const exportData = filteredTrips.map((trip) => ({
+      'Дата': formatDate(trip.trip_date),
+      'Водитель': trip.driver?.full_name || 'N/A',
+      'Автомобиль': trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model} (${trip.vehicle.license_plate})` : 'N/A',
+      'Маршрут': trip.route?.name || 'N/A',
+      'Дистанция (км)': trip.route?.distance_km || 0,
+      'Выручка': trip.revenue,
+      'Расход топлива': trip.fuel_cost,
+      'Расход на обслуживание': trip.maintenance_cost,
+      'Прочие расходы': trip.other_costs,
+      'Всего расходов': trip.total_costs,
+      'Чистая прибыль': trip.net_profit,
+      'Оплата водителю': trip.driver_payment,
+      'Оплата владельцу': trip.owner_payment,
+      'Статус': getStatusLabel(trip.status),
+      'Комментарий': trip.comment || '',
+    }));
+
+    // Создание книги Excel
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Рейсы');
+
+    // Автоматическая настройка ширины столбцов
+    const maxWidth = 50;
+    const columnWidths = Object.keys(exportData[0] || {}).map((key) => {
+      const maxLength = Math.max(
+        key.length,
+        ...exportData.map((row) => String(row[key as keyof typeof row]).length)
+      );
+      return { wch: Math.min(maxLength + 2, maxWidth) };
+    });
+    worksheet['!cols'] = columnWidths;
+
+    // Генерация имени файла с текущей датой
+    const today = new Date().toISOString().split('T')[0];
+    const filename = `Рейсы_${today}.xlsx`;
+
+    // Скачивание файла
+    XLSX.writeFile(workbook, filename);
+  };
+
   const openCreateModal = () => {
     setEditingTrip(null);
     reset({
@@ -337,9 +382,19 @@ export const Trips: React.FC = () => {
         title="Рейсы"
         subtitle={`Всего рейсов: ${filteredTrips.length}`}
         actions={
-          <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-            Добавить рейс
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={exportToExcel}
+              icon={<Download size={20} />}
+              disabled={filteredTrips.length === 0}
+            >
+              Экспорт в Excel
+            </Button>
+            <Button onClick={openCreateModal} icon={<Plus size={20} />}>
+              Добавить рейс
+            </Button>
+          </div>
         }
       />
 
