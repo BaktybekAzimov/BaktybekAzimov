@@ -74,7 +74,7 @@ DECLARE
   selected_vehicle_id UUID;
   selected_route_id UUID;
   revenue NUMERIC;
-  avg_cost NUMERIC;
+  route_cost NUMERIC;
   fuel_cost NUMERIC;
   maintenance_cost NUMERIC;
   other_costs NUMERIC;
@@ -88,10 +88,10 @@ BEGIN
     -- Выбираем случайных водителя, транспорт и маршрут
     SELECT id INTO selected_driver_id FROM drivers ORDER BY random() LIMIT 1;
     SELECT id INTO selected_vehicle_id FROM vehicles ORDER BY random() LIMIT 1;
-    SELECT id, avg_cost INTO selected_route_id, avg_cost FROM routes ORDER BY random() LIMIT 1;
+    SELECT id, avg_cost INTO selected_route_id, route_cost FROM routes ORDER BY random() LIMIT 1;
 
     -- Выручка = средняя стоимость маршрута * (0.8 - 1.5) - случайный множитель
-    revenue := avg_cost * (0.8 + random() * 0.7);
+    revenue := route_cost * (0.8 + random() * 0.7);
 
     -- ВАЖНО: Расходы должны быть МЕНЬШЕ выручки чтобы была прибыль!
     -- Топливо: 30-40% от выручки
