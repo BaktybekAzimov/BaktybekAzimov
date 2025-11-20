@@ -73,6 +73,20 @@ export const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
+
+  // Расширенные фильтры
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
+  const [selectedDriver, setSelectedDriver] = useState<string>('all');
+  const [selectedVehicle, setSelectedVehicle] = useState<string>('all');
+  const [selectedRoute, setSelectedRoute] = useState<string>('all');
+
+  // Справочники для фильтров
+  const [drivers, setDrivers] = useState<Array<{id: string; full_name: string}>>([]);
+  const [vehicles, setVehicles] = useState<Array<{id: string; brand: string; model: string; license_plate: string}>>([]);
+  const [routes, setRoutes] = useState<Array<{id: string; name: string}>>([]);
+
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 0,
     totalTrips: 0,
@@ -98,11 +112,12 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadSettings();
+    loadFilterData();
   }, []);
 
   useEffect(() => {
     fetchDashboardData();
-  }, [dateFilter, selectedMonth, widgetSettings]);
+  }, [dateFilter, selectedMonth, showAdvancedFilters, dateFrom, dateTo, selectedDriver, selectedVehicle, selectedRoute, widgetSettings]);
 
   const loadSettings = async () => {
     try {
@@ -126,6 +141,22 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const loadFilterData = async () => {
+    try {
+      const [driversRes, vehiclesRes, routesRes] = await Promise.all([
+        supabase.from('drivers').select('id, full_name').eq('status', 'active'),
+        supabase.from('vehicles').select('id, brand, model, license_plate'),
+        supabase.from('routes').select('id, name'),
+      ]);
+
+      if (driversRes.data) setDrivers(driversRes.data);
+      if (vehiclesRes.data) setVehicles(vehiclesRes.data);
+      if (routesRes.data) setRoutes(routesRes.data);
+    } catch (err) {
+      console.error('Error loading filter data:', err);
+    }
+  };
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
@@ -135,19 +166,26 @@ export const Dashboard: React.FC = () => {
       let end: Date | null = null;
 
       // Determine date range based on filter
-      if (dateFilter === 'custom' && selectedMonth) {
-        // Parse selectedMonth (format: 'yyyy-MM')
-        const [year, month] = selectedMonth.split('-').map(Number);
-        const date = new Date(year, month - 1, 1);
-        start = startOfMonth(date);
-        end = endOfMonth(date);
-      } else if (dateFilter !== 'custom') {
-        const range = getDateRange(dateFilter);
-        start = range.start;
-        end = range.end;
+      if (showAdvancedFilters) {
+        // Use custom date range from advanced filters
+        if (dateFrom) start = new Date(dateFrom + 'T00:00:00');
+        if (dateTo) end = new Date(dateTo + 'T23:59:59');
+      } else {
+        // Use standard date filter
+        if (dateFilter === 'custom' && selectedMonth) {
+          // Parse selectedMonth (format: 'yyyy-MM')
+          const [year, month] = selectedMonth.split('-').map(Number);
+          const date = new Date(year, month - 1, 1);
+          start = startOfMonth(date);
+          end = endOfMonth(date);
+        } else if (dateFilter !== 'custom') {
+          const range = getDateRange(dateFilter);
+          start = range.start;
+          end = range.end;
+        }
       }
 
-      // Build query with date filter
+      // Build query with filters
       let tripsQuery = supabase
         .from('trips')
         .select('*, driver:drivers(*), vehicle:vehicles(*), route:routes(*)')
@@ -157,6 +195,19 @@ export const Dashboard: React.FC = () => {
         tripsQuery = tripsQuery
           .gte('trip_date', start.toISOString())
           .lte('trip_date', end.toISOString());
+      }
+
+      // Применяем расширенные фильтры
+      if (showAdvancedFilters) {
+        if (selectedDriver !== 'all') {
+          tripsQuery = tripsQuery.eq('driver_id', selectedDriver);
+        }
+        if (selectedVehicle !== 'all') {
+          tripsQuery = tripsQuery.eq('vehicle_id', selectedVehicle);
+        }
+        if (selectedRoute !== 'all') {
+          tripsQuery = tripsQuery.eq('route_id', selectedRoute);
+        }
       }
 
       const { data: trips, error: tripsError } = await tripsQuery;
@@ -380,38 +431,151 @@ export const Dashboard: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Дашборд"
-        subtitle="Обзор бизнес-показателей"
+        title={
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg">
+              <Truck className="h-6 w-6 text-white" />
+            </div>
+            <span>Дашборд • Аналитика рейсов</span>
+          </div>
+        }
+        subtitle="Обзор бизнес-показателей и статистика"
         actions={
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            {/* Quick Filter Buttons */}
-            <div className="flex gap-2 flex-wrap">
-              {filterButtons.map((btn) => (
-                <Button
-                  key={btn.value}
-                  variant={dateFilter === btn.value ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setDateFilter(btn.value)}
-                >
-                  {btn.label}
-                </Button>
-              ))}
-            </div>
-            {/* Month Selector */}
-            <div className="flex items-center gap-2 min-w-[200px]">
-              <Calendar className="w-4 h-4 text-secondary-500" />
-              <Select
-                value={selectedMonth}
-                onChange={handleMonthChange}
-                options={monthOptions}
-                className="min-w-[180px]"
-              />
-            </div>
+            {!showAdvancedFilters && (
+              <>
+                {/* Quick Filter Buttons */}
+                <div className="flex gap-2 flex-wrap">
+                  {filterButtons.map((btn) => (
+                    <Button
+                      key={btn.value}
+                      variant={dateFilter === btn.value ? 'primary' : 'ghost'}
+                      size="sm"
+                      onClick={() => setDateFilter(btn.value)}
+                    >
+                      {btn.label}
+                    </Button>
+                  ))}
+                </div>
+                {/* Month Selector */}
+                <div className="flex items-center gap-2 min-w-[200px]">
+                  <Calendar className="w-4 h-4 text-secondary-500" />
+                  <Select
+                    value={selectedMonth}
+                    onChange={handleMonthChange}
+                    options={monthOptions}
+                    className="min-w-[180px]"
+                  />
+                </div>
+              </>
+            )}
+            <Button
+              variant={showAdvancedFilters ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            >
+              {showAdvancedFilters ? '✓ Фильтры активны' : 'Расширенные фильтры'}
+            </Button>
           </div>
         }
       />
 
       <div className="p-6 space-y-4">
+        {/* Расширенные фильтры */}
+        {showAdvancedFilters && (
+          <Card>
+            <h3 className="text-base font-semibold text-secondary-900 mb-4">Фильтры аналитики</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+              {/* Дата от */}
+              <div>
+                <label className="block text-sm font-medium text-secondary-700 mb-1">Дата от</label>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+
+              {/* Дата до */}
+              <div>
+                <label className="block text-sm font-medium text-secondary-700 mb-1">Дата до</label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+
+              {/* Водитель */}
+              <div>
+                <label className="block text-sm font-medium text-secondary-700 mb-1">Водитель</label>
+                <select
+                  value={selectedDriver}
+                  onChange={(e) => setSelectedDriver(e.target.value)}
+                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="all">Все водители</option>
+                  {drivers.map((driver) => (
+                    <option key={driver.id} value={driver.id}>{driver.full_name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Транспорт */}
+              <div>
+                <label className="block text-sm font-medium text-secondary-700 mb-1">Транспорт</label>
+                <select
+                  value={selectedVehicle}
+                  onChange={(e) => setSelectedVehicle(e.target.value)}
+                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="all">Весь транспорт</option>
+                  {vehicles.map((vehicle) => (
+                    <option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.brand} {vehicle.model} ({vehicle.license_plate})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Маршрут */}
+              <div>
+                <label className="block text-sm font-medium text-secondary-700 mb-1">Маршрут</label>
+                <select
+                  value={selectedRoute}
+                  onChange={(e) => setSelectedRoute(e.target.value)}
+                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="all">Все маршруты</option>
+                  {routes.map((route) => (
+                    <option key={route.id} value={route.id}>{route.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Кнопка сброса */}
+            {(dateFrom || dateTo || selectedDriver !== 'all' || selectedVehicle !== 'all' || selectedRoute !== 'all') && (
+              <div className="flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setDateFrom('');
+                    setDateTo('');
+                    setSelectedDriver('all');
+                    setSelectedVehicle('all');
+                    setSelectedRoute('all');
+                  }}
+                >
+                  Сбросить фильтры
+                </Button>
+              </div>
+            )}
+          </Card>
+        )}
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard
