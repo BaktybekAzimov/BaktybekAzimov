@@ -88,6 +88,9 @@ export const Dashboard: React.FC = () => {
 
   // Настройки виджетов
   const [widgetSettings, setWidgetSettings] = useState({
+    widget_revenue_chart_enabled: true,
+    widget_routes_chart_enabled: true,
+    widget_recent_trips_enabled: true,
     widget_top_drivers_enabled: false,
     widget_monthly_comparison_enabled: false,
     widget_vehicle_utilization_enabled: true,
@@ -105,11 +108,14 @@ export const Dashboard: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('settings')
-        .select('widget_top_drivers_enabled, widget_monthly_comparison_enabled, widget_vehicle_utilization_enabled')
+        .select('widget_revenue_chart_enabled, widget_routes_chart_enabled, widget_recent_trips_enabled, widget_top_drivers_enabled, widget_monthly_comparison_enabled, widget_vehicle_utilization_enabled')
         .single();
 
       if (data && !error) {
         setWidgetSettings({
+          widget_revenue_chart_enabled: data.widget_revenue_chart_enabled,
+          widget_routes_chart_enabled: data.widget_routes_chart_enabled,
+          widget_recent_trips_enabled: data.widget_recent_trips_enabled,
           widget_top_drivers_enabled: data.widget_top_drivers_enabled,
           widget_monthly_comparison_enabled: data.widget_monthly_comparison_enabled,
           widget_vehicle_utilization_enabled: data.widget_vehicle_utilization_enabled,
@@ -439,9 +445,11 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Charts - Компактная аналитика */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Прибыль по дням - компактный bar chart */}
-          <Card className="lg:col-span-2">
+        {(widgetSettings.widget_revenue_chart_enabled || widgetSettings.widget_routes_chart_enabled) && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Прибыль по дням - компактный bar chart */}
+            {widgetSettings.widget_revenue_chart_enabled && (
+              <Card className="lg:col-span-2">
             <h3 className="text-base font-semibold text-secondary-900 mb-3">
               Прибыль за период
             </h3>
@@ -473,6 +481,7 @@ export const Dashboard: React.FC = () => {
                     fill="#10b981"
                     name="Прибыль"
                     radius={[4, 4, 0, 0]}
+                    cursor="default"
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -481,10 +490,12 @@ export const Dashboard: React.FC = () => {
                 Нет данных
               </div>
             )}
-          </Card>
+              </Card>
+            )}
 
-          {/* Рейсы по маршрутам - круговой график */}
-          <Card>
+            {/* Рейсы по маршрутам - круговой график */}
+            {widgetSettings.widget_routes_chart_enabled && (
+              <Card>
             <h3 className="text-base font-semibold text-secondary-900 mb-3">
               Распределение рейсов
             </h3>
@@ -503,6 +514,8 @@ export const Dashboard: React.FC = () => {
                       percent ? `${(percent * 100).toFixed(0)}%` : ''
                     }
                     labelLine={false}
+                    cursor="default"
+                    isAnimationActive={false}
                   >
                     {routeData.slice(0, 5).map((_route, index) => {
                       const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -546,8 +559,10 @@ export const Dashboard: React.FC = () => {
                 })}
               </div>
             )}
-          </Card>
-        </div>
+              </Card>
+            )}
+          </div>
+        )}
 
         {/* Дополнительные виджеты */}
         {(widgetSettings.widget_vehicle_utilization_enabled ||
@@ -713,7 +728,8 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* Recent Trips Table - Компактная версия */}
-        <Card>
+        {widgetSettings.widget_recent_trips_enabled && (
+          <Card>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-semibold text-secondary-900">
               Последние рейсы
@@ -767,7 +783,8 @@ export const Dashboard: React.FC = () => {
               Нет рейсов
             </div>
           )}
-        </Card>
+          </Card>
+        )}
       </div>
     </MainLayout>
   );
