@@ -9,19 +9,32 @@ import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { TrendingUp, Truck, DollarSign, TrendingDown, Calendar } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel } from '../lib/utils';
+import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel, cn } from '../lib/utils';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
 // Local type definitions
-type DateFilter = 'today' | 'week' | 'month' | 'all' | 'custom';
+type DateFilter = 'today' | 'month' | 'all' | 'custom';
 
 interface DashboardStats {
   totalRevenue: number;
   totalTrips: number;
   netProfit: number;
   avgProfitPerTrip: number;
+}
+
+interface DriverStats {
+  driver_id: string;
+  driver_name: string;
+  total_trips: number;
+  total_profit: number;
+}
+
+interface MonthComparison {
+  month: string;
+  revenue: number;
+  profit: number;
 }
 
 interface ChartDataPoint {
@@ -52,7 +65,7 @@ interface Trip {
 export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('month');
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 0,
@@ -63,10 +76,40 @@ export const Dashboard: React.FC = () => {
   const [recentTrips, setRecentTrips] = useState<Trip[]>([]);
   const [revenueData, setRevenueData] = useState<ChartDataPoint[]>([]);
   const [routeData, setRouteData] = useState<RouteChartData[]>([]);
+  const [topDrivers, setTopDrivers] = useState<DriverStats[]>([]);
+  const [monthComparison, setMonthComparison] = useState<MonthComparison[]>([]);
+
+  // Настройки виджетов
+  const [widgetSettings, setWidgetSettings] = useState({
+    widget_top_drivers_enabled: false,
+    widget_monthly_comparison_enabled: false,
+  });
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
-  }, [dateFilter, selectedMonth]);
+  }, [dateFilter, selectedMonth, widgetSettings]);
+
+  const loadSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('widget_top_drivers_enabled, widget_monthly_comparison_enabled')
+        .single();
+
+      if (data && !error) {
+        setWidgetSettings({
+          widget_top_drivers_enabled: data.widget_top_drivers_enabled,
+          widget_monthly_comparison_enabled: data.widget_monthly_comparison_enabled,
+        });
+      }
+    } catch (err) {
+      console.error('Error loading widget settings:', err);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -169,6 +212,66 @@ export const Dashboard: React.FC = () => {
         setRouteData([]);
       }
 
+      // Топ 5 водителей (только если включено в настройках)
+      if (widgetSettings.widget_top_drivers_enabled && trips && trips.length > 0) {
+        const groupedByDriver = trips.reduce((acc, trip) => {
+          const driverId = trip.driver?.id || 'unknown';
+          const driverName = trip.driver?.full_name || 'Неизвестный';
+          if (!acc[driverId]) {
+            acc[driverId] = {
+              driver_id: driverId,
+              driver_name: driverName,
+              total_trips: 0,
+              total_profit: 0,
+            };
+          }
+          acc[driverId].total_trips += 1;
+          acc[driverId].total_profit += trip.net_profit;
+          return acc;
+        }, {} as Record<string, DriverStats>);
+
+        const topDriversData = (Object.values(groupedByDriver) as DriverStats[])
+          .sort((a, b) => b.total_profit - a.total_profit)
+          .slice(0, 5);
+        setTopDrivers(topDriversData);
+      } else {
+        setTopDrivers([]);
+      }
+
+      // Сравнение последних 6 месяцев (только если включено)
+      if (widgetSettings.widget_monthly_comparison_enabled) {
+        const { data: allTrips } = await supabase
+          .from('trips')
+          .select('trip_date, revenue, net_profit')
+          .eq('status', 'completed')
+          .gte('trip_date', subMonths(new Date(), 6).toISOString());
+
+        if (allTrips && allTrips.length > 0) {
+          const groupedByMonth = allTrips.reduce((acc, trip) => {
+            const month = format(new Date(trip.trip_date), 'MMM yyyy', { locale: ru });
+            if (!acc[month]) {
+              acc[month] = { month, revenue: 0, profit: 0 };
+            }
+            acc[month].revenue += trip.revenue;
+            acc[month].profit += trip.net_profit;
+            return acc;
+          }, {} as Record<string, MonthComparison>);
+
+          const monthComparisonData = Object.values(groupedByMonth)
+            .sort((a, b) => {
+              const dateA = new Date(a.month);
+              const dateB = new Date(b.month);
+              return dateA.getTime() - dateB.getTime();
+            })
+            .slice(-6);
+          setMonthComparison(monthComparisonData);
+        } else {
+          setMonthComparison([]);
+        }
+      } else {
+        setMonthComparison([]);
+      }
+
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Не удалось загрузить данные дашборда');
@@ -179,7 +282,6 @@ export const Dashboard: React.FC = () => {
 
   const filterButtons: Array<{ label: string; value: DateFilter }> = [
     { label: 'Сегодня', value: 'today' },
-    { label: 'Неделя', value: 'week' },
     { label: 'Месяц', value: 'month' },
     { label: 'Всё время', value: 'all' },
   ];
@@ -398,6 +500,112 @@ export const Dashboard: React.FC = () => {
             )}
           </Card>
         </div>
+
+        {/* Дополнительные виджеты - Топ 5 водителей и Сравнение месяцев */}
+        {(widgetSettings.widget_top_drivers_enabled || widgetSettings.widget_monthly_comparison_enabled) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Топ 5 водителей */}
+            {widgetSettings.widget_top_drivers_enabled && (
+              <Card>
+                <h3 className="text-base font-semibold text-secondary-900 mb-3">
+                  🏆 Топ 5 водителей
+                </h3>
+                {topDrivers.length > 0 ? (
+                  <div className="space-y-2">
+                    {topDrivers.map((driver, index) => (
+                      <div
+                        key={driver.driver_id}
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary-50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
+                              index === 0 && "bg-yellow-100 text-yellow-700",
+                              index === 1 && "bg-gray-100 text-gray-700",
+                              index === 2 && "bg-orange-100 text-orange-700",
+                              index > 2 && "bg-secondary-100 text-secondary-700"
+                            )}
+                          >
+                            {index + 1}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-secondary-900">
+                              {driver.driver_name}
+                            </p>
+                            <p className="text-xs text-secondary-500">
+                              {driver.total_trips} рейсов
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-success-600">
+                            {formatCurrency(driver.total_profit)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-sm text-secondary-400">
+                    Нет данных о водителях
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* Сравнение месяцев */}
+            {widgetSettings.widget_monthly_comparison_enabled && (
+              <Card>
+                <h3 className="text-base font-semibold text-secondary-900 mb-3">
+                  📊 Сравнение последних месяцев
+                </h3>
+                {monthComparison.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={monthComparison}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <XAxis
+                        dataKey="month"
+                        stroke="#94a3b8"
+                        style={{ fontSize: '10px' }}
+                        tick={{ fill: '#64748b' }}
+                      />
+                      <YAxis
+                        stroke="#94a3b8"
+                        style={{ fontSize: '10px' }}
+                        tick={{ fill: '#64748b' }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#fff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                        }}
+                      />
+                      <Bar
+                        dataKey="revenue"
+                        fill="#3b82f6"
+                        name="Выручка"
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar
+                        dataKey="profit"
+                        fill="#10b981"
+                        name="Прибыль"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[220px] flex items-center justify-center text-sm text-secondary-400">
+                    Нет данных для сравнения
+                  </div>
+                )}
+              </Card>
+            )}
+          </div>
+        )}
 
         {/* Recent Trips Table - Компактная версия */}
         <Card>
