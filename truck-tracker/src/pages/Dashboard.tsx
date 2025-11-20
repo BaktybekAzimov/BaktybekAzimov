@@ -436,10 +436,12 @@ export const Dashboard: React.FC = () => {
             <div className="p-2 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg">
               <Truck className="h-6 w-6 text-white" />
             </div>
-            <span>Дашборд • Аналитика рейсов</span>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-secondary-900">Система учета рейсов</span>
+              <span className="text-sm text-secondary-600">Дашборд • Аналитика</span>
+            </div>
           </div>
         }
-        subtitle="Обзор бизнес-показателей и статистика"
         actions={
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
             {!showAdvancedFilters && (
