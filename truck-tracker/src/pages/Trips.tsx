@@ -212,46 +212,117 @@ export const Trips: React.FC = () => {
   };
 
   const exportToExcel = () => {
-    // Подготовка данных для экспорта
-    const exportData = filteredTrips.map((trip) => ({
-      'Дата': formatDate(trip.trip_date),
-      'Водитель': trip.driver?.full_name || 'N/A',
-      'Автомобиль': trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model} (${trip.vehicle.license_plate})` : 'N/A',
-      'Маршрут': trip.route?.name || 'N/A',
-      'Дистанция (км)': trip.route?.distance_km || 0,
-      'Выручка': trip.revenue,
-      'Расход топлива': trip.fuel_cost,
-      'Расход на обслуживание': trip.maintenance_cost,
-      'Прочие расходы': trip.other_costs,
-      'Всего расходов': trip.total_costs,
-      'Чистая прибыль': trip.net_profit,
-      'Оплата водителю': trip.driver_payment,
-      'Оплата владельцу': trip.owner_payment,
-      'Статус': getStatusLabel(trip.status),
-      'Комментарий': trip.comment || '',
-    }));
+    if (filteredTrips.length === 0) {
+      alert('Нет данных для экспорта');
+      return;
+    }
 
-    // Создание книги Excel
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Рейсы');
 
-    // Автоматическая настройка ширины столбцов
-    const maxWidth = 50;
-    const columnWidths = Object.keys(exportData[0] || {}).map((key) => {
-      const maxLength = Math.max(
-        key.length,
-        ...exportData.map((row) => String(row[key as keyof typeof row]).length)
-      );
-      return { wch: Math.min(maxLength + 2, maxWidth) };
-    });
-    worksheet['!cols'] = columnWidths;
+    // Заголовок отчета
+    const today = new Date().toLocaleDateString('ru-RU');
+    const reportTitle = [
+      ['СИСТЕМА УЧЕТА РЕЙСОВ - ОТЧЕТ'],
+      [`Дата формирования: ${today}`],
+      [`Всего рейсов: ${filteredTrips.length}`],
+      [], // Пустая строка
+    ];
 
-    // Генерация имени файла с текущей датой
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `Рейсы_${today}.xlsx`;
+    // Заголовки колонок
+    const headers = [
+      'Дата',
+      'Водитель',
+      'Автомобиль',
+      'Маршрут',
+      'Дистанция (км)',
+      'Выручка',
+      'Топливо',
+      'Обслуживание',
+      'Прочие',
+      'Всего расходов',
+      'Прибыль',
+      'Оплата водителю',
+      'Оплата владельцу',
+      'Статус',
+      'Комментарий'
+    ];
 
-    // Скачивание файла
+    // Данные
+    const data = filteredTrips.map((trip) => [
+      formatDate(trip.trip_date),
+      trip.driver?.full_name || 'N/A',
+      trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model} (${trip.vehicle.license_plate})` : 'N/A',
+      trip.route?.name || 'N/A',
+      trip.route?.distance_km || 0,
+      trip.revenue,
+      trip.fuel_cost,
+      trip.maintenance_cost,
+      trip.other_costs,
+      trip.total_costs,
+      trip.net_profit,
+      trip.driver_payment,
+      trip.owner_payment,
+      getStatusLabel(trip.status),
+      trip.comment || ''
+    ]);
+
+    // Итоговые суммы
+    const totals = [
+      '',
+      '',
+      '',
+      '',
+      'ИТОГО:',
+      filteredTrips.reduce((sum, t) => sum + t.revenue, 0),
+      filteredTrips.reduce((sum, t) => sum + t.fuel_cost, 0),
+      filteredTrips.reduce((sum, t) => sum + t.maintenance_cost, 0),
+      filteredTrips.reduce((sum, t) => sum + t.other_costs, 0),
+      filteredTrips.reduce((sum, t) => sum + t.total_costs, 0),
+      filteredTrips.reduce((sum, t) => sum + t.net_profit, 0),
+      filteredTrips.reduce((sum, t) => sum + t.driver_payment, 0),
+      filteredTrips.reduce((sum, t) => sum + t.owner_payment, 0),
+      '',
+      ''
+    ];
+
+    // Объединяем все данные
+    const sheetData = [
+      ...reportTitle,
+      headers,
+      ...data,
+      [], // Пустая строка
+      totals
+    ];
+
+    // Создаем worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Настройка ширины колонок
+    worksheet['!cols'] = [
+      { wch: 12 },  // Дата
+      { wch: 20 },  // Водитель
+      { wch: 30 },  // Автомобиль
+      { wch: 25 },  // Маршрут
+      { wch: 14 },  // Дистанция
+      { wch: 12 },  // Выручка
+      { wch: 12 },  // Топливо
+      { wch: 14 },  // Обслуживание
+      { wch: 10 },  // Прочие
+      { wch: 14 },  // Всего расходов
+      { wch: 12 },  // Прибыль
+      { wch: 16 },  // Оплата водителю
+      { wch: 16 },  // Оплата владельцу
+      { wch: 12 },  // Статус
+      { wch: 30 },  // Комментарий
+    ];
+
+    // Добавляем worksheet в workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Отчет по рейсам');
+
+    // Генерация имени файла
+    const filename = `Отчет_рейсы_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    // Скачивание
     XLSX.writeFile(workbook, filename);
   };
 
