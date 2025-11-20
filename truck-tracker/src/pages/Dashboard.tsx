@@ -37,6 +37,12 @@ interface MonthComparison {
   profit: number;
 }
 
+interface VehicleUtilization {
+  status: string;
+  count: number;
+  percentage: number;
+}
+
 interface ChartDataPoint {
   date: string;
   revenue: number;
@@ -78,11 +84,13 @@ export const Dashboard: React.FC = () => {
   const [routeData, setRouteData] = useState<RouteChartData[]>([]);
   const [topDrivers, setTopDrivers] = useState<DriverStats[]>([]);
   const [monthComparison, setMonthComparison] = useState<MonthComparison[]>([]);
+  const [vehicleUtilization, setVehicleUtilization] = useState<VehicleUtilization[]>([]);
 
   // Настройки виджетов
   const [widgetSettings, setWidgetSettings] = useState({
     widget_top_drivers_enabled: false,
     widget_monthly_comparison_enabled: false,
+    widget_vehicle_utilization_enabled: true,
   });
 
   useEffect(() => {
@@ -97,13 +105,14 @@ export const Dashboard: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('settings')
-        .select('widget_top_drivers_enabled, widget_monthly_comparison_enabled')
+        .select('widget_top_drivers_enabled, widget_monthly_comparison_enabled, widget_vehicle_utilization_enabled')
         .single();
 
       if (data && !error) {
         setWidgetSettings({
           widget_top_drivers_enabled: data.widget_top_drivers_enabled,
           widget_monthly_comparison_enabled: data.widget_monthly_comparison_enabled,
+          widget_vehicle_utilization_enabled: data.widget_vehicle_utilization_enabled,
         });
       }
     } catch (err) {
@@ -270,6 +279,45 @@ export const Dashboard: React.FC = () => {
         }
       } else {
         setMonthComparison([]);
+      }
+
+      // Загруженность транспорта (только если включено)
+      if (widgetSettings.widget_vehicle_utilization_enabled) {
+        const { data: vehicles } = await supabase
+          .from('vehicles')
+          .select('status');
+
+        if (vehicles && vehicles.length > 0) {
+          const total = vehicles.length;
+          const statusCounts = vehicles.reduce((acc, vehicle) => {
+            acc[vehicle.status] = (acc[vehicle.status] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+
+          const utilizationData: VehicleUtilization[] = [
+            {
+              status: 'active',
+              count: statusCounts['active'] || 0,
+              percentage: Math.round(((statusCounts['active'] || 0) / total) * 100),
+            },
+            {
+              status: 'maintenance',
+              count: statusCounts['maintenance'] || 0,
+              percentage: Math.round(((statusCounts['maintenance'] || 0) / total) * 100),
+            },
+            {
+              status: 'inactive',
+              count: statusCounts['inactive'] || 0,
+              percentage: Math.round(((statusCounts['inactive'] || 0) / total) * 100),
+            },
+          ];
+
+          setVehicleUtilization(utilizationData);
+        } else {
+          setVehicleUtilization([]);
+        }
+      } else {
+        setVehicleUtilization([]);
       }
 
     } catch (err) {
@@ -501,9 +549,66 @@ export const Dashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Дополнительные виджеты - Топ 5 водителей и Сравнение месяцев */}
-        {(widgetSettings.widget_top_drivers_enabled || widgetSettings.widget_monthly_comparison_enabled) && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Дополнительные виджеты */}
+        {(widgetSettings.widget_vehicle_utilization_enabled ||
+          widgetSettings.widget_top_drivers_enabled ||
+          widgetSettings.widget_monthly_comparison_enabled) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            {/* Загруженность транспорта */}
+            {widgetSettings.widget_vehicle_utilization_enabled && (
+              <Card>
+                <h3 className="text-base font-semibold text-secondary-900 mb-3">
+                  🚛 Загруженность транспорта
+                </h3>
+                {vehicleUtilization.length > 0 ? (
+                  <div className="space-y-3">
+                    {vehicleUtilization.map((item) => {
+                      const statusInfo = {
+                        active: { label: 'В рейсе', color: 'bg-success-500', textColor: 'text-success-700', icon: '✅' },
+                        maintenance: { label: 'На ремонте', color: 'bg-warning-500', textColor: 'text-warning-700', icon: '🔧' },
+                        inactive: { label: 'Свободно', color: 'bg-secondary-400', textColor: 'text-secondary-700', icon: '⏸️' },
+                      }[item.status] || { label: item.status, color: 'bg-gray-500', textColor: 'text-gray-700', icon: '❓' };
+
+                      return (
+                        <div key={item.status} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{statusInfo.icon}</span>
+                              <span className="text-sm font-medium text-secondary-900">
+                                {statusInfo.label}
+                              </span>
+                            </div>
+                            <span className={`text-sm font-bold ${statusInfo.textColor}`}>
+                              {item.count} ({item.percentage}%)
+                            </span>
+                          </div>
+                          {/* Прогресс бар */}
+                          <div className="w-full bg-secondary-200 rounded-full h-2">
+                            <div
+                              className={`${statusInfo.color} h-2 rounded-full transition-all duration-300`}
+                              style={{ width: `${item.percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {/* Итого */}
+                    <div className="pt-3 border-t border-secondary-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-secondary-900">Всего транспорта:</span>
+                        <span className="text-sm font-bold text-primary-600">
+                          {vehicleUtilization.reduce((sum, item) => sum + item.count, 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-sm text-secondary-400">
+                    Нет данных о транспорте
+                  </div>
+                )}
+              </Card>
+            )}
             {/* Топ 5 водителей */}
             {widgetSettings.widget_top_drivers_enabled && (
               <Card>

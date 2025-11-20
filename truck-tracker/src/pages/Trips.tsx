@@ -98,6 +98,11 @@ export const Trips: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [driverFilter, setDriverFilter] = useState<string>('all');
+  const [vehicleFilter, setVehicleFilter] = useState<string>('all');
+  const [dateFromFilter, setDateFromFilter] = useState<string>('');
+  const [dateToFilter, setDateToFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const itemsPerPage = 20;
@@ -128,21 +133,48 @@ export const Trips: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Filter trips based on search query
-    if (searchQuery.trim() === '') {
-      setFilteredTrips(trips);
-    } else {
+    // Применяем все фильтры
+    let filtered = [...trips];
+
+    // Поиск по маршруту, водителю, транспорту
+    if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase();
-      const filtered = trips.filter(
+      filtered = filtered.filter(
         (trip) =>
           trip.driver?.full_name.toLowerCase().includes(query) ||
           trip.vehicle?.license_plate.toLowerCase().includes(query) ||
           trip.route?.name.toLowerCase().includes(query)
       );
-      setFilteredTrips(filtered);
     }
+
+    // Фильтр по статусу
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter((trip) => trip.status === statusFilter);
+    }
+
+    // Фильтр по водителю
+    if (driverFilter !== 'all') {
+      filtered = filtered.filter((trip) => trip.driver_id === driverFilter);
+    }
+
+    // Фильтр по транспорту
+    if (vehicleFilter !== 'all') {
+      filtered = filtered.filter((trip) => trip.vehicle_id === vehicleFilter);
+    }
+
+    // Фильтр по дате ОТ
+    if (dateFromFilter) {
+      filtered = filtered.filter((trip) => trip.trip_date >= dateFromFilter);
+    }
+
+    // Фильтр по дате ДО
+    if (dateToFilter) {
+      filtered = filtered.filter((trip) => trip.trip_date <= dateToFilter);
+    }
+
+    setFilteredTrips(filtered);
     setCurrentPage(1);
-  }, [searchQuery, trips]);
+  }, [searchQuery, statusFilter, driverFilter, vehicleFilter, dateFromFilter, dateToFilter, trips]);
 
   const fetchData = async () => {
     try {
@@ -318,14 +350,99 @@ export const Trips: React.FC = () => {
           </Card>
         )}
 
-        {/* Search */}
+        {/* Расширенные фильтры */}
         <Card>
-          <Input
-            placeholder="Поиск по водителю, автомобилю или маршруту..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            icon={<Search size={20} />}
-          />
+          <div className="space-y-4">
+            {/* Первая строка: поиск */}
+            <Input
+              placeholder="Поиск по водителю, автомобилю или маршруту..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              icon={<Search size={20} />}
+            />
+
+            {/* Вторая строка: фильтры */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+              {/* Статус */}
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                options={[
+                  { value: 'all', label: 'Все статусы' },
+                  { value: 'completed', label: 'Завершён' },
+                  { value: 'in_progress', label: 'В пути' },
+                  { value: 'cancelled', label: 'Отменён' },
+                ]}
+              />
+
+              {/* Водитель */}
+              <Select
+                value={driverFilter}
+                onChange={(e) => setDriverFilter(e.target.value)}
+                options={[
+                  { value: 'all', label: 'Все водители' },
+                  ...drivers.map((d) => ({
+                    value: d.id,
+                    label: d.full_name,
+                  })),
+                ]}
+              />
+
+              {/* Транспорт */}
+              <Select
+                value={vehicleFilter}
+                onChange={(e) => setVehicleFilter(e.target.value)}
+                options={[
+                  { value: 'all', label: 'Весь транспорт' },
+                  ...vehicles.map((v) => ({
+                    value: v.id,
+                    label: `${v.brand} ${v.model} (${v.license_plate})`,
+                  })),
+                ]}
+              />
+
+              {/* Дата ОТ */}
+              <Input
+                type="date"
+                value={dateFromFilter}
+                onChange={(e) => setDateFromFilter(e.target.value)}
+                placeholder="От"
+              />
+
+              {/* Дата ДО */}
+              <Input
+                type="date"
+                value={dateToFilter}
+                onChange={(e) => setDateToFilter(e.target.value)}
+                placeholder="До"
+              />
+            </div>
+
+            {/* Кнопка сброса фильтров */}
+            {(statusFilter !== 'all' ||
+              driverFilter !== 'all' ||
+              vehicleFilter !== 'all' ||
+              dateFromFilter ||
+              dateToFilter ||
+              searchQuery) && (
+              <div className="flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setStatusFilter('all');
+                    setDriverFilter('all');
+                    setVehicleFilter('all');
+                    setDateFromFilter('');
+                    setDateToFilter('');
+                  }}
+                >
+                  Сбросить фильтры
+                </Button>
+              </div>
+            )}
+          </div>
         </Card>
 
         {/* Trips Table */}
