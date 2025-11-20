@@ -5,7 +5,6 @@ import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import {
   Settings as SettingsIcon,
@@ -15,11 +14,9 @@ import {
   Save,
   MessageCircle,
   BarChart3,
-  Bell,
   Eye,
   EyeOff,
   Check,
-  X as XIcon,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -291,10 +288,10 @@ export const Settings: React.FC = () => {
               </label>
               <Select
                 value={settings.currency}
-                onChange={(value) =>
+                onChange={(e) =>
                   setSettings({
                     ...settings,
-                    currency: value as 'KGS' | 'USD' | 'RUB',
+                    currency: e.target.value as 'KGS' | 'USD' | 'RUB',
                   })
                 }
                 options={currencyOptions}
@@ -328,10 +325,10 @@ export const Settings: React.FC = () => {
             </label>
             <Select
               value={settings.language}
-              onChange={(value) =>
+              onChange={(e) =>
                 setSettings({
                   ...settings,
-                  language: value as 'ru' | 'ky',
+                  language: e.target.value as 'ru' | 'ky',
                 })
               }
               options={languageOptions}

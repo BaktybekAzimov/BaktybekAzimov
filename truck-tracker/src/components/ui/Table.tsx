@@ -110,11 +110,12 @@ export const TableHead: React.FC<TableHeadProps> = ({
 interface TableCellProps {
   children: React.ReactNode;
   className?: string;
+  colSpan?: number;
 }
 
-export const TableCell: React.FC<TableCellProps> = ({ children, className }) => {
+export const TableCell: React.FC<TableCellProps> = ({ children, className, colSpan }) => {
   return (
-    <td className={cn('px-6 py-4 text-sm text-secondary-900', className)}>
+    <td className={cn('px-6 py-4 text-sm text-secondary-900', className)} colSpan={colSpan}>
       {children}
     </td>
   );

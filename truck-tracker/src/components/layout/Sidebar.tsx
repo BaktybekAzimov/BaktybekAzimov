@@ -6,10 +6,8 @@ import {
   Users,
   Car,
   MapPin,
-  FileText,
   LogOut,
   Settings as SettingsIcon,
-  Menu,
   X,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -28,7 +26,7 @@ const navigationKeys = [
 
 export const Sidebar: React.FC = () => {
   const { signOut, user, isAdmin } = useAuth();
-  const { isOpen, toggle } = useSidebar();
+  const { toggle } = useSidebar();
   const { t } = useLanguage();
 
   const handleSignOut = async () => {

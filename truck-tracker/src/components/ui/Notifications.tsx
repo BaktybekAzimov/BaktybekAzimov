@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, X, Check } from 'lucide-react';
-import { Badge } from './Badge';
+import { Bell, X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Notification {

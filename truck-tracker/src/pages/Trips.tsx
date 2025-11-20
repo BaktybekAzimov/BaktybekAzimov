@@ -107,7 +107,6 @@ export const Trips: React.FC = () => {
     handleSubmit,
     reset,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<TripFormData>();
 

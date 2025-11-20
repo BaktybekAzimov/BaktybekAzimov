@@ -29,11 +29,13 @@ interface ChartDataPoint {
   date: string;
   revenue: number;
   profit: number;
+  trips?: number;
 }
 
 interface RouteChartData {
   name: string;
   trips: number;
+  revenue?: number;
 }
 
 interface Trip {
@@ -81,7 +83,7 @@ export const Dashboard: React.FC = () => {
         const date = new Date(year, month - 1, 1);
         start = startOfMonth(date);
         end = endOfMonth(date);
-      } else {
+      } else if (dateFilter !== 'custom') {
         const range = getDateRange(dateFilter);
         start = range.start;
         end = range.end;
@@ -139,7 +141,7 @@ export const Dashboard: React.FC = () => {
           return acc;
         }, {} as Record<string, ChartDataPoint>);
 
-        const chartData = Object.values(groupedByDate).sort((a, b) =>
+        const chartData = (Object.values(groupedByDate) as ChartDataPoint[]).sort((a, b) =>
           new Date(a.date).getTime() - new Date(b.date).getTime()
         );
         setRevenueData(chartData);
@@ -159,7 +161,7 @@ export const Dashboard: React.FC = () => {
           return acc;
         }, {} as Record<string, RouteChartData>);
 
-        const routeChartData = Object.values(groupedByRoute)
+        const routeChartData = (Object.values(groupedByRoute) as RouteChartData[])
           .sort((a, b) => b.trips - a.trips)
           .slice(0, 10);
         setRouteData(routeChartData);
@@ -190,8 +192,8 @@ export const Dashboard: React.FC = () => {
     return { value, label };
   });
 
-  const handleMonthChange = (value: string) => {
-    setSelectedMonth(value);
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMonth(e.target.value);
     setDateFilter('custom');
   };
 

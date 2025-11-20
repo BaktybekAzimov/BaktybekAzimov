@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useSidebar } from '../../contexts/SidebarContext';
 import { useLanguage } from '../../contexts/LanguageContext';
