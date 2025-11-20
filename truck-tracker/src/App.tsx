@@ -1,21 +1,23 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { SidebarProvider } from './contexts/SidebarContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { MainLayout } from './components/layout/MainLayout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Trips } from './pages/Trips';
 import { Drivers } from './pages/Drivers';
 import { Vehicles } from './pages/Vehicles';
 import { Routes as RoutesPage } from './pages/Routes';
+import { Settings } from './pages/Settings';
 import { DriverForm } from './pages/DriverForm';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
+        <SidebarProvider>
+          <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/driver-form" element={<DriverForm />} />
@@ -25,9 +27,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <MainLayout>
-                  <Dashboard />
-                </MainLayout>
+                <Dashboard />
               </ProtectedRoute>
             }
           />
@@ -35,9 +35,7 @@ function App() {
             path="/trips"
             element={
               <ProtectedRoute>
-                <MainLayout>
-                  <Trips />
-                </MainLayout>
+                <Trips />
               </ProtectedRoute>
             }
           />
@@ -45,9 +43,7 @@ function App() {
             path="/drivers"
             element={
               <ProtectedRoute>
-                <MainLayout>
-                  <Drivers />
-                </MainLayout>
+                <Drivers />
               </ProtectedRoute>
             }
           />
@@ -55,9 +51,7 @@ function App() {
             path="/vehicles"
             element={
               <ProtectedRoute>
-                <MainLayout>
-                  <Vehicles />
-                </MainLayout>
+                <Vehicles />
               </ProtectedRoute>
             }
           />
@@ -65,9 +59,15 @@ function App() {
             path="/routes"
             element={
               <ProtectedRoute>
-                <MainLayout>
-                  <RoutesPage />
-                </MainLayout>
+                <RoutesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />
@@ -77,7 +77,8 @@ function App() {
 
           {/* 404 - redirect to dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+          </Routes>
+        </SidebarProvider>
       </AuthProvider>
     </BrowserRouter>
   );
