@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -15,9 +16,10 @@ import { DriverForm } from './pages/DriverForm';
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <SidebarProvider>
-          <Routes>
+      <LanguageProvider>
+        <AuthProvider>
+          <SidebarProvider>
+            <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/driver-form" element={<DriverForm />} />

@@ -2,6 +2,7 @@ import React from 'react';
 import { Menu, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useSidebar } from '../../contexts/SidebarContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isOpen, toggle, close } = useSidebar();
+  const { t } = useLanguage();
 
   return (
     <div className="flex min-h-screen max-w-full bg-secondary-50 overflow-hidden">
@@ -34,23 +36,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar with menu button */}
-        <div className="bg-white border-b border-secondary-200 px-4 py-3 lg:px-6 flex items-center gap-4">
-          <button
-            onClick={toggle}
-            className="p-2 rounded-lg hover:bg-secondary-100 transition-colors"
-            aria-label="Toggle sidebar"
-          >
-            {isOpen ? (
-              <X className="w-6 h-6 text-secondary-600" />
-            ) : (
+        {/* Top bar with menu button (only when sidebar is closed) */}
+        {!isOpen && (
+          <div className="bg-white border-b border-secondary-200 px-4 py-3 flex items-center gap-4 lg:hidden">
+            <button
+              onClick={toggle}
+              className="p-2 rounded-lg hover:bg-secondary-100 transition-colors"
+              aria-label="Open sidebar"
+            >
               <Menu className="w-6 h-6 text-secondary-600" />
-            )}
-          </button>
-          <h2 className="text-lg font-semibold text-secondary-900">
-            Система учёта рейсов
-          </h2>
-        </div>
+            </button>
+            <h2 className="text-lg font-semibold text-secondary-900">
+              {t('app.title')}
+            </h2>
+          </div>
+        )}
 
         {/* Page content */}
         <main className="flex-1 overflow-x-auto overflow-y-auto">

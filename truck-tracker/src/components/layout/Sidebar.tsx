@@ -9,21 +9,27 @@ import {
   FileText,
   LogOut,
   Settings as SettingsIcon,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSidebar } from '../../contexts/SidebarContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { cn } from '../../lib/utils';
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Рейсы', href: '/trips', icon: Truck },
-  { name: 'Водители', href: '/drivers', icon: Users },
-  { name: 'Машины', href: '/vehicles', icon: Car },
-  { name: 'Маршруты', href: '/routes', icon: MapPin },
-  { name: 'Настройки', href: '/settings', icon: SettingsIcon, adminOnly: true },
+const navigationKeys = [
+  { key: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { key: 'nav.trips', href: '/trips', icon: Truck },
+  { key: 'nav.drivers', href: '/drivers', icon: Users },
+  { key: 'nav.vehicles', href: '/vehicles', icon: Car },
+  { key: 'nav.routes', href: '/routes', icon: MapPin },
+  { key: 'nav.settings', href: '/settings', icon: SettingsIcon, adminOnly: true },
 ];
 
 export const Sidebar: React.FC = () => {
   const { signOut, user, isAdmin } = useAuth();
+  const { isOpen, toggle } = useSidebar();
+  const { t } = useLanguage();
 
   const handleSignOut = async () => {
     try {
@@ -35,26 +41,36 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-64 bg-white border-r border-secondary-200 flex flex-col h-screen sticky top-0">
-      {/* Logo */}
+      {/* Logo with Toggle Button */}
       <div className="px-6 py-6 border-b border-secondary-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
-            <Truck className="h-6 w-6 text-white" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
+              <Truck className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-secondary-900">{t('app.title')}</h1>
+              <p className="text-xs text-secondary-500">{t('app.subtitle')}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-secondary-900">TruckTrack</h1>
-            <p className="text-xs text-secondary-500">Учёт рейсов</p>
-          </div>
+          {/* Toggle button inside sidebar */}
+          <button
+            onClick={toggle}
+            className="p-2 rounded-lg hover:bg-secondary-100 transition-colors lg:hidden"
+            aria-label="Close sidebar"
+          >
+            <X className="w-5 h-5 text-secondary-600" />
+          </button>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        {navigation
+        {navigationKeys
           .filter((item) => !item.adminOnly || isAdmin)
           .map((item) => (
             <NavLink
-              key={item.name}
+              key={item.key}
               to={item.href}
               className={({ isActive }) =>
                 cn(
@@ -67,7 +83,7 @@ export const Sidebar: React.FC = () => {
               }
             >
               <item.icon className="h-5 w-5" />
-              {item.name}
+              {t(item.key)}
             </NavLink>
           ))}
       </nav>
@@ -77,9 +93,9 @@ export const Sidebar: React.FC = () => {
         <div className="mb-3 px-4">
           <p className="text-sm font-medium text-secondary-900">{user?.email}</p>
           <p className="text-xs text-secondary-500 capitalize">
-            {user?.role === 'admin' && 'Администратор'}
-            {user?.role === 'dispatcher' && 'Диспетчер'}
-            {user?.role === 'driver' && 'Водитель'}
+            {user?.role === 'admin' && t('role.admin')}
+            {user?.role === 'dispatcher' && t('role.dispatcher')}
+            {user?.role === 'driver' && t('role.driver')}
           </p>
         </div>
         <button
@@ -87,7 +103,7 @@ export const Sidebar: React.FC = () => {
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-error-600 hover:bg-error-50 transition-all duration-200"
         >
           <LogOut className="h-5 w-5" />
-          Выйти
+          {t('nav.logout')}
         </button>
       </div>
     </aside>

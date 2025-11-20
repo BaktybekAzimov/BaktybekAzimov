@@ -10,22 +10,22 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Settings as SettingsIcon, DollarSign, Percent, Globe, Save, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface AppSettings {
   driver_payment_percentage: number;
   currency: 'KGS' | 'USD' | 'RUB';
-  language: 'ru' | 'ky';
   expense_types: string[];
 }
 
 export const Settings: React.FC = () => {
   const { isAdmin } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<AppSettings>({
     driver_payment_percentage: 30,
     currency: 'KGS',
-    language: 'ru',
     expense_types: ['Топливо', 'Обслуживание', 'Прочие расходы'],
   });
   const [newExpenseType, setNewExpenseType] = useState('');
@@ -96,7 +96,7 @@ export const Settings: React.FC = () => {
   if (!isAdmin) {
     return (
       <MainLayout>
-        <Header title="Настройки" />
+        <Header title={t('settings.title')} />
         <div className="p-8">
           <Card className="bg-error-50 border border-error-200">
             <p className="text-error-700">У вас нет прав для доступа к настройкам</p>
@@ -109,7 +109,7 @@ export const Settings: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Настройки" />
+        <Header title={t('settings.title')} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -120,8 +120,8 @@ export const Settings: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Настройки системы"
-        subtitle="Управление параметрами приложения"
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle')}
         icon={SettingsIcon}
         actions={
           <Button
@@ -130,7 +130,7 @@ export const Settings: React.FC = () => {
             className="flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Сохранение...' : 'Сохранить изменения'}
+            {saving ? 'Сохранение...' : t('settings.save')}
           </Button>
         }
       />
@@ -144,7 +144,7 @@ export const Settings: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-900">
-                Финансовые параметры
+                {t('settings.financial')}
               </h3>
               <p className="text-sm text-secondary-500">
                 Настройки расчётов и валюты
@@ -156,7 +156,7 @@ export const Settings: React.FC = () => {
             {/* Процент водителя */}
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Процент выплаты водителю
+                {t('settings.driver_percentage')}
               </label>
               <div className="relative">
                 <Input
@@ -185,7 +185,7 @@ export const Settings: React.FC = () => {
             {/* Валюта */}
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Валюта по умолчанию
+                {t('settings.currency')}
               </label>
               <Select
                 value={settings.currency}
@@ -212,7 +212,7 @@ export const Settings: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-900">
-                Региональные настройки
+                {t('settings.regional')}
               </h3>
               <p className="text-sm text-secondary-500">
                 Язык интерфейса и форматы
@@ -222,20 +222,15 @@ export const Settings: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-secondary-700 mb-2">
-              Язык интерфейса
+              {t('settings.language')}
             </label>
             <Select
-              value={settings.language}
-              onChange={(value) =>
-                setSettings({
-                  ...settings,
-                  language: value as AppSettings['language'],
-                })
-              }
+              value={language}
+              onChange={(value) => setLanguage(value as 'ru' | 'ky')}
               options={languageOptions}
             />
-            <p className="mt-2 text-sm text-warning-600 font-medium">
-              ⚠️ Переключение языка будет доступно в следующей версии
+            <p className="mt-2 text-sm text-success-600 font-medium">
+              ✅ Переключение языка активно! Измените язык и увидите изменения.
             </p>
           </div>
         </Card>
@@ -244,7 +239,7 @@ export const Settings: React.FC = () => {
         <Card>
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-secondary-900 mb-2">
-              Типы расходов
+              {t('settings.expense_types')}
             </h3>
             <p className="text-sm text-secondary-500">
               Управление категориями расходов для рейсов
@@ -284,7 +279,7 @@ export const Settings: React.FC = () => {
             />
             <Button onClick={addExpenseType} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Добавить
+              {t('button.add')}
             </Button>
           </div>
         </Card>
