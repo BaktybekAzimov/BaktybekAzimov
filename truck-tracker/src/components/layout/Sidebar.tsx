@@ -54,52 +54,55 @@ export const Sidebar: React.FC = () => {
         </button>
       </div>
 
-      {/* Navigation - показывается только когда isOpen */}
-      {isOpen && (
-        <>
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            {navigationKeys
-              .filter((item) => !item.adminOnly || isAdmin)
-              .map((item) => (
-                <NavLink
-                  key={item.key}
-                  to={item.href}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
-                      'text-sm font-medium',
-                      isActive
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
-                    )
-                  }
-                >
-                  <item.icon className="h-5 w-5" />
-                  {t(item.key)}
-                </NavLink>
-              ))}
-          </nav>
-
-          {/* User Info & Logout */}
-          <div className="px-4 py-4 border-t border-secondary-200">
-            <div className="mb-3 px-4">
-              <p className="text-sm font-medium text-secondary-900">{user?.email}</p>
-              <p className="text-xs text-secondary-500 capitalize">
-                {user?.role === 'admin' && t('role.admin')}
-                {user?.role === 'dispatcher' && t('role.dispatcher')}
-                {user?.role === 'driver' && t('role.driver')}
-              </p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-error-600 hover:bg-error-50 transition-all duration-200"
+      {/* Navigation - всегда показывается */}
+      <nav className="flex-1 px-2 py-6 space-y-2 overflow-y-auto">
+        {navigationKeys
+          .filter((item) => !item.adminOnly || isAdmin)
+          .map((item) => (
+            <NavLink
+              key={item.key}
+              to={item.href}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 rounded-lg transition-all duration-200',
+                  'text-sm font-medium',
+                  isOpen ? 'px-4 py-3' : 'px-2 py-3 justify-center',
+                  isActive
+                    ? 'bg-primary-50 text-primary-700'
+                    : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
+                )
+              }
             >
-              <LogOut className="h-5 w-5" />
-              {t('nav.logout')}
-            </button>
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {isOpen && <span>{t(item.key)}</span>}
+            </NavLink>
+          ))}
+      </nav>
+
+      {/* User Info & Logout */}
+      <div className={cn("py-4 border-t border-secondary-200", isOpen ? "px-4" : "px-2")}>
+        {isOpen && (
+          <div className="mb-3 px-4">
+            <p className="text-sm font-medium text-secondary-900 truncate">{user?.email}</p>
+            <p className="text-xs text-secondary-500 capitalize">
+              {user?.role === 'admin' && t('role.admin')}
+              {user?.role === 'dispatcher' && t('role.dispatcher')}
+              {user?.role === 'driver' && t('role.driver')}
+            </p>
           </div>
-        </>
-      )}
+        )}
+        <button
+          onClick={handleSignOut}
+          className={cn(
+            "w-full flex items-center rounded-lg text-sm font-medium text-error-600 hover:bg-error-50 transition-all duration-200",
+            isOpen ? "gap-3 px-4 py-3" : "px-2 py-3 justify-center"
+          )}
+          title={!isOpen ? t('nav.logout') : undefined}
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {isOpen && <span>{t('nav.logout')}</span>}
+        </button>
+      </div>
     </aside>
   );
 };
