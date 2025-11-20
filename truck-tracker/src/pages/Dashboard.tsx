@@ -7,13 +7,16 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '.
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
-import { TrendingUp, Truck, DollarSign, TrendingDown } from 'lucide-react';
+import { Select } from '../components/ui/Select';
+import { TrendingUp, Truck, DollarSign, TrendingDown, Calendar } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel } from '../lib/utils';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 // Local type definitions
-type DateFilter = 'today' | 'week' | 'month' | 'all';
+type DateFilter = 'today' | 'week' | 'month' | 'all' | 'custom';
 
 interface DashboardStats {
   totalRevenue: number;
@@ -47,7 +50,8 @@ interface Trip {
 export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dateFilter, setDateFilter] = useState<DateFilter>('month');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 0,
     totalTrips: 0,
@@ -60,14 +64,28 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [dateFilter]);
+  }, [dateFilter, selectedMonth]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const { start, end } = getDateRange(dateFilter);
+      let start: Date | null = null;
+      let end: Date | null = null;
+
+      // Determine date range based on filter
+      if (dateFilter === 'custom' && selectedMonth) {
+        // Parse selectedMonth (format: 'yyyy-MM')
+        const [year, month] = selectedMonth.split('-').map(Number);
+        const date = new Date(year, month - 1, 1);
+        start = startOfMonth(date);
+        end = endOfMonth(date);
+      } else {
+        const range = getDateRange(dateFilter);
+        start = range.start;
+        end = range.end;
+      }
 
       // Build query with date filter
       let tripsQuery = supabase
@@ -164,6 +182,19 @@ export const Dashboard: React.FC = () => {
     { label: 'Всё время', value: 'all' },
   ];
 
+  // Generate month options for the last 12 months
+  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const date = subMonths(new Date(), i);
+    const value = format(date, 'yyyy-MM');
+    const label = format(date, 'LLLL yyyy', { locale: ru });
+    return { value, label };
+  });
+
+  const handleMonthChange = (value: string) => {
+    setSelectedMonth(value);
+    setDateFilter('custom');
+  };
+
   if (loading) {
     return (
       <MainLayout>
@@ -194,17 +225,30 @@ export const Dashboard: React.FC = () => {
         title="Дашборд"
         subtitle="Обзор бизнес-показателей"
         actions={
-          <div className="flex gap-2">
-            {filterButtons.map((btn) => (
-              <Button
-                key={btn.value}
-                variant={dateFilter === btn.value ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setDateFilter(btn.value)}
-              >
-                {btn.label}
-              </Button>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            {/* Quick Filter Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              {filterButtons.map((btn) => (
+                <Button
+                  key={btn.value}
+                  variant={dateFilter === btn.value ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setDateFilter(btn.value)}
+                >
+                  {btn.label}
+                </Button>
+              ))}
+            </div>
+            {/* Month Selector */}
+            <div className="flex items-center gap-2 min-w-[200px]">
+              <Calendar className="w-4 h-4 text-secondary-500" />
+              <Select
+                value={selectedMonth}
+                onChange={handleMonthChange}
+                options={monthOptions}
+                className="min-w-[180px]"
+              />
+            </div>
           </div>
         }
       />
