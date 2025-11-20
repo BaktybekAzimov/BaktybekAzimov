@@ -6,15 +6,9 @@
 -- ============================================
 
 DELETE FROM trips;
-DELETE FROM routes WHERE id NOT IN (SELECT DISTINCT route_id FROM trips WHERE route_id IS NOT NULL);
-DELETE FROM vehicles WHERE id NOT IN (SELECT DISTINCT vehicle_id FROM trips WHERE vehicle_id IS NOT NULL);
-DELETE FROM drivers WHERE id NOT IN (SELECT DISTINCT driver_id FROM trips WHERE driver_id IS NOT NULL);
-
--- Сбрасываем счетчики
-ALTER SEQUENCE trips_id_seq RESTART WITH 1;
-ALTER SEQUENCE routes_id_seq RESTART WITH 1;
-ALTER SEQUENCE vehicles_id_seq RESTART WITH 1;
-ALTER SEQUENCE drivers_id_seq RESTART WITH 1;
+DELETE FROM routes;
+DELETE FROM vehicles;
+DELETE FROM drivers;
 
 -- ============================================
 -- 2. Создаем водителей (10 штук)
