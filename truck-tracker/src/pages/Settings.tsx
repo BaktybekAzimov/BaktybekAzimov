@@ -7,15 +7,49 @@ import { Select } from '../components/ui/Select';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Settings as SettingsIcon, DollarSign, Percent, Globe, Save, Plus, Trash2 } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  DollarSign,
+  Percent,
+  Globe,
+  Save,
+  MessageCircle,
+  BarChart3,
+  Bell,
+  Eye,
+  EyeOff,
+  Check,
+  X as XIcon,
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
-interface AppSettings {
+interface SupabaseSettings {
+  id: string;
   driver_payment_percentage: number;
   currency: 'KGS' | 'USD' | 'RUB';
-  expense_types: string[];
+  language: 'ru' | 'ky';
+
+  // Telegram
+  telegram_bot_token: string | null;
+  telegram_bot_enabled: boolean;
+  telegram_admin_chat_id: string | null;
+  telegram_notifications_enabled: boolean;
+
+  // Виджеты аналитики
+  widget_revenue_chart_enabled: boolean;
+  widget_routes_chart_enabled: boolean;
+  widget_recent_trips_enabled: boolean;
+  widget_vehicle_utilization_enabled: boolean;
+  widget_top_drivers_enabled: boolean;
+  widget_monthly_comparison_enabled: boolean;
+
+  // Уведомления
+  notifications_new_trip_enabled: boolean;
+  notifications_trip_completed_enabled: boolean;
+  notifications_daily_report_enabled: boolean;
+  notifications_weekly_report_enabled: boolean;
 }
 
 export const Settings: React.FC = () => {
@@ -23,62 +57,99 @@ export const Settings: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<AppSettings>({
-    driver_payment_percentage: 30,
-    currency: 'KGS',
-    expense_types: ['Топливо', 'Обслуживание', 'Прочие расходы'],
-  });
-  const [newExpenseType, setNewExpenseType] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [settings, setSettings] = useState<SupabaseSettings | null>(null);
+  const [showTelegramToken, setShowTelegramToken] = useState(false);
 
   useEffect(() => {
-    loadSettings();
-  }, []);
+    if (isAdmin) {
+      loadSettings();
+    }
+  }, [isAdmin]);
 
   const loadSettings = async () => {
     try {
       setLoading(true);
-      // Загрузка настроек из localStorage (или можно создать таблицу settings в Supabase)
-      const savedSettings = localStorage.getItem('app_settings');
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
+      setError(null);
+
+      const { data, error: fetchError } = await supabase
+        .from('settings')
+        .select('*')
+        .single();
+
+      if (fetchError) {
+        // Если таблицы нет, показать предупреждение
+        throw new Error('Таблица settings не найдена. Выполните SQL скрипт create-settings-table.sql');
       }
-    } catch (error) {
-      console.error('Error loading settings:', error);
+
+      setSettings(data);
+
+      // Синхронизировать язык
+      if (data.language && data.language !== language) {
+        setLanguage(data.language as 'ru' | 'ky');
+      }
+    } catch (err: any) {
+      console.error('Error loading settings:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const saveSettings = async () => {
+    if (!settings) return;
+
     try {
       setSaving(true);
-      // Сохранение в localStorage (или в Supabase)
-      localStorage.setItem('app_settings', JSON.stringify(settings));
+      setError(null);
+      setSuccess(false);
 
-      // Показать уведомление об успехе
-      alert('Настройки успешно сохранены!');
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      alert('Ошибка при сохранении настроек');
+      const { error: updateError } = await supabase
+        .from('settings')
+        .update({
+          driver_payment_percentage: settings.driver_payment_percentage,
+          currency: settings.currency,
+          language: settings.language,
+          telegram_bot_token: settings.telegram_bot_token,
+          telegram_bot_enabled: settings.telegram_bot_enabled,
+          telegram_admin_chat_id: settings.telegram_admin_chat_id,
+          telegram_notifications_enabled: settings.telegram_notifications_enabled,
+          widget_revenue_chart_enabled: settings.widget_revenue_chart_enabled,
+          widget_routes_chart_enabled: settings.widget_routes_chart_enabled,
+          widget_recent_trips_enabled: settings.widget_recent_trips_enabled,
+          widget_vehicle_utilization_enabled: settings.widget_vehicle_utilization_enabled,
+          widget_top_drivers_enabled: settings.widget_top_drivers_enabled,
+          widget_monthly_comparison_enabled: settings.widget_monthly_comparison_enabled,
+          notifications_new_trip_enabled: settings.notifications_new_trip_enabled,
+          notifications_trip_completed_enabled: settings.notifications_trip_completed_enabled,
+          notifications_daily_report_enabled: settings.notifications_daily_report_enabled,
+          notifications_weekly_report_enabled: settings.notifications_weekly_report_enabled,
+        })
+        .eq('id', settings.id);
+
+      if (updateError) throw updateError;
+
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+
+      // Обновить язык если изменился
+      if (settings.language !== language) {
+        setLanguage(settings.language as 'ru' | 'ky');
+      }
+    } catch (err: any) {
+      console.error('Error saving settings:', err);
+      setError(err.message);
     } finally {
       setSaving(false);
     }
   };
 
-  const addExpenseType = () => {
-    if (newExpenseType.trim()) {
-      setSettings({
-        ...settings,
-        expense_types: [...settings.expense_types, newExpenseType.trim()],
-      });
-      setNewExpenseType('');
-    }
-  };
-
-  const removeExpenseType = (index: number) => {
+  const toggleWidget = (widgetKey: keyof SupabaseSettings) => {
+    if (!settings) return;
     setSettings({
       ...settings,
-      expense_types: settings.expense_types.filter((_, i) => i !== index),
+      [widgetKey]: !settings[widgetKey],
     });
   };
 
@@ -117,6 +188,27 @@ export const Settings: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <MainLayout>
+        <Header title={t('settings.title')} />
+        <div className="p-8">
+          <Card className="bg-error-50 border-2 border-error-200">
+            <h3 className="text-error-900 font-semibold mb-2">Ошибка загрузки настроек</h3>
+            <p className="text-error-700 text-sm mb-4">{error}</p>
+            <p className="text-error-600 text-xs">
+              Выполните SQL скрипт: <code className="bg-error-100 px-2 py-1 rounded">supabase/create-settings-table.sql</code>
+            </p>
+          </Card>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!settings) {
+    return null;
+  }
+
   return (
     <MainLayout>
       <Header
@@ -136,6 +228,16 @@ export const Settings: React.FC = () => {
       />
 
       <div className="p-8 space-y-6">
+        {/* Success Message */}
+        {success && (
+          <Card className="bg-success-50 border-2 border-success-500 animate-in fade-in">
+            <div className="flex items-center gap-3 text-success-700">
+              <Check className="w-5 h-5" />
+              <p className="font-semibold">Настройки успешно сохранены!</p>
+            </div>
+          </Card>
+        )}
+
         {/* Финансовые настройки */}
         <Card>
           <div className="flex items-center gap-3 mb-6">
@@ -192,7 +294,7 @@ export const Settings: React.FC = () => {
                 onChange={(value) =>
                   setSettings({
                     ...settings,
-                    currency: value as AppSettings['currency'],
+                    currency: value as 'KGS' | 'USD' | 'RUB',
                   })
                 }
                 options={currencyOptions}
@@ -225,62 +327,312 @@ export const Settings: React.FC = () => {
               {t('settings.language')}
             </label>
             <Select
-              value={language}
-              onChange={(value) => setLanguage(value as 'ru' | 'ky')}
+              value={settings.language}
+              onChange={(value) =>
+                setSettings({
+                  ...settings,
+                  language: value as 'ru' | 'ky',
+                })
+              }
               options={languageOptions}
             />
             <p className="mt-2 text-sm text-success-600 font-medium">
-              ✅ Переключение языка активно! Измените язык и увидите изменения.
+              ✅ Переключение языка активно! Нажмите "Сохранить изменения".
             </p>
           </div>
         </Card>
 
-        {/* Типы расходов */}
+        {/* Telegram Интеграция */}
         <Card>
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-secondary-900 mb-2">
-              {t('settings.expense_types')}
-            </h3>
-            <p className="text-sm text-secondary-500">
-              Управление категориями расходов для рейсов
-            </p>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <MessageCircle className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900">
+                Telegram Бот
+              </h3>
+              <p className="text-sm text-secondary-500">
+                Уведомления через Telegram (100% бесплатно)
+              </p>
+            </div>
           </div>
 
-          {/* Список типов расходов */}
-          <div className="space-y-3 mb-4">
-            {settings.expense_types.map((type, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg"
+          <div className="space-y-4">
+            {/* Включить Telegram */}
+            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+              <div>
+                <p className="font-medium text-secondary-900">Включить Telegram бот</p>
+                <p className="text-sm text-secondary-500">Активировать интеграцию</p>
+              </div>
+              <button
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    telegram_bot_enabled: !settings.telegram_bot_enabled,
+                  })
+                }
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.telegram_bot_enabled ? 'bg-success-600' : 'bg-secondary-300'
+                }`}
               >
-                <span className="text-secondary-900">{type}</span>
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.telegram_bot_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Bot Token */}
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 mb-2">
+                Bot Token (от @BotFather)
+              </label>
+              <div className="relative">
+                <Input
+                  type={showTelegramToken ? 'text' : 'password'}
+                  value={settings.telegram_bot_token || ''}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      telegram_bot_token: e.target.value,
+                    })
+                  }
+                  placeholder="6789012345:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"
+                />
                 <button
-                  onClick={() => removeExpenseType(index)}
-                  className="p-2 text-error-600 hover:bg-error-50 rounded-lg transition-colors"
-                  disabled={settings.expense_types.length <= 1}
+                  type="button"
+                  onClick={() => setShowTelegramToken(!showTelegramToken)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  {showTelegramToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            ))}
+            </div>
+
+            {/* Admin Chat ID */}
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 mb-2">
+                Admin Chat ID
+              </label>
+              <Input
+                type="text"
+                value={settings.telegram_admin_chat_id || ''}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    telegram_admin_chat_id: e.target.value,
+                  })
+                }
+                placeholder="123456789"
+              />
+              <p className="mt-1 text-xs text-secondary-500">
+                Получите через @userinfobot или смотрите TELEGRAM_SETUP.md
+              </p>
+            </div>
+
+            {/* Уведомления */}
+            <div>
+              <p className="text-sm font-medium text-secondary-700 mb-3">Типы уведомлений:</p>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifications_new_trip_enabled}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        notifications_new_trip_enabled: e.target.checked,
+                      })
+                    }
+                    className="rounded border-secondary-300"
+                  />
+                  <span className="text-sm text-secondary-900">Новый рейс создан</span>
+                </label>
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifications_trip_completed_enabled}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        notifications_trip_completed_enabled: e.target.checked,
+                      })
+                    }
+                    className="rounded border-secondary-300"
+                  />
+                  <span className="text-sm text-secondary-900">Рейс завершён</span>
+                </label>
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifications_daily_report_enabled}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        notifications_daily_report_enabled: e.target.checked,
+                      })
+                    }
+                    className="rounded border-secondary-300"
+                  />
+                  <span className="text-sm text-secondary-900">Ежедневный отчёт</span>
+                </label>
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifications_weekly_report_enabled}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        notifications_weekly_report_enabled: e.target.checked,
+                      })
+                    }
+                    className="rounded border-secondary-300"
+                  />
+                  <span className="text-sm text-secondary-900">Еженедельный отчёт</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Виджеты аналитики */}
+        <Card>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <BarChart3 className="w-6 h-6 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900">
+                Виджеты Dashboard
+              </h3>
+              <p className="text-sm text-secondary-500">
+                Включить/выключить графики и аналитику
+              </p>
+            </div>
           </div>
 
-          {/* Добавить новый тип */}
-          <div className="flex gap-3">
-            <Input
-              value={newExpenseType}
-              onChange={(e) => setNewExpenseType(e.target.value)}
-              placeholder="Введите новый тип расхода..."
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  addExpenseType();
-                }
-              }}
-            />
-            <Button onClick={addExpenseType} className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              {t('button.add')}
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Revenue Chart */}
+            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+              <div>
+                <p className="font-medium text-secondary-900">График выручки</p>
+                <p className="text-xs text-secondary-500">Выручка по дням</p>
+              </div>
+              <button
+                onClick={() => toggleWidget('widget_revenue_chart_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.widget_revenue_chart_enabled ? 'bg-success-600' : 'bg-secondary-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.widget_revenue_chart_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Routes Chart */}
+            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+              <div>
+                <p className="font-medium text-secondary-900">График маршрутов</p>
+                <p className="text-xs text-secondary-500">Рейсы по маршрутам</p>
+              </div>
+              <button
+                onClick={() => toggleWidget('widget_routes_chart_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.widget_routes_chart_enabled ? 'bg-success-600' : 'bg-secondary-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.widget_routes_chart_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Recent Trips */}
+            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+              <div>
+                <p className="font-medium text-secondary-900">Последние рейсы</p>
+                <p className="text-xs text-secondary-500">Таблица последних 10</p>
+              </div>
+              <button
+                onClick={() => toggleWidget('widget_recent_trips_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.widget_recent_trips_enabled ? 'bg-success-600' : 'bg-secondary-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.widget_recent_trips_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Vehicle Utilization */}
+            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+              <div>
+                <p className="font-medium text-secondary-900">Загруженность транспорта</p>
+                <p className="text-xs text-secondary-500">Статус машин</p>
+              </div>
+              <button
+                onClick={() => toggleWidget('widget_vehicle_utilization_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.widget_vehicle_utilization_enabled ? 'bg-success-600' : 'bg-secondary-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.widget_vehicle_utilization_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Top Drivers */}
+            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+              <div>
+                <p className="font-medium text-secondary-900">Топ-5 водителей</p>
+                <p className="text-xs text-secondary-500">Лучшие по прибыли</p>
+              </div>
+              <button
+                onClick={() => toggleWidget('widget_top_drivers_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.widget_top_drivers_enabled ? 'bg-success-600' : 'bg-secondary-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.widget_top_drivers_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Monthly Comparison */}
+            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+              <div>
+                <p className="font-medium text-secondary-900">Сравнение месяцев</p>
+                <p className="text-xs text-secondary-500">Текущий vs предыдущий</p>
+              </div>
+              <button
+                onClick={() => toggleWidget('widget_monthly_comparison_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.widget_monthly_comparison_enabled ? 'bg-success-600' : 'bg-secondary-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.widget_monthly_comparison_enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </Card>
 
@@ -290,10 +642,11 @@ export const Settings: React.FC = () => {
             ℹ️ Важная информация
           </h4>
           <ul className="text-sm text-primary-700 space-y-1">
-            <li>• После изменения процента выплат новые рейсы будут использовать новое значение</li>
-            <li>• Старые рейсы сохранят прежние расчёты</li>
-            <li>• Для применения нового процента к существующим рейсам потребуется пересчёт в БД</li>
-            <li>• Изменение валюты не конвертирует существующие суммы автоматически</li>
+            <li>• Все настройки сохраняются в Supabase и применяются мгновенно</li>
+            <li>• Telegram интеграция работает только при наличии токена и Chat ID</li>
+            <li>• Выключенные виджеты не будут отображаться на Dashboard</li>
+            <li>• Изменение языка применится после сохранения настроек</li>
+            <li>• Для настройки Telegram смотрите TELEGRAM_SETUP.md</li>
           </ul>
         </Card>
       </div>
