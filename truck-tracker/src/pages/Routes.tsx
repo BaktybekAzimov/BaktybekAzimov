@@ -186,7 +186,7 @@ export const Routes: React.FC = () => {
               <TableRow>
                 <TableHead>Название маршрута</TableHead>
                 <TableHead>Расстояние (км)</TableHead>
-                <TableHead>Средняя стоимость</TableHead>
+                <TableHead>Стандартная цена рейса</TableHead>
                 <TableHead>Кол-во рейсов</TableHead>
                 <TableHead>Общая выручка</TableHead>
                 <TableHead>Средняя выручка</TableHead>
@@ -287,15 +287,15 @@ export const Routes: React.FC = () => {
           />
 
           <Input
-            label="Средняя стоимость"
+            label="Стандартная цена рейса"
             type="number"
             step="0.01"
             min="0"
             placeholder="Например: 15000"
-            helperText="Ориентировочная стоимость рейса по этому маршруту"
+            helperText="Базовая цена за рейс по этому маршруту"
             {...register('avg_cost', {
-              required: 'Стоимость обязательна',
-              min: { value: 0, message: 'Стоимость должна быть положительной' },
+              required: 'Цена обязательна',
+              min: { value: 0, message: 'Цена должна быть положительной' },
             })}
             error={errors.avg_cost?.message}
           />
