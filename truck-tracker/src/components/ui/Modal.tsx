@@ -60,7 +60,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"
         onClick={onClose}
       />
 
@@ -68,22 +68,22 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           className={cn(
-            'relative bg-white rounded-xl shadow-strong w-full',
+            'relative bg-white dark:bg-secondary-800 rounded-xl shadow-strong dark:shadow-none dark:border dark:border-secondary-700 w-full',
             'transform transition-all',
             sizes[size]
           )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 dark:border-secondary-700">
             {title && (
-              <h2 className="text-xl font-semibold text-secondary-900">
+              <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
                 {title}
               </h2>
             )}
             <button
               onClick={onClose}
-              className="ml-auto text-secondary-400 hover:text-secondary-600 transition-colors"
+              className="ml-auto text-secondary-400 hover:text-secondary-600 dark:text-secondary-500 dark:hover:text-secondary-300 transition-colors"
             >
               <X size={24} />
             </button>
@@ -96,7 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-4 border-t border-secondary-200">
+            <div className="px-6 py-4 border-t border-secondary-200 dark:border-secondary-700">
               {footer}
             </div>
           )}

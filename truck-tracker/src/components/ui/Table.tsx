@@ -23,7 +23,7 @@ interface TableHeaderProps {
 
 export const TableHeader: React.FC<TableHeaderProps> = ({ children }) => {
   return (
-    <thead className="bg-secondary-50 border-b-2 border-secondary-200">
+    <thead className="bg-secondary-50 dark:bg-secondary-800 border-b-2 border-secondary-200 dark:border-secondary-700">
       {children}
     </thead>
   );
@@ -34,7 +34,7 @@ interface TableBodyProps {
 }
 
 export const TableBody: React.FC<TableBodyProps> = ({ children }) => {
-  return <tbody className="divide-y divide-secondary-200">{children}</tbody>;
+  return <tbody className="divide-y divide-secondary-200 dark:divide-secondary-700">{children}</tbody>;
 };
 
 interface TableRowProps {
@@ -48,7 +48,7 @@ export const TableRow: React.FC<TableRowProps> = ({ children, onClick, className
     <tr
       className={cn(
         'transition-colors',
-        onClick && 'cursor-pointer hover:bg-secondary-50',
+        onClick && 'cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800',
         className
       )}
       onClick={onClick}
@@ -76,8 +76,8 @@ export const TableHead: React.FC<TableHeadProps> = ({
   return (
     <th
       className={cn(
-        'px-6 py-3 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider',
-        sortable && 'cursor-pointer select-none hover:bg-secondary-100 transition-colors',
+        'px-6 py-3 text-left text-xs font-semibold text-secondary-700 dark:text-secondary-300 uppercase tracking-wider',
+        sortable && 'cursor-pointer select-none hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors',
         className
       )}
       onClick={sortable ? onSort : undefined}
@@ -90,14 +90,14 @@ export const TableHead: React.FC<TableHeadProps> = ({
               size={12}
               className={cn(
                 'transition-colors',
-                sortDirection === 'asc' ? 'text-primary-600' : 'text-secondary-400'
+                sortDirection === 'asc' ? 'text-primary-600 dark:text-primary-400' : 'text-secondary-400 dark:text-secondary-500'
               )}
             />
             <ChevronDown
               size={12}
               className={cn(
                 'transition-colors -mt-1',
-                sortDirection === 'desc' ? 'text-primary-600' : 'text-secondary-400'
+                sortDirection === 'desc' ? 'text-primary-600 dark:text-primary-400' : 'text-secondary-400 dark:text-secondary-500'
               )}
             />
           </div>
@@ -115,7 +115,7 @@ interface TableCellProps {
 
 export const TableCell: React.FC<TableCellProps> = ({ children, className, colSpan }) => {
   return (
-    <td className={cn('px-6 py-4 text-sm text-secondary-900', className)} colSpan={colSpan}>
+    <td className={cn('px-6 py-4 text-sm text-secondary-900 dark:text-secondary-100', className)} colSpan={colSpan}>
       {children}
     </td>
   );

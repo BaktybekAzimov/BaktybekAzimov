@@ -13,11 +13,11 @@ export const Badge: React.FC<BadgeProps> = ({
   className,
 }) => {
   const variants = {
-    success: 'bg-success-100 text-success-700 border-success-200',
-    warning: 'bg-warning-100 text-warning-700 border-warning-200',
-    error: 'bg-error-100 text-error-700 border-error-200',
-    info: 'bg-primary-100 text-primary-700 border-primary-200',
-    default: 'bg-secondary-100 text-secondary-700 border-secondary-200',
+    success: 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-400 border-success-200 dark:border-success-700',
+    warning: 'bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-400 border-warning-200 dark:border-warning-700',
+    error: 'bg-error-100 dark:bg-error-900/30 text-error-700 dark:text-error-400 border-error-200 dark:border-error-700',
+    info: 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 border-primary-200 dark:border-primary-700',
+    default: 'bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 border-secondary-200 dark:border-secondary-600',
   };
 
   return (

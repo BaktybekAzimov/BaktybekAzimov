@@ -28,10 +28,10 @@ export const KPICard: React.FC<KPICardProps> = ({
     <Card className={cn('relative overflow-hidden', className)}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-secondary-600 mb-1">
+          <p className="text-sm font-medium text-secondary-600 dark:text-secondary-400 mb-1">
             {title}
           </p>
-          <p className="text-3xl font-bold text-secondary-900 mb-2 font-mono">
+          <p className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-2 font-mono">
             {value}
           </p>
           {trend && (
@@ -39,12 +39,12 @@ export const KPICard: React.FC<KPICardProps> = ({
               <span
                 className={cn(
                   'text-sm font-medium',
-                  trend.isPositive ? 'text-success-600' : 'text-error-600'
+                  trend.isPositive ? 'text-success-600 dark:text-success-400' : 'text-error-600 dark:text-error-400'
                 )}
               >
                 {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
               </span>
-              <span className="text-xs text-secondary-500">vs прошлый период</span>
+              <span className="text-xs text-secondary-500 dark:text-secondary-400">vs прошлый период</span>
             </div>
           )}
         </div>
