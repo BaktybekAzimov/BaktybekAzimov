@@ -55,7 +55,9 @@ export const Sidebar: React.FC = () => {
           </button>
           {isOpen && (
             <div className="flex flex-col overflow-hidden">
-              <h1 className="text-lg font-bold text-secondary-900 dark:text-secondary-100 whitespace-nowrap">Система учета рейсов</h1>
+              <h1 className="text-base font-bold text-secondary-900 dark:text-secondary-100 leading-tight">
+                Система учета<br />рейсов
+              </h1>
             </div>
           )}
         </div>
