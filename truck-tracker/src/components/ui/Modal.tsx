@@ -57,10 +57,10 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity duration-300"
         onClick={onClose}
       />
 
@@ -69,7 +69,8 @@ export const Modal: React.FC<ModalProps> = ({
         <div
           className={cn(
             'relative bg-white dark:bg-secondary-800 rounded-xl shadow-strong dark:shadow-none dark:border dark:border-secondary-700 w-full',
-            'transform transition-all',
+            'transform transition-all duration-300 ease-out',
+            'animate-in zoom-in-95 slide-in-from-bottom-4',
             sizes[size]
           )}
           onClick={(e) => e.stopPropagation()}

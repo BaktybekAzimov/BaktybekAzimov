@@ -485,38 +485,38 @@ export const Dashboard: React.FC = () => {
       <div className="p-6 space-y-4">
         {/* Расширенные фильтры */}
         {showAdvancedFilters && (
-          <Card>
-            <h3 className="text-base font-semibold text-secondary-900 mb-4">Фильтры аналитики</h3>
+          <Card className="animate-slide-up">
+            <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-4">Фильтры аналитики</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
               {/* Дата от */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 mb-1">Дата от</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Дата от</label>
                 <input
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 />
               </div>
 
               {/* Дата до */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 mb-1">Дата до</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Дата до</label>
                 <input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 />
               </div>
 
               {/* Водитель */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 mb-1">Водитель</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Водитель</label>
                 <select
                   value={selectedDriver}
                   onChange={(e) => setSelectedDriver(e.target.value)}
-                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 >
                   <option value="all">Все водители</option>
                   {drivers.map((driver) => (
@@ -527,11 +527,11 @@ export const Dashboard: React.FC = () => {
 
               {/* Транспорт */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 mb-1">Транспорт</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Транспорт</label>
                 <select
                   value={selectedVehicle}
                   onChange={(e) => setSelectedVehicle(e.target.value)}
-                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 >
                   <option value="all">Весь транспорт</option>
                   {vehicles.map((vehicle) => (
@@ -544,11 +544,11 @@ export const Dashboard: React.FC = () => {
 
               {/* Маршрут */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 mb-1">Маршрут</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Маршрут</label>
                 <select
                   value={selectedRoute}
                   onChange={(e) => setSelectedRoute(e.target.value)}
-                  className="w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 >
                   <option value="all">Все маршруты</option>
                   {routes.map((route) => (
@@ -580,34 +580,42 @@ export const Dashboard: React.FC = () => {
         )}
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard
-            title="Общая выручка"
-            value={formatCurrency(stats.totalRevenue)}
-            icon={DollarSign}
-            iconColor="text-success-600"
-            iconBgColor="bg-success-100"
-          />
-          <KPICard
-            title="Всего рейсов"
-            value={stats.totalTrips}
-            icon={Truck}
-            iconColor="text-primary-600"
-            iconBgColor="bg-primary-100"
-          />
-          <KPICard
-            title="Чистая прибыль"
-            value={formatCurrency(stats.netProfit)}
-            icon={TrendingUp}
-            iconColor="text-warning-600"
-            iconBgColor="bg-warning-100"
-          />
-          <KPICard
-            title="Средняя прибыль"
-            value={formatCurrency(stats.avgProfitPerTrip)}
-            icon={TrendingDown}
-            iconColor="text-secondary-600"
-            iconBgColor="bg-secondary-100"
-          />
+          <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
+            <KPICard
+              title="Общая выручка"
+              value={formatCurrency(stats.totalRevenue)}
+              icon={DollarSign}
+              iconColor="text-success-600"
+              iconBgColor="bg-success-100"
+            />
+          </div>
+          <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <KPICard
+              title="Всего рейсов"
+              value={stats.totalTrips}
+              icon={Truck}
+              iconColor="text-primary-600"
+              iconBgColor="bg-primary-100"
+            />
+          </div>
+          <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
+            <KPICard
+              title="Чистая прибыль"
+              value={formatCurrency(stats.netProfit)}
+              icon={TrendingUp}
+              iconColor="text-warning-600"
+              iconBgColor="bg-warning-100"
+            />
+          </div>
+          <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
+            <KPICard
+              title="Средняя прибыль"
+              value={formatCurrency(stats.avgProfitPerTrip)}
+              icon={TrendingDown}
+              iconColor="text-secondary-600"
+              iconBgColor="bg-secondary-100"
+            />
+          </div>
         </div>
 
         {/* Charts - Компактная аналитика */}
@@ -615,8 +623,8 @@ export const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Прибыль по дням - компактный bar chart */}
             {widgetSettings.widget_revenue_chart_enabled && (
-              <Card className="lg:col-span-2">
-            <h3 className="text-base font-semibold text-secondary-900 mb-3">
+              <Card className="lg:col-span-2 animate-scale-in" style={{ animationDelay: '400ms' }}>
+            <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
               Прибыль за период
             </h3>
             {revenueData.length > 0 ? (
@@ -652,7 +660,7 @@ export const Dashboard: React.FC = () => {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400">
+              <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400 dark:text-secondary-500">
                 Нет данных
               </div>
             )}
@@ -662,7 +670,7 @@ export const Dashboard: React.FC = () => {
             {/* Рейсы по маршрутам - круговой график */}
             {widgetSettings.widget_routes_chart_enabled && (
               <Card>
-            <h3 className="text-base font-semibold text-secondary-900 mb-3">
+            <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
               Распределение рейсов
             </h3>
             {routeData.length > 0 ? (
@@ -705,7 +713,7 @@ export const Dashboard: React.FC = () => {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400">
+              <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400 dark:text-secondary-500">
                 Нет данных
               </div>
             )}
@@ -744,7 +752,7 @@ export const Dashboard: React.FC = () => {
             {/* Загруженность транспорта */}
             {widgetSettings.widget_vehicle_utilization_enabled && (
               <Card>
-                <h3 className="text-base font-semibold text-secondary-900 mb-3">
+                <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
                   🚛 Загруженность транспорта
                 </h3>
                 {vehicleUtilization.length > 0 ? (
@@ -799,7 +807,7 @@ export const Dashboard: React.FC = () => {
             {/* Топ 5 водителей */}
             {widgetSettings.widget_top_drivers_enabled && (
               <Card>
-                <h3 className="text-base font-semibold text-secondary-900 mb-3">
+                <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
                   🏆 Топ 5 водителей
                 </h3>
                 {topDrivers.length > 0 ? (
@@ -849,7 +857,7 @@ export const Dashboard: React.FC = () => {
             {/* Сравнение месяцев */}
             {widgetSettings.widget_monthly_comparison_enabled && (
               <Card>
-                <h3 className="text-base font-semibold text-secondary-900 mb-3">
+                <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
                   📊 Сравнение последних месяцев
                 </h3>
                 {monthComparison.length > 0 ? (
