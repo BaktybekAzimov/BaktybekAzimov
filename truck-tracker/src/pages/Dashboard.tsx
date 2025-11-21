@@ -7,7 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
-import { TrendingUp, Truck, DollarSign, TrendingDown, Calendar } from 'lucide-react';
+import { TrendingUp, Truck, DollarSign, TrendingDown, Calendar, LayoutDashboard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel, cn } from '../lib/utils';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -431,17 +431,9 @@ export const Dashboard: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title={
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg">
-              <Truck className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-secondary-900">Система учета рейсов</span>
-              <span className="text-sm text-secondary-600">Дашборд • Аналитика</span>
-            </div>
-          </div>
-        }
+        title="Дашборд"
+        subtitle="Аналитика"
+        icon={LayoutDashboard}
         actions={
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
             {!showAdvancedFilters && (

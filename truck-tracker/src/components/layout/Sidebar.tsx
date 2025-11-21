@@ -43,15 +43,22 @@ export const Sidebar: React.FC = () => {
         isOpen ? "w-64" : "w-16"
       )}
     >
-      {/* Logo - всегда видимая кнопка */}
-      <div className="border-b border-secondary-200 dark:border-secondary-700 flex items-center justify-center py-6">
-        <button
-          onClick={toggle}
-          className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
-          aria-label="Toggle sidebar"
-        >
-          <Truck className="h-6 w-6 text-white" />
-        </button>
+      {/* Logo & Title */}
+      <div className="border-b border-secondary-200 dark:border-secondary-700 py-6 px-4">
+        <div className={cn("flex items-center gap-3", isOpen ? "justify-start" : "justify-center")}>
+          <button
+            onClick={toggle}
+            className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer flex-shrink-0"
+            aria-label="Toggle sidebar"
+          >
+            <Truck className="h-6 w-6 text-white" />
+          </button>
+          {isOpen && (
+            <div className="flex flex-col overflow-hidden">
+              <h1 className="text-lg font-bold text-secondary-900 dark:text-secondary-100 whitespace-nowrap">Система учета рейсов</h1>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Navigation - всегда показывается */}
