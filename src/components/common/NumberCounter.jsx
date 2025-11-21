@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
@@ -58,6 +59,15 @@ const NumberCounter = ({
       )}
     </div>
   );
+};
+
+NumberCounter.propTypes = {
+  end: PropTypes.number.isRequired,
+  suffix: PropTypes.string,
+  prefix: PropTypes.string,
+  label: PropTypes.string,
+  duration: PropTypes.number,
+  className: PropTypes.string
 };
 
 export default NumberCounter;

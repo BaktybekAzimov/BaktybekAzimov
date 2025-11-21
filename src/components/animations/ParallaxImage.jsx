@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
@@ -99,6 +100,18 @@ const ParallaxImage = ({
       )}
     </div>
   );
+};
+
+ParallaxImage.propTypes = {
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string,
+  speed: PropTypes.number,
+  scale: PropTypes.number,
+  className: PropTypes.string,
+  containerClassName: PropTypes.string,
+  overlay: PropTypes.bool,
+  overlayColor: PropTypes.string,
+  direction: PropTypes.oneOf(['vertical', 'horizontal', 'both'])
 };
 
 export default ParallaxImage;

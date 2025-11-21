@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 
 const ProductCard3D = ({
   title,
@@ -82,6 +83,14 @@ const ProductCard3D = ({
       />
     </div>
   );
+};
+
+ProductCard3D.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string.isRequired,
+  price: PropTypes.string,
+  image: PropTypes.string,
+  bgColor: PropTypes.string
 };
 
 export default ProductCard3D;

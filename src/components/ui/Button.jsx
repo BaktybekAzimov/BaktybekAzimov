@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import PropTypes from 'prop-types';
 
 const Button = ({
   children,
@@ -42,6 +43,16 @@ const Button = ({
       {children}
     </button>
   );
+};
+
+Button.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'outline', 'ghost', 'dark']),
+  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  fullWidth: PropTypes.bool,
+  onClick: PropTypes.func,
+  className: PropTypes.string,
+  disabled: PropTypes.bool
 };
 
 export default Button;
