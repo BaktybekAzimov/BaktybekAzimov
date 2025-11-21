@@ -685,7 +685,13 @@ export const Dashboard: React.FC = () => {
                   >
                     {routeData.slice(0, 5).map((_route, index) => {
                       const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-                      return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                      return (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                          stroke="none"
+                        />
+                      );
                     })}
                   </Pie>
                   <Tooltip

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -15,9 +16,10 @@ import { DriverForm } from './pages/DriverForm';
 function App() {
   return (
     <BrowserRouter>
-      <LanguageProvider>
-        <AuthProvider>
-          <SidebarProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <SidebarProvider>
             <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
@@ -79,9 +81,10 @@ function App() {
           {/* 404 - redirect to dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
-        </SidebarProvider>
-      </AuthProvider>
-    </LanguageProvider>
+            </SidebarProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

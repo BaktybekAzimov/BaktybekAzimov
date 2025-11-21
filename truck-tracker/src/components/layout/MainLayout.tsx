@@ -7,7 +7,7 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="flex min-h-screen max-w-full bg-secondary-50">
+    <div className="flex min-h-screen max-w-full bg-secondary-50 dark:bg-secondary-950 transition-colors duration-200">
       {/* Sidebar - всегда видимый */}
       <Sidebar />
 
