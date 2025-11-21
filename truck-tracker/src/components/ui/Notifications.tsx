@@ -107,12 +107,12 @@ export const Notifications: React.FC = () => {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-secondary-100 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-all duration-200 group"
         aria-label={t('notifications.title')}
       >
-        <Bell className="w-5 h-5 text-secondary-600" />
+        <Bell className="w-5 h-5 text-secondary-600 dark:text-secondary-400 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-12" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-error-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+          <span className="absolute top-1 right-1 w-4 h-4 bg-error-500 text-white text-xs rounded-full flex items-center justify-center font-bold animate-pulse">
             {unreadCount}
           </span>
         )}
@@ -120,16 +120,16 @@ export const Notifications: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-secondary-200 z-50">
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-secondary-800 rounded-lg shadow-lg dark:shadow-none border border-secondary-200 dark:border-secondary-700 z-50 animate-scale-in">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-secondary-200 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-secondary-900">
+          <div className="px-4 py-3 border-b border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-secondary-900 dark:text-secondary-100">
               {t('notifications.title')} {unreadCount > 0 && `(${unreadCount})`}
             </h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors duration-200"
               >
                 {t('notifications.mark_all')}
               </button>
@@ -137,17 +137,17 @@ export const Notifications: React.FC = () => {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto custom-scrollbar">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-secondary-500 text-sm">
+              <div className="px-4 py-8 text-center text-secondary-500 dark:text-secondary-400 text-sm">
                 {t('notifications.no_notifications')}
               </div>
             ) : (
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`px-4 py-3 border-b border-secondary-100 hover:bg-secondary-50 transition-colors cursor-pointer ${
-                    !notification.read ? 'bg-primary-50' : ''
+                  className={`px-4 py-3 border-b border-secondary-100 dark:border-secondary-700 hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-all duration-200 cursor-pointer ${
+                    !notification.read ? 'bg-primary-50 dark:bg-primary-900/20' : ''
                   }`}
                   onClick={() => !notification.read && markAsRead(notification.id)}
                 >
@@ -155,17 +155,17 @@ export const Notifications: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-lg">{getIcon(notification.type)}</span>
-                        <h4 className="text-sm font-semibold text-secondary-900">
+                        <h4 className="text-sm font-semibold text-secondary-900 dark:text-secondary-100">
                           {notification.title}
                         </h4>
                         {!notification.read && (
-                          <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-primary-500 dark:bg-primary-400 rounded-full animate-pulse"></div>
                         )}
                       </div>
-                      <p className="text-xs text-secondary-600 mb-1">
+                      <p className="text-xs text-secondary-600 dark:text-secondary-400 mb-1">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-secondary-400">
+                      <p className="text-xs text-secondary-400 dark:text-secondary-500">
                         {formatTimestamp(notification.timestamp)}
                       </p>
                     </div>
@@ -174,9 +174,9 @@ export const Notifications: React.FC = () => {
                         e.stopPropagation();
                         removeNotification(notification.id);
                       }}
-                      className="p-1 hover:bg-secondary-200 rounded transition-colors"
+                      className="p-1 hover:bg-secondary-200 dark:hover:bg-secondary-600 rounded transition-all duration-200 group"
                     >
-                      <X className="w-3 h-3 text-secondary-500" />
+                      <X className="w-3 h-3 text-secondary-500 dark:text-secondary-400 group-hover:text-error-500 dark:group-hover:text-error-400 transition-colors duration-200" />
                     </button>
                   </div>
                 </div>
@@ -186,13 +186,13 @@ export const Notifications: React.FC = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-secondary-200">
+            <div className="px-4 py-2 border-t border-secondary-200 dark:border-secondary-700">
               <button
                 onClick={() => {
                   markAllAsRead();
                   setIsOpen(false);
                 }}
-                className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors duration-200"
               >
                 {t('notifications.view_all')} →
               </button>
