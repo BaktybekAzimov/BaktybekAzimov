@@ -25,8 +25,8 @@ export const KPICard: React.FC<KPICardProps> = ({
   className,
 }) => {
   return (
-    <Card className={cn('relative overflow-hidden', className)}>
-      <div className="flex items-start justify-between">
+    <Card className={cn('relative overflow-hidden group', className)}>
+      <div className="flex items-start justify-between transition-all duration-300">
         <div className="flex-1">
           <p className="text-sm font-medium text-secondary-600 dark:text-secondary-400 mb-1">
             {title}
@@ -48,8 +48,8 @@ export const KPICard: React.FC<KPICardProps> = ({
             </div>
           )}
         </div>
-        <div className={cn('p-3 rounded-xl', iconBgColor)}>
-          <Icon className={cn('h-6 w-6', iconColor)} />
+        <div className={cn('p-3 rounded-xl transition-all duration-300 group-hover:scale-110', iconBgColor)}>
+          <Icon className={cn('h-6 w-6 transition-transform duration-300 group-hover:rotate-12', iconColor)} />
         </div>
       </div>
     </Card>
