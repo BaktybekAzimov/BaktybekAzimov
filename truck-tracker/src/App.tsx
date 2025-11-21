@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { FontSizeProvider } from './contexts/FontSizeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -11,12 +12,14 @@ import { Drivers } from './pages/Drivers';
 import { Vehicles } from './pages/Vehicles';
 import { Routes as RoutesPage } from './pages/Routes';
 import { Settings } from './pages/Settings';
+import { Users } from './pages/Users';
 import { DriverForm } from './pages/DriverForm';
 
 function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
+        <FontSizeProvider>
         <LanguageProvider>
           <AuthProvider>
             <SidebarProvider>
@@ -74,6 +77,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Redirect root to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -84,6 +95,7 @@ function App() {
             </SidebarProvider>
           </AuthProvider>
         </LanguageProvider>
+        </FontSizeProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

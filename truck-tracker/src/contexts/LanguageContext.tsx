@@ -32,6 +32,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.drivers': 'Водители',
     'nav.vehicles': 'Машины',
     'nav.routes': 'Маршруты',
+    'nav.users': 'Пользователи',
     'nav.settings': 'Настройки',
     'nav.logout': 'Выйти',
 
@@ -154,6 +155,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.drivers': 'Айдоочулар',
     'nav.vehicles': 'Унаалар',
     'nav.routes': 'Маршруттар',
+    'nav.users': 'Колдонуучулар',
     'nav.settings': 'Жөндөөлөр',
     'nav.logout': 'Чыгуу',
 
