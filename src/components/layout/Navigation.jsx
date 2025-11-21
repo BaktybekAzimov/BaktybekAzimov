@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const Navigation = ({ mobile = false }) => {
   const location = useLocation();
@@ -107,6 +108,10 @@ const Navigation = ({ mobile = false }) => {
       ))}
     </nav>
   );
+};
+
+Navigation.propTypes = {
+  mobile: PropTypes.bool
 };
 
 export default Navigation;

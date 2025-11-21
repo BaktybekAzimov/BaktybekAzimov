@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 
 const WaterDrops = ({ count = 50, color = 'rgba(74, 144, 181, 0.6)' }) => {
   const canvasRef = useRef(null);
@@ -73,6 +74,11 @@ const WaterDrops = ({ count = 50, color = 'rgba(74, 144, 181, 0.6)' }) => {
       style={{ mixBlendMode: 'screen' }}
     />
   );
+};
+
+WaterDrops.propTypes = {
+  count: PropTypes.number,
+  color: PropTypes.string
 };
 
 export default WaterDrops;
