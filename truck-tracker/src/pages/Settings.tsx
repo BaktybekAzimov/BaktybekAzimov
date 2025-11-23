@@ -365,11 +365,11 @@ export const Settings: React.FC = () => {
             <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => setFontSize("small")}
-                className={\`p-4 rounded-lg border-2 transition-all duration-200 \${
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                   fontSize === "small"
                     ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
                     : "border-secondary-300 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-700"
-                }\`}
+                }`}
               >
                 <div className="text-center">
                   <div className="text-xs font-medium text-secondary-900 dark:text-secondary-100 mb-1">
@@ -386,11 +386,11 @@ export const Settings: React.FC = () => {
 
               <button
                 onClick={() => setFontSize("medium")}
-                className={\`p-4 rounded-lg border-2 transition-all duration-200 \${
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                   fontSize === "medium"
                     ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
                     : "border-secondary-300 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-700"
-                }\`}
+                }`}
               >
                 <div className="text-center">
                   <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-1">
@@ -407,11 +407,11 @@ export const Settings: React.FC = () => {
 
               <button
                 onClick={() => setFontSize("large")}
-                className={\`p-4 rounded-lg border-2 transition-all duration-200 \${
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                   fontSize === "large"
                     ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
                     : "border-secondary-300 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-700"
-                }\`}
+                }`}
               >
                 <div className="text-center">
                   <div className="text-base font-medium text-secondary-900 dark:text-secondary-100 mb-1">
