@@ -17,9 +17,11 @@ import {
   Eye,
   EyeOff,
   Check,
+  Type,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useFontSize } from '../contexts/FontSizeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface SupabaseSettings {
@@ -50,6 +52,7 @@ interface SupabaseSettings {
 }
 
 export const Settings: React.FC = () => {
+  const { fontSize, setFontSize } = useFontSize();
   const { isAdmin } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -335,6 +338,96 @@ export const Settings: React.FC = () => {
             />
             <p className="mt-2 text-sm text-success-600 font-medium">
               ✅ Переключение языка активно! Нажмите "Сохранить изменения".
+            </p>
+          </div>
+        </Card>
+
+        {/* Настройки внешнего вида */}
+        <Card>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+              <Type className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+                Внешний вид
+              </h3>
+              <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                Настройка отображения интерфейса
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
+              Размер шрифта
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => setFontSize("small")}
+                className={\`p-4 rounded-lg border-2 transition-all duration-200 \${
+                  fontSize === "small"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
+                    : "border-secondary-300 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-700"
+                }\`}
+              >
+                <div className="text-center">
+                  <div className="text-xs font-medium text-secondary-900 dark:text-secondary-100 mb-1">
+                    Маленький
+                  </div>
+                  <div className="text-xl font-bold text-secondary-700 dark:text-secondary-300">
+                    Aa
+                  </div>
+                  <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+                    14px
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setFontSize("medium")}
+                className={\`p-4 rounded-lg border-2 transition-all duration-200 \${
+                  fontSize === "medium"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
+                    : "border-secondary-300 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-700"
+                }\`}
+              >
+                <div className="text-center">
+                  <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-1">
+                    Средний
+                  </div>
+                  <div className="text-2xl font-bold text-secondary-700 dark:text-secondary-300">
+                    Aa
+                  </div>
+                  <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+                    16px
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setFontSize("large")}
+                className={\`p-4 rounded-lg border-2 transition-all duration-200 \${
+                  fontSize === "large"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
+                    : "border-secondary-300 dark:border-secondary-600 hover:border-primary-300 dark:hover:border-primary-700"
+                }\`}
+              >
+                <div className="text-center">
+                  <div className="text-base font-medium text-secondary-900 dark:text-secondary-100 mb-1">
+                    Большой
+                  </div>
+                  <div className="text-3xl font-bold text-secondary-700 dark:text-secondary-300">
+                    Aa
+                  </div>
+                  <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+                    18px
+                  </div>
+                </div>
+              </button>
+            </div>
+            <p className="mt-3 text-sm text-secondary-500 dark:text-secondary-400">
+              💡 Размер шрифта применяется мгновенно ко всему приложению
             </p>
           </div>
         </Card>
