@@ -5,13 +5,29 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Format currency (Kyrgyz som)
+// Currency symbols mapping
+const currencySymbols: Record<string, string> = {
+  KGS: 'с',
+  USD: '$',
+  RUB: '₽',
+};
+
+// Format currency based on saved settings
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('ru-RU', {
+  const currency = localStorage.getItem('currency') || 'KGS';
+  const symbol = currencySymbols[currency] || 'с';
+
+  const formatted = new Intl.NumberFormat('ru-RU', {
     style: 'decimal',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  }).format(amount) + ' с';
+  }).format(amount);
+
+  // USD uses prefix, others use suffix
+  if (currency === 'USD') {
+    return `${symbol}${formatted}`;
+  }
+  return `${formatted} ${symbol}`;
 }
 
 // Format date
@@ -50,8 +66,9 @@ export function calculateTripFinancials(
 ): TripCalculation {
   const totalCosts = fuelCost + maintenanceCost + otherCosts;
   const netProfit = revenue - totalCosts;
-  const driverPayment = netProfit * 0.3;
-  const ownerPayment = netProfit * 0.7;
+  // При убыточном рейсе выплаты = 0 (водитель не должен платить за убытки)
+  const driverPayment = netProfit > 0 ? netProfit * 0.3 : 0;
+  const ownerPayment = netProfit > 0 ? netProfit * 0.7 : netProfit; // Убыток несёт владелец
 
   return {
     totalCosts,

@@ -10,10 +10,23 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, User } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
+import { formatCurrency, formatDate, getStatusColor } from '../lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
+
+// Helper function for chart colors based on theme
+const getChartColors = (isDark: boolean) => ({
+  grid: isDark ? '#374151' : '#e2e8f0',
+  text: isDark ? '#9ca3af' : '#64748b',
+  tooltip: {
+    bg: isDark ? '#1f2937' : '#fff',
+    border: isDark ? '#374151' : '#e2e8f0',
+    text: isDark ? '#f3f4f6' : '#1f2937',
+  },
+});
 
 interface Driver {
   id: string;
@@ -49,6 +62,9 @@ interface DriverStats {
 }
 
 export const Drivers: React.FC = () => {
+  const { t } = useLanguage();
+  const { theme } = useTheme();
+  const chartColors = getChartColors(theme === 'dark');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [drivers, setDrivers] = useState<DriverStats[]>([]);
@@ -100,7 +116,7 @@ export const Drivers: React.FC = () => {
       setDrivers(data || []);
     } catch (err) {
       console.error('Error fetching drivers:', err);
-      setError('Не удалось загрузить данные водителей');
+      setError(t('error.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -162,16 +178,29 @@ export const Drivers: React.FC = () => {
       fetchDrivers();
     } catch (err) {
       console.error('Error saving driver:', err);
-      setError('Не удалось сохранить водителя');
+      setError(t('error.save_failed'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этого водителя?')) return;
+    if (!confirm(t('confirm.delete_driver'))) return;
 
     try {
+      // Проверка на активные рейсы
+      const { data: activeTrips } = await supabase
+        .from('trips')
+        .select('id')
+        .eq('driver_id', id)
+        .in('status', ['in_progress', 'planned'])
+        .limit(1);
+
+      if (activeTrips && activeTrips.length > 0) {
+        setError(t('error.has_active_trips'));
+        return;
+      }
+
       const { error } = await supabase.from('drivers').delete().eq('id', id);
 
       if (error) throw error;
@@ -179,7 +208,7 @@ export const Drivers: React.FC = () => {
       fetchDrivers();
     } catch (err) {
       console.error('Error deleting driver:', err);
-      setError('Не удалось удалить водителя');
+      setError(t('error.delete_failed'));
     }
   };
 
@@ -196,7 +225,7 @@ export const Drivers: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Водители" />
+        <Header title={t('drivers.title')} icon={Users} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -207,45 +236,47 @@ export const Drivers: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Водители"
-        subtitle={`Всего водителей: ${drivers.length}`}
+        title={t('drivers.title')}
+        subtitle={`${t('drivers.total')}: ${drivers.length}`}
+        icon={Users}
         actions={
           <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-            Добавить водителя
+            {t('drivers.add')}
           </Button>
         }
       />
 
       <div className="p-8 space-y-6">
         {error && (
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">{error}</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{error}</p>
           </Card>
         )}
 
         {/* Top Drivers Chart */}
         {topDriversData.length > 0 && (
           <Card>
-            <h3 className="text-lg font-semibold text-secondary-900 mb-4">
-              Топ 10 водителей по выплатам
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+              {t('drivers.top_by_payments')}
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={topDriversData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
                 <XAxis
                   dataKey="name"
-                  stroke="#64748b"
+                  stroke={chartColors.text}
                   style={{ fontSize: '12px' }}
                   angle={-45}
                   textAnchor="end"
                   height={100}
                 />
-                <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                <YAxis stroke={chartColors.text} style={{ fontSize: '12px' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e2e8f0',
+                    backgroundColor: chartColors.tooltip.bg,
+                    border: `1px solid ${chartColors.tooltip.border}`,
                     borderRadius: '8px',
+                    color: chartColors.tooltip.text,
                   }}
                   formatter={(value: number) => formatCurrency(value)}
                 />
@@ -253,7 +284,7 @@ export const Drivers: React.FC = () => {
                 <Bar
                   dataKey="payment"
                   fill="#1e3a8a"
-                  name="Выплаты"
+                  name={t('drivers.payments')}
                   radius={[8, 8, 0, 0]}
                 />
               </BarChart>
@@ -266,14 +297,14 @@ export const Drivers: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Имя</TableHead>
-                <TableHead>Телефон</TableHead>
-                <TableHead>Дата найма</TableHead>
-                <TableHead>Всего рейсов</TableHead>
-                <TableHead>Общие выплаты</TableHead>
-                <TableHead>Средняя прибыль</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('drivers.name')}</TableHead>
+                <TableHead>{t('drivers.phone')}</TableHead>
+                <TableHead>{t('drivers.hire_date')}</TableHead>
+                <TableHead>{t('drivers.total_trips')}</TableHead>
+                <TableHead>{t('drivers.total_payment')}</TableHead>
+                <TableHead>{t('drivers.avg_profit')}</TableHead>
+                <TableHead>{t('drivers.status')}</TableHead>
+                <TableHead>{t('drivers.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -291,19 +322,19 @@ export const Drivers: React.FC = () => {
                     <TableCell>{driver.phone}</TableCell>
                     <TableCell>{formatDate(driver.hire_date)}</TableCell>
                     <TableCell>
-                      <span className="font-semibold text-primary-700">
+                      <span className="font-semibold text-primary-700 dark:text-primary-400">
                         {driver.total_trips || 0}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(driver.total_payment || 0)}
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(driver.avg_profit_per_trip || 0)}
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(driver.status)}>
-                        {getStatusLabel(driver.status)}
+                        {t(`status.${driver.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -314,7 +345,7 @@ export const Drivers: React.FC = () => {
                           onClick={() => openEditModal(driver)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -322,7 +353,7 @@ export const Drivers: React.FC = () => {
                           onClick={() => handleDelete(driver.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -331,7 +362,7 @@ export const Drivers: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-12 text-secondary-500">
-                    Нет водителей
+                    {t('empty.drivers')}
                   </TableCell>
                 </TableRow>
               )}
@@ -344,43 +375,49 @@ export const Drivers: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingDriver ? 'Редактировать водителя' : 'Добавить водителя'}
+        title={editingDriver ? t('modal.edit_driver') : t('modal.add_driver')}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
-            label="Полное имя"
-            {...register('full_name', { required: 'Имя обязательно' })}
+            label={t('drivers.full_name')}
+            {...register('full_name', { required: t('validation.full_name_required') })}
             error={errors.full_name?.message}
           />
 
           <Input
-            label="Телефон"
+            label={t('drivers.phone')}
             type="tel"
-            placeholder="+996 XXX XXX XXX"
-            {...register('phone', { required: 'Телефон обязателен' })}
+            placeholder={t('drivers.phone_placeholder')}
+            {...register('phone', {
+              required: t('validation.phone_required'),
+              pattern: {
+                value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+                message: t('validation.phone_invalid')
+              }
+            })}
             error={errors.phone?.message}
           />
 
           <Input
-            label="Дата найма"
+            label={t('drivers.hire_date')}
             type="date"
-            {...register('hire_date', { required: 'Дата найма обязательна' })}
+            {...register('hire_date', { required: t('validation.hire_date_required') })}
             error={errors.hire_date?.message}
           />
 
           <Select
-            label="Статус"
-            {...register('status', { required: 'Статус обязателен' })}
+            label={t('drivers.status')}
+            {...register('status', { required: t('validation.status_required') })}
             options={[
-              { value: 'active', label: 'Активен' },
-              { value: 'inactive', label: 'Неактивен' },
+              { value: 'active', label: t('status.active') },
+              { value: 'inactive', label: t('status.inactive') },
             ]}
             error={errors.status?.message}
           />
 
           <Input
-            label="Заметки"
+            label={t('drivers.notes')}
             {...register('notes')}
             error={errors.notes?.message}
           />
@@ -392,10 +429,10 @@ export const Drivers: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingDriver ? 'Сохранить' : 'Создать'}
+              {editingDriver ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>

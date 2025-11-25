@@ -11,6 +11,7 @@ import { Input } from '../components/ui/Input';
 import { Plus, Edit, Trash2, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency } from '../lib/utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Route {
   id: string;
@@ -38,6 +39,7 @@ interface RouteStats {
 }
 
 export const Routes: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [routes, setRoutes] = useState<RouteStats[]>([]);
@@ -89,7 +91,7 @@ export const Routes: React.FC = () => {
       setRoutes(data || []);
     } catch (err) {
       console.error('Error fetching routes:', err);
-      setError('Не удалось загрузить данные маршрутов');
+      setError(t('error.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -145,16 +147,28 @@ export const Routes: React.FC = () => {
       fetchRoutes();
     } catch (err) {
       console.error('Error saving route:', err);
-      setError('Не удалось сохранить маршрут');
+      setError(t('error.save_failed'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этот маршрут?')) return;
+    if (!confirm(t('confirm.delete_route'))) return;
 
     try {
+      // Проверка на связанные рейсы
+      const { data: linkedTrips } = await supabase
+        .from('trips')
+        .select('id')
+        .eq('route_id', id)
+        .limit(1);
+
+      if (linkedTrips && linkedTrips.length > 0) {
+        setError(t('error.has_linked_trips'));
+        return;
+      }
+
       const { error } = await supabase.from('routes').delete().eq('id', id);
 
       if (error) throw error;
@@ -162,14 +176,14 @@ export const Routes: React.FC = () => {
       fetchRoutes();
     } catch (err) {
       console.error('Error deleting route:', err);
-      setError('Не удалось удалить маршрут');
+      setError(t('error.delete_failed'));
     }
   };
 
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Маршруты" />
+        <Header title={t('routes.title')} icon={MapPin} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -180,19 +194,20 @@ export const Routes: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Маршруты"
-        subtitle={`Всего маршрутов: ${routes.length}`}
+        title={t('routes.title')}
+        subtitle={`${t('routes.total')}: ${routes.length}`}
+        icon={MapPin}
         actions={
           <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-            Добавить маршрут
+            {t('routes.add')}
           </Button>
         }
       />
 
       <div className="p-8 space-y-6">
         {error && (
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">{error}</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{error}</p>
           </Card>
         )}
 
@@ -201,13 +216,13 @@ export const Routes: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Название маршрута</TableHead>
-                <TableHead>Расстояние (км)</TableHead>
-                <TableHead>Стандартная цена рейса</TableHead>
-                <TableHead>Кол-во рейсов</TableHead>
-                <TableHead>Общая выручка</TableHead>
-                <TableHead>Средняя выручка</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('routes.name')}</TableHead>
+                <TableHead>{t('routes.distance')}</TableHead>
+                <TableHead>{t('routes.standard_price')}</TableHead>
+                <TableHead>{t('routes.trip_count')}</TableHead>
+                <TableHead>{t('routes.total_revenue')}</TableHead>
+                <TableHead>{t('routes.avg_revenue')}</TableHead>
+                <TableHead>{t('trips.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -223,22 +238,22 @@ export const Routes: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="font-semibold text-secondary-700">
-                        {route.distance_km} км
+                      <span className="font-semibold text-secondary-700 dark:text-secondary-400">
+                        {route.distance_km} {t('routes.km')}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(route.avg_cost)}
                     </TableCell>
                     <TableCell>
-                      <span className="font-semibold text-primary-700">
+                      <span className="font-semibold text-primary-700 dark:text-primary-400">
                         {route.trip_count || 0}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(route.total_revenue || 0)}
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(route.avg_revenue || 0)}
                     </TableCell>
                     <TableCell>
@@ -249,7 +264,7 @@ export const Routes: React.FC = () => {
                           onClick={() => openEditModal(route)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -257,7 +272,7 @@ export const Routes: React.FC = () => {
                           onClick={() => handleDelete(route.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -266,7 +281,7 @@ export const Routes: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-12 text-secondary-500">
-                    Нет маршрутов
+                    {t('empty.routes')}
                   </TableCell>
                 </TableRow>
               )}
@@ -279,40 +294,40 @@ export const Routes: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingRoute ? 'Редактировать маршрут' : 'Добавить маршрут'}
+        title={editingRoute ? t('modal.edit_route') : t('modal.add_route')}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
-            label="Название маршрута"
-            placeholder="Например: Бишкек - Алматы"
-            {...register('name', { required: 'Название обязательно' })}
+            label={t('routes.name')}
+            placeholder={t('routes.name_placeholder')}
+            {...register('name', { required: t('validation.name_required') })}
             error={errors.name?.message}
           />
 
           <Input
-            label="Расстояние (км)"
+            label={t('routes.distance')}
             type="number"
             step="0.01"
             min="0"
-            placeholder="Например: 245.5"
+            placeholder={t('routes.distance_placeholder')}
             {...register('distance_km', {
-              required: 'Расстояние обязательно',
-              min: { value: 0, message: 'Расстояние должно быть положительным' },
+              required: t('validation.distance_required'),
+              min: { value: 0, message: t('validation.distance_positive') },
             })}
             error={errors.distance_km?.message}
           />
 
           <Input
-            label="Стандартная цена рейса"
+            label={t('routes.standard_price')}
             type="number"
             step="0.01"
             min="0"
-            placeholder="Например: 15000"
-            helperText="Базовая цена за рейс по этому маршруту"
+            placeholder={t('routes.price_placeholder')}
+            helperText={t('routes.price_helper')}
             {...register('avg_cost', {
-              required: 'Цена обязательна',
-              min: { value: 0, message: 'Цена должна быть положительной' },
+              required: t('validation.price_required'),
+              min: { value: 0, message: t('validation.price_positive') },
             })}
             error={errors.avg_cost?.message}
           />
@@ -324,10 +339,10 @@ export const Routes: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingRoute ? 'Сохранить' : 'Создать'}
+              {editingRoute ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>

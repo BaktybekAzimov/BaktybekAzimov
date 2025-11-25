@@ -10,14 +10,14 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight, Download, Truck as TruckIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useLanguage } from '../contexts/LanguageContext';
 import ExcelJS from 'exceljs';
 import {
   formatCurrency,
   formatDate,
   getStatusColor,
-  getStatusLabel,
   calculateTripFinancials,
 } from '../lib/utils';
 
@@ -89,6 +89,7 @@ interface TripFormData {
 }
 
 export const Trips: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -205,7 +206,7 @@ export const Trips: React.FC = () => {
       setRoutes(routesRes.data || []);
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError('Не удалось загрузить данные');
+      setError(t('error.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -213,121 +214,124 @@ export const Trips: React.FC = () => {
 
   const exportToExcel = async () => {
     if (filteredTrips.length === 0) {
-      alert('Нет данных для экспорта');
+      alert(t('export.no_data'));
       return;
     }
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Отчет по рейсам');
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(t('export.sheet_name'));
 
-    // Заголовок отчета
-    const today = new Date().toLocaleDateString('ru-RU');
-    worksheet.addRow(['СИСТЕМА УЧЕТА РЕЙСОВ - ОТЧЕТ']);
-    worksheet.addRow([`Дата формирования: ${today}`]);
-    worksheet.addRow([`Всего рейсов: ${filteredTrips.length}`]);
-    worksheet.addRow([]); // Пустая строка
+      // Заголовок отчета
+      const today = new Date().toLocaleDateString('ru-RU');
+      worksheet.addRow([t('export.report_title')]);
+      worksheet.addRow([`${t('export.generated_date')}: ${today}`]);
+      worksheet.addRow([`${t('export.total_trips')}: ${filteredTrips.length}`]);
+      worksheet.addRow([]);
 
-    // Заголовки колонок
-    const headers = [
-      'Дата',
-      'Водитель',
-      'Автомобиль',
-      'Маршрут',
-      'Дистанция (км)',
-      'Выручка',
-      'Топливо',
-      'Обслуживание',
-      'Прочие',
-      'Всего расходов',
-      'Прибыль',
-      'Оплата водителю',
-      'Оплата владельцу',
-      'Статус',
-      'Комментарий'
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.font = { bold: true };
-    headerRow.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFE0E0E0' }
-    };
+      // Заголовки колонок
+      const headers = [
+        t('export.header.date'),
+        t('export.header.driver'),
+        t('export.header.vehicle'),
+        t('export.header.route'),
+        t('export.header.distance'),
+        t('export.header.revenue'),
+        t('export.header.fuel'),
+        t('export.header.maintenance'),
+        t('export.header.other'),
+        t('export.header.total_costs'),
+        t('export.header.profit'),
+        t('export.header.driver_payment'),
+        t('export.header.owner_payment'),
+        t('export.header.status'),
+        t('export.header.comment')
+      ];
+      const headerRow = worksheet.addRow(headers);
+      headerRow.font = { bold: true };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
 
-    // Данные
-    filteredTrips.forEach((trip) => {
-      worksheet.addRow([
-        formatDate(trip.trip_date),
-        trip.driver?.full_name || 'N/A',
-        trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model} (${trip.vehicle.license_plate})` : 'N/A',
-        trip.route?.name || 'N/A',
-        trip.route?.distance_km || 0,
-        trip.revenue,
-        trip.fuel_cost,
-        trip.maintenance_cost,
-        trip.other_costs,
-        trip.total_costs,
-        trip.net_profit,
-        trip.driver_payment,
-        trip.owner_payment,
-        getStatusLabel(trip.status),
-        trip.comment || ''
+      // Данные
+      filteredTrips.forEach((trip) => {
+        worksheet.addRow([
+          formatDate(trip.trip_date),
+          trip.driver?.full_name || 'N/A',
+          trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model} (${trip.vehicle.license_plate})` : 'N/A',
+          trip.route?.name || 'N/A',
+          trip.route?.distance_km || 0,
+          trip.revenue,
+          trip.fuel_cost,
+          trip.maintenance_cost,
+          trip.other_costs,
+          trip.total_costs,
+          trip.net_profit,
+          trip.driver_payment,
+          trip.owner_payment,
+          t(`status.${trip.status}`),
+          trip.comment || ''
+        ]);
+      });
+
+      // Пустая строка
+      worksheet.addRow([]);
+
+      // Итоговые суммы
+      const totalsRow = worksheet.addRow([
+        '',
+        '',
+        '',
+        '',
+        `${t('export.totals')}:`,
+        filteredTrips.reduce((sum, trip) => sum + trip.revenue, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.fuel_cost, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.maintenance_cost, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.other_costs, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.total_costs, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.net_profit, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.driver_payment, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.owner_payment, 0),
+        '',
+        ''
       ]);
-    });
+      totalsRow.font = { bold: true };
 
-    // Пустая строка
-    worksheet.addRow([]);
+      // Настройка ширины колонок
+      worksheet.columns = [
+        { width: 12 },
+        { width: 20 },
+        { width: 30 },
+        { width: 25 },
+        { width: 14 },
+        { width: 12 },
+        { width: 12 },
+        { width: 14 },
+        { width: 10 },
+        { width: 14 },
+        { width: 12 },
+        { width: 16 },
+        { width: 16 },
+        { width: 12 },
+        { width: 30 },
+      ];
 
-    // Итоговые суммы
-    const totalsRow = worksheet.addRow([
-      '',
-      '',
-      '',
-      '',
-      'ИТОГО:',
-      filteredTrips.reduce((sum, t) => sum + t.revenue, 0),
-      filteredTrips.reduce((sum, t) => sum + t.fuel_cost, 0),
-      filteredTrips.reduce((sum, t) => sum + t.maintenance_cost, 0),
-      filteredTrips.reduce((sum, t) => sum + t.other_costs, 0),
-      filteredTrips.reduce((sum, t) => sum + t.total_costs, 0),
-      filteredTrips.reduce((sum, t) => sum + t.net_profit, 0),
-      filteredTrips.reduce((sum, t) => sum + t.driver_payment, 0),
-      filteredTrips.reduce((sum, t) => sum + t.owner_payment, 0),
-      '',
-      ''
-    ]);
-    totalsRow.font = { bold: true };
-
-    // Настройка ширины колонок
-    worksheet.columns = [
-      { width: 12 },  // Дата
-      { width: 20 },  // Водитель
-      { width: 30 },  // Автомобиль
-      { width: 25 },  // Маршрут
-      { width: 14 },  // Дистанция
-      { width: 12 },  // Выручка
-      { width: 12 },  // Топливо
-      { width: 14 },  // Обслуживание
-      { width: 10 },  // Прочие
-      { width: 14 },  // Всего расходов
-      { width: 12 },  // Прибыль
-      { width: 16 },  // Оплата водителю
-      { width: 16 },  // Оплата владельцу
-      { width: 12 },  // Статус
-      { width: 30 },  // Комментарий
-    ];
-
-    // Генерация имени файла
-    const filename = `Отчет_рейсы_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    // Скачивание
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    window.URL.revokeObjectURL(url);
+      // Генерация имени файла и скачивание
+      const filename = `${t('export.filename_prefix')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting to Excel:', err);
+      alert(t('export.error'));
+    }
   };
 
   const openCreateModal = () => {
@@ -401,35 +405,76 @@ export const Trips: React.FC = () => {
           .eq('id', editingTrip.id);
 
         if (error) throw error;
+
+        // Update vehicle status based on trip status change
+        if (data.status === 'in_progress') {
+          // If vehicle changed, set old vehicle to available
+          if (editingTrip.vehicle_id !== data.vehicle_id) {
+            await supabase
+              .from('vehicles')
+              .update({ status: 'available' })
+              .eq('id', editingTrip.vehicle_id);
+          }
+          // Set new vehicle to in_trip
+          await supabase
+            .from('vehicles')
+            .update({ status: 'in_trip' })
+            .eq('id', data.vehicle_id);
+        } else if (data.status === 'completed' || data.status === 'cancelled') {
+          // Set vehicle to available when trip is completed or cancelled
+          await supabase
+            .from('vehicles')
+            .update({ status: 'available' })
+            .eq('id', data.vehicle_id);
+        }
       } else {
         // Create new trip
         const { error } = await supabase.from('trips').insert([tripData]);
 
         if (error) throw error;
+
+        // Update vehicle status for new trip
+        if (data.status === 'in_progress') {
+          await supabase
+            .from('vehicles')
+            .update({ status: 'in_trip' })
+            .eq('id', data.vehicle_id);
+        }
       }
 
       setIsModalOpen(false);
       fetchData();
     } catch (err) {
       console.error('Error saving trip:', err);
-      setError('Не удалось сохранить рейс');
+      setError(t('error.save_failed'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этот рейс?')) return;
+    if (!confirm(t('confirm.delete_trip'))) return;
 
     try {
+      // Get trip data before deleting to update vehicle status
+      const tripToDelete = trips.find(trip => trip.id === id);
+
       const { error } = await supabase.from('trips').delete().eq('id', id);
 
       if (error) throw error;
 
+      // If trip was in_progress, set vehicle to available
+      if (tripToDelete && tripToDelete.status === 'in_progress') {
+        await supabase
+          .from('vehicles')
+          .update({ status: 'available' })
+          .eq('id', tripToDelete.vehicle_id);
+      }
+
       fetchData();
     } catch (err) {
       console.error('Error deleting trip:', err);
-      setError('Не удалось удалить рейс');
+      setError(t('error.delete_failed'));
     }
   };
 
@@ -443,7 +488,7 @@ export const Trips: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Рейсы" />
+        <Header title={t('trips.title')} icon={TruckIcon} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -454,8 +499,9 @@ export const Trips: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Рейсы"
-        subtitle={`Всего рейсов: ${filteredTrips.length}`}
+        title={t('trips.title')}
+        subtitle={`${t('trips.total')}: ${filteredTrips.length}`}
+        icon={TruckIcon}
         actions={
           <div className="flex gap-3">
             <Button
@@ -464,10 +510,10 @@ export const Trips: React.FC = () => {
               icon={<Download size={20} />}
               disabled={filteredTrips.length === 0}
             >
-              Экспорт в Excel
+              {t('export.excel')}
             </Button>
             <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-              Добавить рейс
+              {t('trips.add')}
             </Button>
           </div>
         }
@@ -475,8 +521,8 @@ export const Trips: React.FC = () => {
 
       <div className="p-8 space-y-6">
         {error && (
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">{error}</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{error}</p>
           </Card>
         )}
 
@@ -485,7 +531,7 @@ export const Trips: React.FC = () => {
           <div className="space-y-4">
             {/* Первая строка: поиск */}
             <Input
-              placeholder="Поиск по водителю, автомобилю или маршруту..."
+              placeholder={t('trips.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               icon={<Search size={20} />}
@@ -498,10 +544,10 @@ export const Trips: React.FC = () => {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'Все статусы' },
-                  { value: 'completed', label: 'Завершён' },
-                  { value: 'in_progress', label: 'В пути' },
-                  { value: 'cancelled', label: 'Отменён' },
+                  { value: 'all', label: t('filter.all_statuses') },
+                  { value: 'completed', label: t('status.completed') },
+                  { value: 'in_progress', label: t('status.in_progress') },
+                  { value: 'cancelled', label: t('status.cancelled') },
                 ]}
               />
 
@@ -510,7 +556,7 @@ export const Trips: React.FC = () => {
                 value={driverFilter}
                 onChange={(e) => setDriverFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'Все водители' },
+                  { value: 'all', label: t('filter.all_drivers') },
                   ...drivers.map((d) => ({
                     value: d.id,
                     label: d.full_name,
@@ -523,7 +569,7 @@ export const Trips: React.FC = () => {
                 value={vehicleFilter}
                 onChange={(e) => setVehicleFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'Весь транспорт' },
+                  { value: 'all', label: t('filter.all_vehicles') },
                   ...vehicles.map((v) => ({
                     value: v.id,
                     label: `${v.brand} ${v.model} (${v.license_plate})`,
@@ -568,7 +614,7 @@ export const Trips: React.FC = () => {
                     setDateToFilter('');
                   }}
                 >
-                  Сбросить фильтры
+                  {t('common.reset_filters')}
                 </Button>
               </div>
             )}
@@ -580,15 +626,15 @@ export const Trips: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Дата</TableHead>
-                <TableHead>Водитель</TableHead>
-                <TableHead>Автомобиль</TableHead>
-                <TableHead>Маршрут</TableHead>
-                <TableHead>Выручка</TableHead>
-                <TableHead>Расходы</TableHead>
-                <TableHead>Прибыль</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('trips.date')}</TableHead>
+                <TableHead>{t('trips.driver')}</TableHead>
+                <TableHead>{t('trips.vehicle')}</TableHead>
+                <TableHead>{t('trips.route')}</TableHead>
+                <TableHead>{t('trips.revenue')}</TableHead>
+                <TableHead>{t('trips.expenses')}</TableHead>
+                <TableHead>{t('trips.profit')}</TableHead>
+                <TableHead>{t('trips.status')}</TableHead>
+                <TableHead>{t('trips.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -605,18 +651,18 @@ export const Trips: React.FC = () => {
                         : 'N/A'}
                     </TableCell>
                     <TableCell>{trip.route?.name || 'N/A'}</TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(trip.revenue)}
                     </TableCell>
-                    <TableCell className="font-mono text-error-700">
+                    <TableCell className="font-mono text-error-700 dark:text-error-400">
                       {formatCurrency(trip.total_costs)}
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-primary-700">
+                    <TableCell className="font-mono font-semibold text-primary-700 dark:text-primary-400">
                       {formatCurrency(trip.net_profit)}
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(trip.status)}>
-                        {getStatusLabel(trip.status)}
+                        {t(`status.${trip.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -627,7 +673,7 @@ export const Trips: React.FC = () => {
                           onClick={() => openEditModal(trip)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -635,7 +681,7 @@ export const Trips: React.FC = () => {
                           onClick={() => handleDelete(trip.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -644,7 +690,7 @@ export const Trips: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-12 text-secondary-500">
-                    {searchQuery ? 'Рейсы не найдены' : 'Нет рейсов'}
+                    {searchQuery ? t('empty.trips_search') : t('empty.trips')}
                   </TableCell>
                 </TableRow>
               )}
@@ -653,9 +699,9 @@ export const Trips: React.FC = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t border-secondary-200">
-              <p className="text-sm text-secondary-600">
-                Страница {currentPage} из {totalPages}
+            <div className="flex items-center justify-between mt-6 pt-6 border-t border-secondary-200 dark:border-secondary-700">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+                {t('common.page')} {currentPage} {t('common.of')} {totalPages}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -665,7 +711,7 @@ export const Trips: React.FC = () => {
                   disabled={currentPage === 1}
                   icon={<ChevronLeft size={16} />}
                 >
-                  Назад
+                  {t('common.back')}
                 </Button>
                 <Button
                   variant="outline"
@@ -674,7 +720,7 @@ export const Trips: React.FC = () => {
                   disabled={currentPage === totalPages}
                   icon={<ChevronRight size={16} />}
                 >
-                  Вперед
+                  {t('common.forward')}
                 </Button>
               </div>
             </div>
@@ -686,21 +732,21 @@ export const Trips: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingTrip ? 'Редактировать рейс' : 'Добавить рейс'}
+        title={editingTrip ? t('modal.edit_trip') : t('modal.add_trip')}
         size="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Дата рейса"
+              label={t('trips.date')}
               type="date"
-              {...register('trip_date', { required: 'Дата обязательна' })}
+              {...register('trip_date', { required: t('validation.date_required') })}
               error={errors.trip_date?.message}
             />
 
             <Select
-              label="Водитель"
-              {...register('driver_id', { required: 'Водитель обязателен' })}
+              label={t('trips.driver')}
+              {...register('driver_id', { required: t('validation.driver_required') })}
               options={drivers.map((d) => ({
                 value: d.id,
                 label: d.full_name,
@@ -709,8 +755,8 @@ export const Trips: React.FC = () => {
             />
 
             <Select
-              label="Автомобиль"
-              {...register('vehicle_id', { required: 'Автомобиль обязателен' })}
+              label={t('trips.vehicle')}
+              {...register('vehicle_id', { required: t('validation.vehicle_required') })}
               options={vehicles.map((v) => ({
                 value: v.id,
                 label: `${v.brand} ${v.model} (${v.license_plate})`,
@@ -719,8 +765,8 @@ export const Trips: React.FC = () => {
             />
 
             <Select
-              label="Маршрут"
-              {...register('route_id', { required: 'Маршрут обязателен' })}
+              label={t('trips.route')}
+              {...register('route_id', { required: t('validation.route_required') })}
               options={routes.map((r) => ({
                 value: r.id,
                 label: r.name,
@@ -729,23 +775,23 @@ export const Trips: React.FC = () => {
             />
 
             <Input
-              label="Выручка"
+              label={t('trips.revenue')}
               type="number"
               step="0.01"
-              {...register('revenue', { required: 'Выручка обязательна', min: 0 })}
+              {...register('revenue', { required: t('validation.revenue_required'), min: 0 })}
               error={errors.revenue?.message}
             />
 
             <Input
-              label="Расход на топливо"
+              label={t('trips.fuel_cost')}
               type="number"
               step="0.01"
-              {...register('fuel_cost', { required: 'Расход на топливо обязателен', min: 0 })}
+              {...register('fuel_cost', { required: t('validation.fuel_required'), min: 0 })}
               error={errors.fuel_cost?.message}
             />
 
             <Input
-              label="Расход на ремонт"
+              label={t('trips.maintenance_cost')}
               type="number"
               step="0.01"
               {...register('maintenance_cost', { min: 0 })}
@@ -753,7 +799,7 @@ export const Trips: React.FC = () => {
             />
 
             <Input
-              label="Прочие расходы"
+              label={t('trips.other_costs')}
               type="number"
               step="0.01"
               {...register('other_costs', { min: 0 })}
@@ -761,42 +807,42 @@ export const Trips: React.FC = () => {
             />
 
             <Select
-              label="Статус"
-              {...register('status', { required: 'Статус обязателен' })}
+              label={t('trips.status')}
+              {...register('status', { required: t('validation.status_required') })}
               options={[
-                { value: 'completed', label: 'Завершён' },
-                { value: 'in_progress', label: 'В пути' },
-                { value: 'cancelled', label: 'Отменён' },
+                { value: 'completed', label: t('status.completed') },
+                { value: 'in_progress', label: t('status.in_progress') },
+                { value: 'cancelled', label: t('status.cancelled') },
               ]}
               error={errors.status?.message}
             />
           </div>
 
           {/* Auto-calculated values */}
-          <Card className="bg-secondary-50">
-            <h4 className="font-semibold text-secondary-900 mb-3">Автоматический расчёт:</h4>
+          <Card className="bg-secondary-50 dark:bg-secondary-800">
+            <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-3">{t('common.auto_calc')}:</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <p className="text-secondary-600">Общие расходы:</p>
-                <p className="font-mono font-bold text-error-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.total_costs')}:</p>
+                <p className="font-mono font-bold text-error-700 dark:text-error-400">
                   {formatCurrency(calculatedValues.totalCosts)}
                 </p>
               </div>
               <div>
-                <p className="text-secondary-600">Чистая прибыль:</p>
-                <p className="font-mono font-bold text-success-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.net_profit')}:</p>
+                <p className="font-mono font-bold text-success-700 dark:text-success-400">
                   {formatCurrency(calculatedValues.netProfit)}
                 </p>
               </div>
               <div>
-                <p className="text-secondary-600">Водителю (30%):</p>
-                <p className="font-mono font-bold text-primary-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.driver_share')} (30%):</p>
+                <p className="font-mono font-bold text-primary-700 dark:text-primary-400">
                   {formatCurrency(calculatedValues.driverPayment)}
                 </p>
               </div>
               <div>
-                <p className="text-secondary-600">Владельцу (70%):</p>
-                <p className="font-mono font-bold text-primary-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.owner_share')} (70%):</p>
+                <p className="font-mono font-bold text-primary-700 dark:text-primary-400">
                   {formatCurrency(calculatedValues.ownerPayment)}
                 </p>
               </div>
@@ -810,10 +856,10 @@ export const Trips: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingTrip ? 'Сохранить' : 'Создать'}
+              {editingTrip ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>

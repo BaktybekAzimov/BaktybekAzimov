@@ -10,9 +10,10 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, Truck } from 'lucide-react';
+import { Plus, Edit, Trash2, Truck, Car } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
+import { formatCurrency, formatDate, getStatusColor } from '../lib/utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Vehicle {
   id: string;
@@ -52,6 +53,7 @@ interface VehicleStats {
 }
 
 export const Vehicles: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<VehicleStats[]>([]);
@@ -86,19 +88,37 @@ export const Vehicles: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch vehicle stats from the view
-      const { data, error: fetchError } = await supabase
+      // Сначала пробуем view vehicle_stats
+      let { data, error: fetchError } = await supabase
         .from('vehicle_stats')
         .select('*')
         .order('total_revenue', { ascending: false });
 
-      if (fetchError) throw fetchError;
+      // Если view не существует, используем обычную таблицу vehicles
+      if (fetchError) {
+        console.log('View vehicle_stats not found, using vehicles table');
+        const { data: vehiclesData, error: vehiclesError } = await supabase
+          .from('vehicles')
+          .select('*')
+          .order('brand', { ascending: true });
+
+        if (vehiclesError) throw vehiclesError;
+
+        // Преобразуем данные в формат VehicleStats
+        data = (vehiclesData || []).map(vehicle => ({
+          ...vehicle,
+          total_trips: 0,
+          total_revenue: 0,
+          avg_profit_per_trip: 0,
+          last_trip_date: undefined,
+        }));
+      }
 
       setVehicles(data || []);
       setFilteredVehicles(data || []);
     } catch (err) {
       console.error('Error fetching vehicles:', err);
-      setError('Не удалось загрузить данные автомобилей');
+      setError(t('error.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -163,16 +183,29 @@ export const Vehicles: React.FC = () => {
       fetchVehicles();
     } catch (err) {
       console.error('Error saving vehicle:', err);
-      setError('Не удалось сохранить автомобиль');
+      setError(t('error.save_failed'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этот автомобиль?')) return;
+    if (!confirm(t('confirm.delete_vehicle'))) return;
 
     try {
+      // Проверка на активные рейсы
+      const { data: activeTrips } = await supabase
+        .from('trips')
+        .select('id')
+        .eq('vehicle_id', id)
+        .in('status', ['in_progress', 'planned'])
+        .limit(1);
+
+      if (activeTrips && activeTrips.length > 0) {
+        setError(t('error.has_active_trips'));
+        return;
+      }
+
       const { error } = await supabase.from('vehicles').delete().eq('id', id);
 
       if (error) throw error;
@@ -180,7 +213,7 @@ export const Vehicles: React.FC = () => {
       fetchVehicles();
     } catch (err) {
       console.error('Error deleting vehicle:', err);
-      setError('Не удалось удалить автомобиль');
+      setError(t('error.delete_failed'));
     }
   };
 
@@ -195,7 +228,7 @@ export const Vehicles: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Автомобили" />
+        <Header title={t('vehicles.title')} icon={Car} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -206,19 +239,20 @@ export const Vehicles: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Автомобили"
-        subtitle={`Всего автомобилей: ${vehicles.length}`}
+        title={t('vehicles.title')}
+        subtitle={`${t('vehicles.total')}: ${vehicles.length}`}
+        icon={Car}
         actions={
           <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-            Добавить автомобиль
+            {t('vehicles.add')}
           </Button>
         }
       />
 
       <div className="p-8 space-y-6">
         {error && (
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">{error}</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{error}</p>
           </Card>
         )}
 
@@ -230,28 +264,28 @@ export const Vehicles: React.FC = () => {
               size="sm"
               onClick={() => setStatusFilter('all')}
             >
-              Все ({statusCounts.all})
+              {t('common.all')} ({statusCounts.all})
             </Button>
             <Button
               variant={statusFilter === 'available' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('available')}
             >
-              Свободны ({statusCounts.available})
+              {t('filter.free')} ({statusCounts.available})
             </Button>
             <Button
               variant={statusFilter === 'in_trip' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('in_trip')}
             >
-              В рейсе ({statusCounts.in_trip})
+              {t('filter.in_trip')} ({statusCounts.in_trip})
             </Button>
             <Button
               variant={statusFilter === 'maintenance' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('maintenance')}
             >
-              На ремонте ({statusCounts.maintenance})
+              {t('filter.maintenance')} ({statusCounts.maintenance})
             </Button>
           </div>
         </Card>
@@ -261,15 +295,15 @@ export const Vehicles: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Автомобиль</TableHead>
-                <TableHead>Номер</TableHead>
-                <TableHead>Год</TableHead>
-                <TableHead>Всего рейсов</TableHead>
-                <TableHead>Общая выручка</TableHead>
-                <TableHead>Средняя прибыль</TableHead>
-                <TableHead>Последний рейс</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('trips.vehicle')}</TableHead>
+                <TableHead>{t('vehicles.plate')}</TableHead>
+                <TableHead>{t('vehicles.year')}</TableHead>
+                <TableHead>{t('vehicles.total_trips')}</TableHead>
+                <TableHead>{t('vehicles.revenue')}</TableHead>
+                <TableHead>{t('vehicles.avg_profit')}</TableHead>
+                <TableHead>{t('vehicles.last_trip')}</TableHead>
+                <TableHead>{t('vehicles.status')}</TableHead>
+                <TableHead>{t('trips.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -289,26 +323,26 @@ export const Vehicles: React.FC = () => {
                     </TableCell>
                     <TableCell>{vehicle.year}</TableCell>
                     <TableCell>
-                      <span className="font-semibold text-primary-700">
+                      <span className="font-semibold text-primary-700 dark:text-primary-400">
                         {vehicle.total_trips || 0}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(vehicle.total_revenue || 0)}
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(vehicle.avg_profit_per_trip || 0)}
                     </TableCell>
                     <TableCell>
                       {vehicle.last_trip_date ? (
                         formatDate(vehicle.last_trip_date)
                       ) : (
-                        <span className="text-secondary-400">Нет данных</span>
+                        <span className="text-secondary-400 dark:text-secondary-500">{t('common.no_data')}</span>
                       )}
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(vehicle.status)}>
-                        {getStatusLabel(vehicle.status)}
+                        {t(`status.${vehicle.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -319,7 +353,7 @@ export const Vehicles: React.FC = () => {
                           onClick={() => openEditModal(vehicle)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -327,7 +361,7 @@ export const Vehicles: React.FC = () => {
                           onClick={() => handleDelete(vehicle.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -336,7 +370,7 @@ export const Vehicles: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-12 text-secondary-500">
-                    {statusFilter === 'all' ? 'Нет автомобилей' : 'Нет автомобилей с таким статусом'}
+                    {statusFilter === 'all' ? t('empty.vehicles') : t('empty.vehicles_status')}
                   </TableCell>
                 </TableRow>
               )}
@@ -349,60 +383,60 @@ export const Vehicles: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingVehicle ? 'Редактировать автомобиль' : 'Добавить автомобиль'}
+        title={editingVehicle ? t('modal.edit_vehicle') : t('modal.add_vehicle')}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
-            label="Марка"
-            placeholder="Например: Volvo"
-            {...register('brand', { required: 'Марка обязательна' })}
+            label={t('vehicles.brand')}
+            placeholder={t('vehicles.brand_placeholder')}
+            {...register('brand', { required: t('validation.brand_required') })}
             error={errors.brand?.message}
           />
 
           <Input
-            label="Модель"
-            placeholder="Например: FH16"
-            {...register('model', { required: 'Модель обязательна' })}
+            label={t('vehicles.model')}
+            placeholder={t('vehicles.model_placeholder')}
+            {...register('model', { required: t('validation.model_required') })}
             error={errors.model?.message}
           />
 
           <Input
-            label="Номер (госномер)"
-            placeholder="Например: 01ABC123"
-            {...register('license_plate', { required: 'Номер обязателен' })}
+            label={t('vehicles.license_plate')}
+            placeholder={t('vehicles.plate_placeholder')}
+            {...register('license_plate', { required: t('validation.plate_required') })}
             error={errors.license_plate?.message}
           />
 
           <Input
-            label="Год выпуска"
+            label={t('vehicles.year_label')}
             type="number"
             min="1900"
             max={new Date().getFullYear() + 1}
             {...register('year', {
-              required: 'Год обязателен',
-              min: { value: 1900, message: 'Год не может быть меньше 1900' },
+              required: t('validation.year_required'),
+              min: { value: 1900, message: t('validation.year_min') },
               max: {
                 value: new Date().getFullYear() + 1,
-                message: 'Год не может быть больше текущего',
+                message: t('validation.year_max'),
               },
             })}
             error={errors.year?.message}
           />
 
           <Select
-            label="Статус"
-            {...register('status', { required: 'Статус обязателен' })}
+            label={t('vehicles.status')}
+            {...register('status', { required: t('validation.status_required') })}
             options={[
-              { value: 'available', label: 'Свободна' },
-              { value: 'in_trip', label: 'В рейсе' },
-              { value: 'maintenance', label: 'На ремонте' },
+              { value: 'available', label: t('status.available') },
+              { value: 'in_trip', label: t('status.in_trip') },
+              { value: 'maintenance', label: t('status.maintenance') },
             ]}
             error={errors.status?.message}
           />
 
           <Input
-            label="Заметки"
+            label={t('vehicles.notes')}
             {...register('notes')}
             error={errors.notes?.message}
           />
@@ -414,10 +448,10 @@ export const Vehicles: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingVehicle ? 'Сохранить' : 'Создать'}
+              {editingVehicle ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>

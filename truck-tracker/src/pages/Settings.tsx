@@ -86,10 +86,15 @@ export const Settings: React.FC = () => {
 
       if (fetchError) {
         // Если таблицы нет, показать предупреждение
-        throw new Error('Таблица settings не найдена. Выполните SQL скрипт create-settings-table.sql');
+        throw new Error(t('settings.table_not_found'));
       }
 
       setSettings(data);
+
+      // Синхронизировать валюту в localStorage
+      if (data.currency) {
+        localStorage.setItem('currency', data.currency);
+      }
 
       // Синхронизировать язык
       if (data.language && data.language !== language) {
@@ -139,6 +144,9 @@ export const Settings: React.FC = () => {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
 
+      // Синхронизировать валюту в localStorage
+      localStorage.setItem('currency', settings.currency);
+
       // Обновить язык если изменился
       if (settings.language !== language) {
         setLanguage(settings.language as 'ru' | 'ky');
@@ -160,23 +168,23 @@ export const Settings: React.FC = () => {
   };
 
   const currencyOptions = [
-    { value: 'KGS', label: '🇰🇬 Сом (KGS)' },
-    { value: 'USD', label: '🇺🇸 Доллар (USD)' },
-    { value: 'RUB', label: '🇷🇺 Рубль (RUB)' },
+    { value: 'KGS', label: t('settings.currency_kgs') },
+    { value: 'USD', label: t('settings.currency_usd') },
+    { value: 'RUB', label: t('settings.currency_rub') },
   ];
 
   const languageOptions = [
-    { value: 'ru', label: '🇷🇺 Русский' },
-    { value: 'ky', label: '🇰🇬 Кыргызча' },
+    { value: 'ru', label: t('settings.lang_ru') },
+    { value: 'ky', label: t('settings.lang_ky') },
   ];
 
   if (!isAdmin) {
     return (
       <MainLayout>
-        <Header title={t('settings.title')} />
+        <Header title={t('settings.title')} icon={SettingsIcon} />
         <div className="p-8">
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">У вас нет прав для доступа к настройкам</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{t('error.no_access')}</p>
           </Card>
         </div>
       </MainLayout>
@@ -186,7 +194,7 @@ export const Settings: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title={t('settings.title')} />
+        <Header title={t('settings.title')} icon={SettingsIcon} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -197,13 +205,13 @@ export const Settings: React.FC = () => {
   if (error) {
     return (
       <MainLayout>
-        <Header title={t('settings.title')} />
+        <Header title={t('settings.title')} icon={SettingsIcon} />
         <div className="p-8">
-          <Card className="bg-error-50 border-2 border-error-200">
-            <h3 className="text-error-900 font-semibold mb-2">Ошибка загрузки настроек</h3>
-            <p className="text-error-700 text-sm mb-4">{error}</p>
-            <p className="text-error-600 text-xs">
-              Выполните SQL скрипт: <code className="bg-error-100 px-2 py-1 rounded">supabase/create-settings-table.sql</code>
+          <Card className="bg-error-50 dark:bg-error-900/20 border-2 border-error-200 dark:border-error-800">
+            <h3 className="text-error-900 dark:text-error-300 font-semibold mb-2">{t('error.loading')}</h3>
+            <p className="text-error-700 dark:text-error-400 text-sm mb-4">{error}</p>
+            <p className="text-error-600 dark:text-error-500 text-xs">
+              {t('settings.run_sql')}: <code className="bg-error-100 dark:bg-error-900/30 px-2 py-1 rounded">supabase/create-settings-table.sql</code>
             </p>
           </Card>
         </div>
@@ -228,7 +236,7 @@ export const Settings: React.FC = () => {
             className="flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Сохранение...' : t('settings.save')}
+            {saving ? t('common.saving') : t('settings.save')}
           </Button>
         }
       />
@@ -236,10 +244,10 @@ export const Settings: React.FC = () => {
       <div className="p-8 space-y-6">
         {/* Success Message */}
         {success && (
-          <Card className="bg-success-50 border-2 border-success-500 animate-in fade-in">
-            <div className="flex items-center gap-3 text-success-700">
+          <Card className="bg-success-50 dark:bg-success-900/20 border-2 border-success-500 animate-in fade-in">
+            <div className="flex items-center gap-3 text-success-700 dark:text-success-400">
               <Check className="w-5 h-5" />
-              <p className="font-semibold">Настройки успешно сохранены!</p>
+              <p className="font-semibold">{t('settings.saved')}</p>
             </div>
           </Card>
         )}
@@ -247,15 +255,15 @@ export const Settings: React.FC = () => {
         {/* Финансовые настройки */}
         <Card>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-success-100 rounded-lg flex items-center justify-center">
-              <SomIcon className="w-6 h-6 text-success-600" />
+            <div className="w-10 h-10 bg-success-100 dark:bg-success-900/30 rounded-lg flex items-center justify-center">
+              <SomIcon className="w-6 h-6 text-success-600 dark:text-success-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-secondary-900">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
                 {t('settings.financial')}
               </h3>
-              <p className="text-sm text-secondary-500">
-                Настройки расчётов и валюты
+              <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                {t('settings.financial_desc')}
               </p>
             </div>
           </div>
@@ -263,7 +271,7 @@ export const Settings: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Процент водителя */}
             <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                 {t('settings.driver_percentage')}
               </label>
               <div className="relative">
@@ -284,15 +292,14 @@ export const Settings: React.FC = () => {
                   <Percent className="w-5 h-5 text-secondary-400" />
                 </div>
               </div>
-              <p className="mt-2 text-sm text-secondary-500">
-                Текущий: {settings.driver_payment_percentage}% водителю,{' '}
-                {100 - settings.driver_payment_percentage}% владельцу
+              <p className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                {t('common.driver_share')}: {settings.driver_payment_percentage}%, {t('common.owner_share')}: {100 - settings.driver_payment_percentage}%
               </p>
             </div>
 
             {/* Валюта */}
             <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                 {t('settings.currency')}
               </label>
               <Select
@@ -305,8 +312,8 @@ export const Settings: React.FC = () => {
                 }
                 options={currencyOptions}
               />
-              <p className="mt-2 text-sm text-secondary-500">
-                Используется для всех финансовых расчётов
+              <p className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                {t('settings.currency_desc')}
               </p>
             </div>
           </div>
@@ -315,21 +322,21 @@ export const Settings: React.FC = () => {
         {/* Региональные настройки */}
         <Card>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-              <Globe className="w-6 h-6 text-primary-600" />
+            <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+              <Globe className="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-secondary-900">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
                 {t('settings.regional')}
               </h3>
-              <p className="text-sm text-secondary-500">
-                Язык интерфейса и форматы
+              <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                {t('settings.regional_desc')}
               </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
+            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
               {t('settings.language')}
             </label>
             <Select
@@ -342,8 +349,8 @@ export const Settings: React.FC = () => {
               }
               options={languageOptions}
             />
-            <p className="mt-2 text-sm text-success-600 font-medium">
-              ✅ Переключение языка активно! Нажмите "Сохранить изменения".
+            <p className="mt-2 text-sm text-success-600 dark:text-success-400 font-medium">
+              ✅ {t('settings.language_switch_active')}
             </p>
           </div>
         </Card>
@@ -356,17 +363,17 @@ export const Settings: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
-                Внешний вид
+                {t('settings.appearance')}
               </h3>
               <p className="text-sm text-secondary-500 dark:text-secondary-400">
-                Настройка отображения интерфейса
+                {t('settings.appearance_desc')}
               </p>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
-              Размер шрифта
+              {t('settings.font_size')}
             </label>
             <div className="grid grid-cols-3 gap-3">
               <button
@@ -379,7 +386,7 @@ export const Settings: React.FC = () => {
               >
                 <div className="text-center">
                   <div className="text-xs font-medium text-secondary-900 dark:text-secondary-100 mb-1">
-                    Маленький
+                    {t('settings.font_small')}
                   </div>
                   <div className="text-lg font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
@@ -400,7 +407,7 @@ export const Settings: React.FC = () => {
               >
                 <div className="text-center">
                   <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-1">
-                    Средний
+                    {t('settings.font_medium')}
                   </div>
                   <div className="text-xl font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
@@ -421,7 +428,7 @@ export const Settings: React.FC = () => {
               >
                 <div className="text-center">
                   <div className="text-base font-medium text-secondary-900 dark:text-secondary-100 mb-1">
-                    Большой
+                    {t('settings.font_large')}
                   </div>
                   <div className="text-2xl font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
@@ -433,7 +440,7 @@ export const Settings: React.FC = () => {
               </button>
             </div>
             <p className="mt-3 text-sm text-secondary-500 dark:text-secondary-400">
-              💡 Размер шрифта применяется мгновенно ко всему приложению
+              💡 {t('settings.font_hint')}
             </p>
           </div>
         </Card>
@@ -441,25 +448,25 @@ export const Settings: React.FC = () => {
         {/* Telegram Интеграция */}
         <Card>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <MessageCircle className="w-6 h-6 text-blue-600" />
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <MessageCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-secondary-900">
-                Telegram Бот
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+                {t('telegram.title')}
               </h3>
-              <p className="text-sm text-secondary-500">
-                Уведомления через Telegram (100% бесплатно)
+              <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                {t('telegram.subtitle')}
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
             {/* Включить Telegram */}
-            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
               <div>
-                <p className="font-medium text-secondary-900">Включить Telegram бот</p>
-                <p className="text-sm text-secondary-500">Активировать интеграцию</p>
+                <p className="font-medium text-secondary-900 dark:text-secondary-100">{t('telegram.enable')}</p>
+                <p className="text-sm text-secondary-500 dark:text-secondary-400">{t('telegram.activate')}</p>
               </div>
               <button
                 onClick={() =>
@@ -482,8 +489,8 @@ export const Settings: React.FC = () => {
 
             {/* Bot Token */}
             <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Bot Token (от @BotFather)
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                {t('telegram.token')}
               </label>
               <div className="relative">
                 <Input
@@ -509,8 +516,8 @@ export const Settings: React.FC = () => {
 
             {/* Admin Chat ID */}
             <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Admin Chat ID
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                {t('telegram.chat_id')}
               </label>
               <Input
                 type="text"
@@ -523,14 +530,14 @@ export const Settings: React.FC = () => {
                 }
                 placeholder="123456789"
               />
-              <p className="mt-1 text-xs text-secondary-500">
-                Получите через @userinfobot или смотрите TELEGRAM_SETUP.md
+              <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                {t('settings.get_chat_id')}
               </p>
             </div>
 
             {/* Уведомления */}
             <div>
-              <p className="text-sm font-medium text-secondary-700 mb-3">Типы уведомлений:</p>
+              <p className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">{t('telegram.notifications')}</p>
               <div className="space-y-2">
                 <label className="flex items-center gap-3">
                   <input
@@ -542,9 +549,9 @@ export const Settings: React.FC = () => {
                         notifications_new_trip_enabled: e.target.checked,
                       })
                     }
-                    className="rounded border-secondary-300"
+                    className="rounded border-secondary-300 dark:border-secondary-600"
                   />
-                  <span className="text-sm text-secondary-900">Новый рейс создан</span>
+                  <span className="text-sm text-secondary-900 dark:text-secondary-100">{t('telegram.new_trip')}</span>
                 </label>
                 <label className="flex items-center gap-3">
                   <input
@@ -556,9 +563,9 @@ export const Settings: React.FC = () => {
                         notifications_trip_completed_enabled: e.target.checked,
                       })
                     }
-                    className="rounded border-secondary-300"
+                    className="rounded border-secondary-300 dark:border-secondary-600"
                   />
-                  <span className="text-sm text-secondary-900">Рейс завершён</span>
+                  <span className="text-sm text-secondary-900 dark:text-secondary-100">{t('telegram.trip_completed')}</span>
                 </label>
                 <label className="flex items-center gap-3">
                   <input
@@ -570,9 +577,9 @@ export const Settings: React.FC = () => {
                         notifications_daily_report_enabled: e.target.checked,
                       })
                     }
-                    className="rounded border-secondary-300"
+                    className="rounded border-secondary-300 dark:border-secondary-600"
                   />
-                  <span className="text-sm text-secondary-900">Ежедневный отчёт</span>
+                  <span className="text-sm text-secondary-900 dark:text-secondary-100">{t('telegram.daily_report')}</span>
                 </label>
                 <label className="flex items-center gap-3">
                   <input
@@ -584,9 +591,9 @@ export const Settings: React.FC = () => {
                         notifications_weekly_report_enabled: e.target.checked,
                       })
                     }
-                    className="rounded border-secondary-300"
+                    className="rounded border-secondary-300 dark:border-secondary-600"
                   />
-                  <span className="text-sm text-secondary-900">Еженедельный отчёт</span>
+                  <span className="text-sm text-secondary-900 dark:text-secondary-100">{t('telegram.weekly_report')}</span>
                 </label>
               </div>
             </div>
@@ -596,25 +603,25 @@ export const Settings: React.FC = () => {
         {/* Виджеты аналитики */}
         <Card>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+              <BarChart3 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-secondary-900">
-                Виджеты Dashboard
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+                {t('widgets.title')}
               </h3>
-              <p className="text-sm text-secondary-500">
-                Включить/выключить графики и аналитику
+              <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                {t('widgets.subtitle')}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Revenue Chart */}
-            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
               <div>
-                <p className="font-medium text-secondary-900">График выручки</p>
-                <p className="text-xs text-secondary-500">Выручка по дням</p>
+                <p className="font-medium text-secondary-900 dark:text-secondary-100">{t('widgets.revenue_chart')}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">{t('widgets.revenue_desc')}</p>
               </div>
               <button
                 onClick={() => toggleWidget('widget_revenue_chart_enabled')}
@@ -631,10 +638,10 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Routes Chart */}
-            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
               <div>
-                <p className="font-medium text-secondary-900">График маршрутов</p>
-                <p className="text-xs text-secondary-500">Рейсы по маршрутам</p>
+                <p className="font-medium text-secondary-900 dark:text-secondary-100">{t('widgets.routes_chart')}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">{t('widgets.routes_desc')}</p>
               </div>
               <button
                 onClick={() => toggleWidget('widget_routes_chart_enabled')}
@@ -651,10 +658,10 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Recent Trips */}
-            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
               <div>
-                <p className="font-medium text-secondary-900">Последние рейсы</p>
-                <p className="text-xs text-secondary-500">Таблица последних 10</p>
+                <p className="font-medium text-secondary-900 dark:text-secondary-100">{t('widgets.recent_trips')}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">{t('widgets.recent_trips_desc')}</p>
               </div>
               <button
                 onClick={() => toggleWidget('widget_recent_trips_enabled')}
@@ -671,10 +678,10 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Vehicle Utilization */}
-            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
               <div>
-                <p className="font-medium text-secondary-900">Загруженность транспорта</p>
-                <p className="text-xs text-secondary-500">Статус машин</p>
+                <p className="font-medium text-secondary-900 dark:text-secondary-100">{t('widgets.vehicle_utilization')}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">{t('widgets.vehicle_utilization_desc')}</p>
               </div>
               <button
                 onClick={() => toggleWidget('widget_vehicle_utilization_enabled')}
@@ -691,10 +698,10 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Top Drivers */}
-            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
               <div>
-                <p className="font-medium text-secondary-900">Топ-5 водителей</p>
-                <p className="text-xs text-secondary-500">Лучшие по прибыли</p>
+                <p className="font-medium text-secondary-900 dark:text-secondary-100">{t('widgets.top_drivers')}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">{t('widgets.top_drivers_desc')}</p>
               </div>
               <button
                 onClick={() => toggleWidget('widget_top_drivers_enabled')}
@@ -711,10 +718,10 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Monthly Comparison */}
-            <div className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
               <div>
-                <p className="font-medium text-secondary-900">Сравнение месяцев</p>
-                <p className="text-xs text-secondary-500">Текущий vs предыдущий</p>
+                <p className="font-medium text-secondary-900 dark:text-secondary-100">{t('widgets.monthly_comparison')}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">{t('widgets.monthly_comparison_desc')}</p>
               </div>
               <button
                 onClick={() => toggleWidget('widget_monthly_comparison_enabled')}
@@ -733,16 +740,16 @@ export const Settings: React.FC = () => {
         </Card>
 
         {/* Информация */}
-        <Card className="bg-primary-50 border border-primary-200">
-          <h4 className="font-semibold text-primary-900 mb-2">
-            ℹ️ Важная информация
+        <Card className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
+          <h4 className="font-semibold text-primary-900 dark:text-primary-300 mb-2">
+            ℹ️ {t('settings.info_title')}
           </h4>
-          <ul className="text-sm text-primary-700 space-y-1">
-            <li>• Все настройки сохраняются в Supabase и применяются мгновенно</li>
-            <li>• Telegram интеграция работает только при наличии токена и Chat ID</li>
-            <li>• Выключенные виджеты не будут отображаться на Dashboard</li>
-            <li>• Изменение языка применится после сохранения настроек</li>
-            <li>• Для настройки Telegram смотрите TELEGRAM_SETUP.md</li>
+          <ul className="text-sm text-primary-700 dark:text-primary-400 space-y-1">
+            <li>• {t('settings.info_1')}</li>
+            <li>• {t('settings.info_2')}</li>
+            <li>• {t('settings.info_3')}</li>
+            <li>• {t('settings.info_4')}</li>
+            <li>• {t('settings.info_5')}</li>
           </ul>
         </Card>
       </div>

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { formatDate } from '../lib/utils';
 
 interface User {
@@ -34,6 +35,7 @@ interface User {
 
 export const Users: React.FC = () => {
   const { isAdmin } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -121,7 +123,7 @@ export const Users: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) return;
+    if (!confirm(t('users.confirm_delete'))) return;
 
     try {
       const { error } = await supabase
@@ -134,7 +136,7 @@ export const Users: React.FC = () => {
       loadUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert('Ошибка при удалении пользователя');
+      alert(t('users.delete_error'));
     }
   };
 
@@ -163,7 +165,7 @@ export const Users: React.FC = () => {
           .single();
 
         if (existingUser) {
-          alert('Пользователь с таким email уже существует!');
+          alert(t('users.email_exists'));
           return;
         }
 
@@ -181,20 +183,20 @@ export const Users: React.FC = () => {
         if (error) {
           // Если ошибка связана с уникальностью email
           if (error.code === '23505') {
-            alert('Пользователь с таким email уже существует!');
+            alert(t('users.email_exists'));
             return;
           }
           throw error;
         }
 
-        alert('Профиль создан! Пользователь должен зарегистрироваться через страницу входа.');
+        alert(t('users.profile_created'));
       }
 
       setIsModalOpen(false);
       loadUsers();
     } catch (error: any) {
       console.error('Error saving user:', error);
-      alert(error.message || 'Ошибка при сохранении пользователя');
+      alert(error.message || t('users.save_error'));
     }
   };
 
@@ -214,11 +216,11 @@ export const Users: React.FC = () => {
   const getRoleLabel = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'Администратор';
+        return t('role.admin');
       case 'dispatcher':
-        return 'Диспетчер';
+        return t('role.dispatcher');
       case 'driver':
-        return 'Водитель';
+        return t('role.driver');
       default:
         return role;
     }
@@ -227,10 +229,10 @@ export const Users: React.FC = () => {
   if (!isAdmin) {
     return (
       <MainLayout>
-        <Header title="Пользователи" icon={UsersIcon} />
+        <Header title={t('users.title')} icon={UsersIcon} />
         <div className="p-8">
           <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
-            <p className="text-error-700 dark:text-error-400">У вас нет прав для управления пользователями</p>
+            <p className="text-error-700 dark:text-error-400">{t('users.no_access')}</p>
           </Card>
         </div>
       </MainLayout>
@@ -240,7 +242,7 @@ export const Users: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Пользователи" icon={UsersIcon} />
+        <Header title={t('users.title')} icon={UsersIcon} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -251,13 +253,13 @@ export const Users: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Пользователи"
-        subtitle="Управление пользователями и ролями"
+        title={t('users.title')}
+        subtitle={t('users.subtitle')}
         icon={UsersIcon}
         actions={
           <Button onClick={handleAddUser} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            Добавить пользователя
+            {t('users.add')}
           </Button>
         }
       />
@@ -269,7 +271,7 @@ export const Users: React.FC = () => {
             <div className="flex-1">
               <Input
                 type="text"
-                placeholder="Поиск по email, имени или телефону..."
+                placeholder={t('users.search_placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -279,10 +281,10 @@ export const Users: React.FC = () => {
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'Все роли' },
-                  { value: 'admin', label: 'Администраторы' },
-                  { value: 'dispatcher', label: 'Диспетчеры' },
-                  { value: 'driver', label: 'Водители' },
+                  { value: 'all', label: t('users.all_roles') },
+                  { value: 'admin', label: t('users.admins') },
+                  { value: 'dispatcher', label: t('users.dispatchers') },
+                  { value: 'driver', label: t('users.drivers_role') },
                 ]}
               />
             </div>
@@ -294,7 +296,7 @@ export const Users: React.FC = () => {
           <Card className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 border-primary-200 dark:border-primary-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-primary-700 dark:text-primary-400">Всего</p>
+                <p className="text-sm text-primary-700 dark:text-primary-400">{t('users.total')}</p>
                 <p className="text-2xl font-bold text-primary-900 dark:text-primary-100">{users.length}</p>
               </div>
               <UsersIcon className="w-8 h-8 text-primary-600 dark:text-primary-400 opacity-50" />
@@ -303,7 +305,7 @@ export const Users: React.FC = () => {
           <Card className="bg-gradient-to-br from-error-50 to-error-100 dark:from-error-900/30 dark:to-error-800/30 border-error-200 dark:border-error-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-error-700 dark:text-error-400">Администраторы</p>
+                <p className="text-sm text-error-700 dark:text-error-400">{t('users.admins')}</p>
                 <p className="text-2xl font-bold text-error-900 dark:text-error-100">
                   {users.filter(u => u.role === 'admin').length}
                 </p>
@@ -314,7 +316,7 @@ export const Users: React.FC = () => {
           <Card className="bg-gradient-to-br from-warning-50 to-warning-100 dark:from-warning-900/30 dark:to-warning-800/30 border-warning-200 dark:border-warning-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-warning-700 dark:text-warning-400">Диспетчеры</p>
+                <p className="text-sm text-warning-700 dark:text-warning-400">{t('users.dispatchers')}</p>
                 <p className="text-2xl font-bold text-warning-900 dark:text-warning-100">
                   {users.filter(u => u.role === 'dispatcher').length}
                 </p>
@@ -325,7 +327,7 @@ export const Users: React.FC = () => {
           <Card className="bg-gradient-to-br from-success-50 to-success-100 dark:from-success-900/30 dark:to-success-800/30 border-success-200 dark:border-success-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-success-700 dark:text-success-400">Водители</p>
+                <p className="text-sm text-success-700 dark:text-success-400">{t('users.drivers_role')}</p>
                 <p className="text-2xl font-bold text-success-900 dark:text-success-100">
                   {users.filter(u => u.role === 'driver').length}
                 </p>
@@ -342,19 +344,19 @@ export const Users: React.FC = () => {
               <thead className="bg-secondary-50 dark:bg-secondary-800">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
-                    Пользователь
+                    {t('users.user')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
-                    Роль
+                    {t('trips.status')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
-                    Контакты
+                    {t('users.contacts')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
-                    Создан
+                    {t('users.created')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
-                    Действия
+                    {t('trips.actions')}
                   </th>
                 </tr>
               </thead>
@@ -370,7 +372,7 @@ export const Users: React.FC = () => {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
-                            {user.full_name || 'Без имени'}
+                            {user.full_name || t('users.no_name')}
                           </div>
                           <div className="text-sm text-secondary-500 dark:text-secondary-400 flex items-center gap-1">
                             <Mail className="w-3 h-3" />
@@ -425,10 +427,10 @@ export const Users: React.FC = () => {
               <div className="text-center py-12">
                 <UsersIcon className="mx-auto h-12 w-12 text-secondary-400" />
                 <h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-secondary-100">
-                  Пользователи не найдены
+                  {t('users.not_found')}
                 </h3>
                 <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
-                  Попробуйте изменить параметры поиска
+                  {t('users.try_search')}
                 </p>
               </div>
             )}
@@ -440,12 +442,12 @@ export const Users: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingUser ? 'Редактировать пользователя' : 'Добавить пользователя'}
+        title={editingUser ? t('modal.edit_driver') : t('users.add')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              Email
+              {t('auth.email')}
             </label>
             <Input
               type="email"
@@ -458,15 +460,15 @@ export const Users: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              Роль
+              {t('trips.status')}
             </label>
             <Select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
               options={[
-                { value: 'admin', label: 'Администратор' },
-                { value: 'dispatcher', label: 'Диспетчер' },
-                { value: 'driver', label: 'Водитель' },
+                { value: 'admin', label: t('role.admin') },
+                { value: 'dispatcher', label: t('role.dispatcher') },
+                { value: 'driver', label: t('role.driver') },
               ]}
               required
             />
@@ -474,7 +476,7 @@ export const Users: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              Полное имя
+              {t('users.full_name')}
             </label>
             <Input
               type="text"
@@ -485,7 +487,7 @@ export const Users: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              Телефон
+              {t('drivers.phone')}
             </label>
             <Input
               type="tel"
@@ -496,10 +498,10 @@ export const Users: React.FC = () => {
 
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit">
-              {editingUser ? 'Сохранить' : 'Создать'}
+              {editingUser ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>
