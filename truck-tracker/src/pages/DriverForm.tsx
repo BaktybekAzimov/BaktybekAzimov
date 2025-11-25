@@ -5,7 +5,14 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { CheckCircle, Truck, DollarSign } from 'lucide-react';
+import { CheckCircle, Truck } from 'lucide-react';
+
+// Иконка сома (KGS)
+const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">с</text>
+  </svg>
+);
 import { supabase } from '../lib/supabase';
 import { formatCurrency, calculateTripFinancials } from '../lib/utils';
 
@@ -296,7 +303,7 @@ export const DriverForm: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-primary-600 rounded-xl">
-                    <DollarSign className="w-6 h-6 text-white" />
+                    <SomIcon className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <p className="text-sm text-secondary-600 font-medium">

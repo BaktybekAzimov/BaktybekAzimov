@@ -229,8 +229,8 @@ export const Users: React.FC = () => {
       <MainLayout>
         <Header title="Пользователи" icon={UsersIcon} />
         <div className="p-8">
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">У вас нет прав для управления пользователями</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">У вас нет прав для управления пользователями</p>
           </Card>
         </div>
       </MainLayout>
@@ -291,46 +291,46 @@ export const Users: React.FC = () => {
 
         {/* Статистика */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
+          <Card className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 border-primary-200 dark:border-primary-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-primary-700">Всего</p>
-                <p className="text-2xl font-bold text-primary-900">{users.length}</p>
+                <p className="text-sm text-primary-700 dark:text-primary-400">Всего</p>
+                <p className="text-2xl font-bold text-primary-900 dark:text-primary-100">{users.length}</p>
               </div>
-              <UsersIcon className="w-8 h-8 text-primary-600 opacity-50" />
+              <UsersIcon className="w-8 h-8 text-primary-600 dark:text-primary-400 opacity-50" />
             </div>
           </Card>
-          <Card className="bg-gradient-to-br from-error-50 to-error-100 border-error-200">
+          <Card className="bg-gradient-to-br from-error-50 to-error-100 dark:from-error-900/30 dark:to-error-800/30 border-error-200 dark:border-error-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-error-700">Администраторы</p>
-                <p className="text-2xl font-bold text-error-900">
+                <p className="text-sm text-error-700 dark:text-error-400">Администраторы</p>
+                <p className="text-2xl font-bold text-error-900 dark:text-error-100">
                   {users.filter(u => u.role === 'admin').length}
                 </p>
               </div>
-              <Shield className="w-8 h-8 text-error-600 opacity-50" />
+              <Shield className="w-8 h-8 text-error-600 dark:text-error-400 opacity-50" />
             </div>
           </Card>
-          <Card className="bg-gradient-to-br from-warning-50 to-warning-100 border-warning-200">
+          <Card className="bg-gradient-to-br from-warning-50 to-warning-100 dark:from-warning-900/30 dark:to-warning-800/30 border-warning-200 dark:border-warning-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-warning-700">Диспетчеры</p>
-                <p className="text-2xl font-bold text-warning-900">
+                <p className="text-sm text-warning-700 dark:text-warning-400">Диспетчеры</p>
+                <p className="text-2xl font-bold text-warning-900 dark:text-warning-100">
                   {users.filter(u => u.role === 'dispatcher').length}
                 </p>
               </div>
-              <UsersIcon className="w-8 h-8 text-warning-600 opacity-50" />
+              <UsersIcon className="w-8 h-8 text-warning-600 dark:text-warning-400 opacity-50" />
             </div>
           </Card>
-          <Card className="bg-gradient-to-br from-success-50 to-success-100 border-success-200">
+          <Card className="bg-gradient-to-br from-success-50 to-success-100 dark:from-success-900/30 dark:to-success-800/30 border-success-200 dark:border-success-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-success-700">Водители</p>
-                <p className="text-2xl font-bold text-success-900">
+                <p className="text-sm text-success-700 dark:text-success-400">Водители</p>
+                <p className="text-2xl font-bold text-success-900 dark:text-success-100">
                   {users.filter(u => u.role === 'driver').length}
                 </p>
               </div>
-              <UsersIcon className="w-8 h-8 text-success-600 opacity-50" />
+              <UsersIcon className="w-8 h-8 text-success-600 dark:text-success-400 opacity-50" />
             </div>
           </Card>
         </div>

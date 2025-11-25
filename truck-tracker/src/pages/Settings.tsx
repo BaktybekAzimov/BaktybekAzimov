@@ -8,7 +8,6 @@ import { Button } from '../components/ui/Button';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import {
   Settings as SettingsIcon,
-  DollarSign,
   Percent,
   Globe,
   Save,
@@ -19,6 +18,13 @@ import {
   Check,
   Type,
 } from 'lucide-react';
+
+// Иконка сома (KGS)
+const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">с</text>
+  </svg>
+);
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useFontSize } from '../contexts/FontSizeContext';
@@ -242,7 +248,7 @@ export const Settings: React.FC = () => {
         <Card>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-success-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-success-600" />
+              <SomIcon className="w-6 h-6 text-success-600" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-900">
