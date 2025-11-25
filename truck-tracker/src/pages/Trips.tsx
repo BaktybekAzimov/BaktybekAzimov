@@ -689,21 +689,21 @@ export const Trips: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingTrip ? 'Редактировать рейс' : 'Добавить рейс'}
+        title={editingTrip ? t('modal.edit_trip') : t('modal.add_trip')}
         size="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Дата рейса"
+              label={t('trips.date')}
               type="date"
-              {...register('trip_date', { required: 'Дата обязательна' })}
+              {...register('trip_date', { required: t('validation.date_required') })}
               error={errors.trip_date?.message}
             />
 
             <Select
-              label="Водитель"
-              {...register('driver_id', { required: 'Водитель обязателен' })}
+              label={t('trips.driver')}
+              {...register('driver_id', { required: t('validation.driver_required') })}
               options={drivers.map((d) => ({
                 value: d.id,
                 label: d.full_name,
@@ -712,8 +712,8 @@ export const Trips: React.FC = () => {
             />
 
             <Select
-              label="Автомобиль"
-              {...register('vehicle_id', { required: 'Автомобиль обязателен' })}
+              label={t('trips.vehicle')}
+              {...register('vehicle_id', { required: t('validation.vehicle_required') })}
               options={vehicles.map((v) => ({
                 value: v.id,
                 label: `${v.brand} ${v.model} (${v.license_plate})`,
@@ -722,8 +722,8 @@ export const Trips: React.FC = () => {
             />
 
             <Select
-              label="Маршрут"
-              {...register('route_id', { required: 'Маршрут обязателен' })}
+              label={t('trips.route')}
+              {...register('route_id', { required: t('validation.route_required') })}
               options={routes.map((r) => ({
                 value: r.id,
                 label: r.name,
@@ -732,23 +732,23 @@ export const Trips: React.FC = () => {
             />
 
             <Input
-              label="Выручка"
+              label={t('trips.revenue')}
               type="number"
               step="0.01"
-              {...register('revenue', { required: 'Выручка обязательна', min: 0 })}
+              {...register('revenue', { required: t('validation.revenue_required'), min: 0 })}
               error={errors.revenue?.message}
             />
 
             <Input
-              label="Расход на топливо"
+              label={t('trips.fuel_cost')}
               type="number"
               step="0.01"
-              {...register('fuel_cost', { required: 'Расход на топливо обязателен', min: 0 })}
+              {...register('fuel_cost', { required: t('validation.fuel_required'), min: 0 })}
               error={errors.fuel_cost?.message}
             />
 
             <Input
-              label="Расход на ремонт"
+              label={t('trips.maintenance_cost')}
               type="number"
               step="0.01"
               {...register('maintenance_cost', { min: 0 })}
@@ -756,7 +756,7 @@ export const Trips: React.FC = () => {
             />
 
             <Input
-              label="Прочие расходы"
+              label={t('trips.other_costs')}
               type="number"
               step="0.01"
               {...register('other_costs', { min: 0 })}
@@ -764,42 +764,42 @@ export const Trips: React.FC = () => {
             />
 
             <Select
-              label="Статус"
-              {...register('status', { required: 'Статус обязателен' })}
+              label={t('trips.status')}
+              {...register('status', { required: t('validation.status_required') })}
               options={[
-                { value: 'completed', label: 'Завершён' },
-                { value: 'in_progress', label: 'В пути' },
-                { value: 'cancelled', label: 'Отменён' },
+                { value: 'completed', label: t('status.completed') },
+                { value: 'in_progress', label: t('status.in_progress') },
+                { value: 'cancelled', label: t('status.cancelled') },
               ]}
               error={errors.status?.message}
             />
           </div>
 
           {/* Auto-calculated values */}
-          <Card className="bg-secondary-50">
-            <h4 className="font-semibold text-secondary-900 mb-3">Автоматический расчёт:</h4>
+          <Card className="bg-secondary-50 dark:bg-secondary-800">
+            <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-3">{t('common.auto_calc')}:</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <p className="text-secondary-600">Общие расходы:</p>
-                <p className="font-mono font-bold text-error-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.total_costs')}:</p>
+                <p className="font-mono font-bold text-error-700 dark:text-error-400">
                   {formatCurrency(calculatedValues.totalCosts)}
                 </p>
               </div>
               <div>
-                <p className="text-secondary-600">Чистая прибыль:</p>
-                <p className="font-mono font-bold text-success-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.net_profit')}:</p>
+                <p className="font-mono font-bold text-success-700 dark:text-success-400">
                   {formatCurrency(calculatedValues.netProfit)}
                 </p>
               </div>
               <div>
-                <p className="text-secondary-600">Водителю (30%):</p>
-                <p className="font-mono font-bold text-primary-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.driver_share')} (30%):</p>
+                <p className="font-mono font-bold text-primary-700 dark:text-primary-400">
                   {formatCurrency(calculatedValues.driverPayment)}
                 </p>
               </div>
               <div>
-                <p className="text-secondary-600">Владельцу (70%):</p>
-                <p className="font-mono font-bold text-primary-700">
+                <p className="text-secondary-600 dark:text-secondary-400">{t('common.owner_share')} (70%):</p>
+                <p className="font-mono font-bold text-primary-700 dark:text-primary-400">
                   {formatCurrency(calculatedValues.ownerPayment)}
                 </p>
               </div>
@@ -813,10 +813,10 @@ export const Trips: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingTrip ? 'Сохранить' : 'Создать'}
+              {editingTrip ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>

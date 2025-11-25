@@ -14,6 +14,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Иконка сома (KGS)
 const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -89,6 +90,7 @@ interface Trip {
 
 export const Dashboard: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const chartColors = getChartColors(theme === 'dark');
 
   const [loading, setLoading] = useState(true);
@@ -401,16 +403,16 @@ export const Dashboard: React.FC = () => {
 
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      setError('Не удалось загрузить данные дашборда');
+      setError(t('dashboard.error_load'));
     } finally {
       setLoading(false);
     }
   };
 
   const filterButtons: Array<{ label: string; value: DateFilter }> = [
-    { label: 'Сегодня', value: 'today' },
-    { label: 'Месяц', value: 'month' },
-    { label: 'Всё время', value: 'all' },
+    { label: t('filter.today'), value: 'today' },
+    { label: t('filter.month'), value: 'month' },
+    { label: t('filter.all'), value: 'all' },
   ];
 
   // Generate month options for the last 12 months
@@ -429,7 +431,7 @@ export const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Дашборд" />
+        <Header title={t('dashboard.title')} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -440,10 +442,10 @@ export const Dashboard: React.FC = () => {
   if (error) {
     return (
       <MainLayout>
-        <Header title="Дашборд" />
+        <Header title={t('dashboard.title')} />
         <div className="p-8">
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">{error}</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{error}</p>
           </Card>
         </div>
       </MainLayout>
@@ -453,8 +455,8 @@ export const Dashboard: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Дашборд"
-        subtitle="Аналитика"
+        title={t('dashboard.title')}
+        subtitle={t('dashboard.analytics')}
         icon={LayoutDashboard}
         actions={
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
@@ -490,7 +492,7 @@ export const Dashboard: React.FC = () => {
               size="sm"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             >
-              {showAdvancedFilters ? '✓ Фильтры активны' : 'Расширенные фильтры'}
+              {showAdvancedFilters ? t('dashboard.filters_active') : t('dashboard.advanced_filters')}
             </Button>
           </div>
         }
@@ -500,11 +502,11 @@ export const Dashboard: React.FC = () => {
         {/* Расширенные фильтры */}
         {showAdvancedFilters && (
           <Card className="animate-slide-up">
-            <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-4">Фильтры аналитики</h3>
+            <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-4">{t('dashboard.analytics_filters')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
               {/* Дата от */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Дата от</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{t('dashboard.date_from')}</label>
                 <input
                   type="date"
                   value={dateFrom}
@@ -515,7 +517,7 @@ export const Dashboard: React.FC = () => {
 
               {/* Дата до */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Дата до</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{t('dashboard.date_to')}</label>
                 <input
                   type="date"
                   value={dateTo}
@@ -526,13 +528,13 @@ export const Dashboard: React.FC = () => {
 
               {/* Водитель */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Водитель</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{t('trips.driver')}</label>
                 <select
                   value={selectedDriver}
                   onChange={(e) => setSelectedDriver(e.target.value)}
                   className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 >
-                  <option value="all">Все водители</option>
+                  <option value="all">{t('filter.all_drivers')}</option>
                   {drivers.map((driver) => (
                     <option key={driver.id} value={driver.id}>{driver.full_name}</option>
                   ))}
@@ -541,13 +543,13 @@ export const Dashboard: React.FC = () => {
 
               {/* Транспорт */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Транспорт</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{t('trips.vehicle')}</label>
                 <select
                   value={selectedVehicle}
                   onChange={(e) => setSelectedVehicle(e.target.value)}
                   className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 >
-                  <option value="all">Весь транспорт</option>
+                  <option value="all">{t('filter.all_vehicles')}</option>
                   {vehicles.map((vehicle) => (
                     <option key={vehicle.id} value={vehicle.id}>
                       {vehicle.brand} {vehicle.model} ({vehicle.license_plate})
@@ -558,13 +560,13 @@ export const Dashboard: React.FC = () => {
 
               {/* Маршрут */}
               <div>
-                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">Маршрут</label>
+                <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{t('trips.route')}</label>
                 <select
                   value={selectedRoute}
                   onChange={(e) => setSelectedRoute(e.target.value)}
                   className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg text-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 transition-all duration-200"
                 >
-                  <option value="all">Все маршруты</option>
+                  <option value="all">{t('dashboard.all_routes')}</option>
                   {routes.map((route) => (
                     <option key={route.id} value={route.id}>{route.name}</option>
                   ))}
@@ -586,7 +588,7 @@ export const Dashboard: React.FC = () => {
                     setSelectedRoute('all');
                   }}
                 >
-                  Сбросить фильтры
+                  {t('common.reset_filters')}
                 </Button>
               </div>
             )}
@@ -596,7 +598,7 @@ export const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
             <KPICard
-              title="Общая выручка"
+              title={t('dashboard.total_revenue')}
               value={formatCurrency(stats.totalRevenue)}
               icon={SomIcon}
               iconColor="text-success-600"
@@ -605,7 +607,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
             <KPICard
-              title="Всего рейсов"
+              title={t('dashboard.total_trips')}
               value={stats.totalTrips}
               icon={Truck}
               iconColor="text-primary-600"
@@ -614,7 +616,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
             <KPICard
-              title="Чистая прибыль"
+              title={t('dashboard.net_profit')}
               value={formatCurrency(stats.netProfit)}
               icon={TrendingUp}
               iconColor="text-warning-600"
@@ -623,7 +625,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
             <KPICard
-              title="Средняя прибыль"
+              title={t('dashboard.avg_profit')}
               value={formatCurrency(stats.avgProfitPerTrip)}
               icon={TrendingDown}
               iconColor="text-secondary-600"
@@ -639,7 +641,7 @@ export const Dashboard: React.FC = () => {
             {widgetSettings.widget_revenue_chart_enabled && (
               <Card className="lg:col-span-2 animate-scale-in" style={{ animationDelay: '400ms' }}>
             <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-              Прибыль за период
+              {t('dashboard.profit_period')}
             </h3>
             {revenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
@@ -669,7 +671,7 @@ export const Dashboard: React.FC = () => {
                   <Bar
                     dataKey="profit"
                     fill="#10b981"
-                    name="Прибыль"
+                    name={t('trips.profit')}
                     radius={[4, 4, 0, 0]}
                     cursor="default"
                   />
@@ -677,7 +679,7 @@ export const Dashboard: React.FC = () => {
               </ResponsiveContainer>
             ) : (
               <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400 dark:text-secondary-500">
-                Нет данных
+                {t('common.no_data')}
               </div>
             )}
               </Card>
@@ -687,7 +689,7 @@ export const Dashboard: React.FC = () => {
             {widgetSettings.widget_routes_chart_enabled && (
               <Card>
             <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-              Распределение рейсов
+              {t('dashboard.trips_distribution')}
             </h3>
             {routeData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
@@ -732,7 +734,7 @@ export const Dashboard: React.FC = () => {
               </ResponsiveContainer>
             ) : (
               <div className="h-[200px] flex items-center justify-center text-sm text-secondary-400 dark:text-secondary-500">
-                Нет данных
+                {t('common.no_data')}
               </div>
             )}
             {/* Легенда для круговой диаграммы */}
@@ -771,15 +773,15 @@ export const Dashboard: React.FC = () => {
             {widgetSettings.widget_vehicle_utilization_enabled && (
               <Card>
                 <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-                  🚛 Загруженность транспорта
+                  🚛 {t('dashboard.vehicle_utilization')}
                 </h3>
                 {vehicleUtilization.length > 0 ? (
                   <div className="space-y-3">
                     {vehicleUtilization.map((item) => {
                       const statusInfo = {
-                        active: { label: 'В рейсе', color: 'bg-success-500', textColor: 'text-success-600 dark:text-success-400', icon: '✅' },
-                        maintenance: { label: 'На ремонте', color: 'bg-warning-500', textColor: 'text-warning-600 dark:text-warning-400', icon: '🔧' },
-                        inactive: { label: 'Свободно', color: 'bg-secondary-400', textColor: 'text-secondary-600 dark:text-secondary-400', icon: '⏸️' },
+                        active: { label: t('dashboard.vehicle_in_trip'), color: 'bg-success-500', textColor: 'text-success-600 dark:text-success-400', icon: '✅' },
+                        maintenance: { label: t('dashboard.vehicle_maintenance'), color: 'bg-warning-500', textColor: 'text-warning-600 dark:text-warning-400', icon: '🔧' },
+                        inactive: { label: t('dashboard.vehicle_free'), color: 'bg-secondary-400', textColor: 'text-secondary-600 dark:text-secondary-400', icon: '⏸️' },
                       }[item.status] || { label: item.status, color: 'bg-gray-500', textColor: 'text-gray-600 dark:text-gray-400', icon: '❓' };
 
                       return (
@@ -808,7 +810,7 @@ export const Dashboard: React.FC = () => {
                     {/* Итого */}
                     <div className="pt-3 border-t border-secondary-200 dark:border-secondary-700">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Всего транспорта:</span>
+                        <span className="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{t('dashboard.total_vehicles')}</span>
                         <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
                           {vehicleUtilization.reduce((sum, item) => sum + item.count, 0)}
                         </span>
@@ -817,7 +819,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="py-8 text-center text-sm text-secondary-400 dark:text-secondary-500">
-                    Нет данных о транспорте
+                    {t('dashboard.no_vehicles_data')}
                   </div>
                 )}
               </Card>
@@ -826,7 +828,7 @@ export const Dashboard: React.FC = () => {
             {widgetSettings.widget_top_drivers_enabled && (
               <Card>
                 <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-                  🏆 Топ 5 водителей
+                  🏆 {t('dashboard.top_drivers')}
                 </h3>
                 {topDrivers.length > 0 ? (
                   <div className="space-y-2">
@@ -852,7 +854,7 @@ export const Dashboard: React.FC = () => {
                               {driver.driver_name}
                             </p>
                             <p className="text-xs text-secondary-500 dark:text-secondary-400">
-                              {driver.total_trips} рейсов
+                              {driver.total_trips} {t('dashboard.trips_count')}
                             </p>
                           </div>
                         </div>
@@ -866,7 +868,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="py-8 text-center text-sm text-secondary-400 dark:text-secondary-500">
-                    Нет данных о водителях
+                    {t('dashboard.no_drivers_data')}
                   </div>
                 )}
               </Card>
@@ -876,7 +878,7 @@ export const Dashboard: React.FC = () => {
             {widgetSettings.widget_monthly_comparison_enabled && (
               <Card>
                 <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-                  📊 Сравнение последних месяцев
+                  📊 {t('dashboard.monthly_comparison')}
                 </h3>
                 {monthComparison.length > 0 ? (
                   <ResponsiveContainer width="100%" height={220}>
@@ -906,20 +908,20 @@ export const Dashboard: React.FC = () => {
                       <Bar
                         dataKey="revenue"
                         fill="#3b82f6"
-                        name="Выручка"
+                        name={t('trips.revenue')}
                         radius={[4, 4, 0, 0]}
                       />
                       <Bar
                         dataKey="profit"
                         fill="#10b981"
-                        name="Прибыль"
+                        name={t('trips.profit')}
                         radius={[4, 4, 0, 0]}
                       />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="h-[220px] flex items-center justify-center text-sm text-secondary-400 dark:text-secondary-500">
-                    Нет данных для сравнения
+                    {t('dashboard.no_comparison_data')}
                   </div>
                 )}
               </Card>
@@ -932,13 +934,13 @@ export const Dashboard: React.FC = () => {
           <Card>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100">
-              Последние рейсы
+              {t('dashboard.recent_trips')}
             </h3>
             <a
               href="/trips"
               className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
-              Все рейсы →
+              {t('dashboard.all_trips')}
             </a>
           </div>
           {recentTrips.length > 0 ? (
@@ -946,11 +948,11 @@ export const Dashboard: React.FC = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-secondary-200 dark:border-secondary-700">
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Дата</th>
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Водитель</th>
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Маршрут</th>
-                    <th className="text-right py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Прибыль</th>
-                    <th className="text-center py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Статус</th>
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">{t('trips.date')}</th>
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">{t('trips.driver')}</th>
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">{t('trips.route')}</th>
+                    <th className="text-right py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">{t('trips.profit')}</th>
+                    <th className="text-center py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">{t('trips.status')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -980,7 +982,7 @@ export const Dashboard: React.FC = () => {
             </div>
           ) : (
             <div className="py-8 text-center text-sm text-secondary-400 dark:text-secondary-500">
-              Нет рейсов
+              {t('dashboard.no_trips')}
             </div>
           )}
           </Card>
