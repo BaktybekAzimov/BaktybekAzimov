@@ -239,7 +239,7 @@ export const Routes: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <span className="font-semibold text-secondary-700">
-                        {route.distance_km} км
+                        {route.distance_km} {t('routes.km')}
                       </span>
                     </TableCell>
                     <TableCell className="font-mono text-secondary-700">

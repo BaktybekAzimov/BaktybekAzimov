@@ -88,13 +88,31 @@ export const Vehicles: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch vehicle stats from the view
-      const { data, error: fetchError } = await supabase
+      // Сначала пробуем view vehicle_stats
+      let { data, error: fetchError } = await supabase
         .from('vehicle_stats')
         .select('*')
         .order('total_revenue', { ascending: false });
 
-      if (fetchError) throw fetchError;
+      // Если view не существует, используем обычную таблицу vehicles
+      if (fetchError) {
+        console.log('View vehicle_stats not found, using vehicles table');
+        const { data: vehiclesData, error: vehiclesError } = await supabase
+          .from('vehicles')
+          .select('*')
+          .order('brand', { ascending: true });
+
+        if (vehiclesError) throw vehiclesError;
+
+        // Преобразуем данные в формат VehicleStats
+        data = (vehiclesData || []).map(vehicle => ({
+          ...vehicle,
+          total_trips: 0,
+          total_revenue: 0,
+          avg_profit_per_trip: 0,
+          last_trip_date: undefined,
+        }));
+      }
 
       setVehicles(data || []);
       setFilteredVehicles(data || []);

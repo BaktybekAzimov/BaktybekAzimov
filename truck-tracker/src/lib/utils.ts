@@ -50,8 +50,9 @@ export function calculateTripFinancials(
 ): TripCalculation {
   const totalCosts = fuelCost + maintenanceCost + otherCosts;
   const netProfit = revenue - totalCosts;
-  const driverPayment = netProfit * 0.3;
-  const ownerPayment = netProfit * 0.7;
+  // При убыточном рейсе выплаты = 0 (водитель не должен платить за убытки)
+  const driverPayment = netProfit > 0 ? netProfit * 0.3 : 0;
+  const ownerPayment = netProfit > 0 ? netProfit * 0.7 : netProfit; // Убыток несёт владелец
 
   return {
     totalCosts,

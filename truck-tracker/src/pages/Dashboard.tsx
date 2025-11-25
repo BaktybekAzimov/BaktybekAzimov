@@ -285,7 +285,7 @@ export const Dashboard: React.FC = () => {
       // Prepare route chart data (top 10 routes by trips)
       if (trips && trips.length > 0) {
         const groupedByRoute = trips.reduce((acc, trip) => {
-          const routeName = trip.route?.name || 'Неизвестный маршрут';
+          const routeName = trip.route?.name || t('dashboard.unknown_route');
           if (!acc[routeName]) {
             acc[routeName] = { name: routeName, trips: 0, revenue: 0 };
           }
@@ -306,7 +306,7 @@ export const Dashboard: React.FC = () => {
       if (widgetSettings.widget_top_drivers_enabled && trips && trips.length > 0) {
         const groupedByDriver = trips.reduce((acc, trip) => {
           const driverId = trip.driver?.id || 'unknown';
-          const driverName = trip.driver?.full_name || 'Неизвестный';
+          const driverName = trip.driver?.full_name || t('dashboard.unknown_driver');
           if (!acc[driverId]) {
             acc[driverId] = {
               driver_id: driverId,
@@ -375,11 +375,12 @@ export const Dashboard: React.FC = () => {
             return acc;
           }, {} as Record<string, number>);
 
+          // Используем правильные статусы: available, in_trip, maintenance
           const utilizationData: VehicleUtilization[] = [
             {
-              status: 'active',
-              count: statusCounts['active'] || 0,
-              percentage: Math.round(((statusCounts['active'] || 0) / total) * 100),
+              status: 'in_trip',
+              count: statusCounts['in_trip'] || 0,
+              percentage: Math.round(((statusCounts['in_trip'] || 0) / total) * 100),
             },
             {
               status: 'maintenance',
@@ -387,9 +388,9 @@ export const Dashboard: React.FC = () => {
               percentage: Math.round(((statusCounts['maintenance'] || 0) / total) * 100),
             },
             {
-              status: 'inactive',
-              count: statusCounts['inactive'] || 0,
-              percentage: Math.round(((statusCounts['inactive'] || 0) / total) * 100),
+              status: 'available',
+              count: statusCounts['available'] || 0,
+              percentage: Math.round(((statusCounts['available'] || 0) / total) * 100),
             },
           ];
 
@@ -779,9 +780,9 @@ export const Dashboard: React.FC = () => {
                   <div className="space-y-3">
                     {vehicleUtilization.map((item) => {
                       const statusInfo = {
-                        active: { label: t('dashboard.vehicle_in_trip'), color: 'bg-success-500', textColor: 'text-success-600 dark:text-success-400', icon: '✅' },
+                        in_trip: { label: t('dashboard.vehicle_in_trip'), color: 'bg-success-500', textColor: 'text-success-600 dark:text-success-400', icon: '🚛' },
                         maintenance: { label: t('dashboard.vehicle_maintenance'), color: 'bg-warning-500', textColor: 'text-warning-600 dark:text-warning-400', icon: '🔧' },
-                        inactive: { label: t('dashboard.vehicle_free'), color: 'bg-secondary-400', textColor: 'text-secondary-600 dark:text-secondary-400', icon: '⏸️' },
+                        available: { label: t('dashboard.vehicle_free'), color: 'bg-primary-500', textColor: 'text-primary-600 dark:text-primary-400', icon: '✅' },
                       }[item.status] || { label: item.status, color: 'bg-gray-500', textColor: 'text-gray-600 dark:text-gray-400', icon: '❓' };
 
                       return (

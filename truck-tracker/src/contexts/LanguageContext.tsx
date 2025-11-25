@@ -315,6 +315,26 @@ const translations: Record<Language, Record<string, string>> = {
     // Экспорт
     'export.excel': 'Экспорт в Excel',
     'export.no_data': 'Нет данных для экспорта',
+    'export.report_title': 'СИСТЕМА УЧЕТА РЕЙСОВ - ОТЧЕТ',
+    'export.generated_date': 'Дата формирования',
+    'export.total_trips': 'Всего рейсов',
+    'export.sheet_name': 'Отчет по рейсам',
+    'export.header.date': 'Дата',
+    'export.header.driver': 'Водитель',
+    'export.header.vehicle': 'Автомобиль',
+    'export.header.route': 'Маршрут',
+    'export.header.distance': 'Дистанция (км)',
+    'export.header.revenue': 'Выручка',
+    'export.header.fuel': 'Топливо',
+    'export.header.maintenance': 'Обслуживание',
+    'export.header.other': 'Прочие',
+    'export.header.total_costs': 'Всего расходов',
+    'export.header.profit': 'Прибыль',
+    'export.header.driver_payment': 'Оплата водителю',
+    'export.header.owner_payment': 'Оплата владельцу',
+    'export.header.status': 'Статус',
+    'export.header.comment': 'Комментарий',
+    'export.totals': 'ИТОГО',
 
     // Водители (дополнительные)
     'drivers.top_by_payments': 'Топ 10 водителей по выплатам',
@@ -326,6 +346,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Маршруты (дополнительные)
     'routes.trip_count': 'Кол-во рейсов',
+    'routes.km': 'км',
 
     // Валидация
     'validation.required': 'Обязательное поле',
@@ -673,6 +694,26 @@ const translations: Record<Language, Record<string, string>> = {
     // Экспорт
     'export.excel': 'Excel\'ге экспорт',
     'export.no_data': 'Экспорт үчүн маалымат жок',
+    'export.report_title': 'РЕЙСТЕРДИ ЭСЕПКЕ АЛУУ СИСТЕМАСЫ - ОТЧЕТ',
+    'export.generated_date': 'Түзүлгөн күнү',
+    'export.total_trips': 'Бардыгы рейстер',
+    'export.sheet_name': 'Рейстер боюнча отчет',
+    'export.header.date': 'Күнү',
+    'export.header.driver': 'Айдоочу',
+    'export.header.vehicle': 'Унаа',
+    'export.header.route': 'Маршрут',
+    'export.header.distance': 'Аралык (км)',
+    'export.header.revenue': 'Киреше',
+    'export.header.fuel': 'Күйүүчү май',
+    'export.header.maintenance': 'Тейлөө',
+    'export.header.other': 'Башка',
+    'export.header.total_costs': 'Жалпы чыгымдар',
+    'export.header.profit': 'Пайда',
+    'export.header.driver_payment': 'Айдоочуга төлөм',
+    'export.header.owner_payment': 'Ээсине төлөм',
+    'export.header.status': 'Абалы',
+    'export.header.comment': 'Комментарий',
+    'export.totals': 'ЖЫЙЫНТЫГЫ',
 
     // Водители (дополнительные)
     'drivers.top_by_payments': 'Төлөмдөр боюнча топ 10 айдоочу',
@@ -684,6 +725,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Маршруты (дополнительные)
     'routes.trip_count': 'Рейстер саны',
+    'routes.km': 'км',
 
     // Валидация
     'validation.required': 'Милдеттүү талаа',

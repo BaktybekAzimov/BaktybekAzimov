@@ -18,7 +18,6 @@ import {
   formatCurrency,
   formatDate,
   getStatusColor,
-  getStatusLabel,
   calculateTripFinancials,
 } from '../lib/utils';
 
@@ -220,32 +219,32 @@ export const Trips: React.FC = () => {
     }
 
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Отчет по рейсам');
+    const worksheet = workbook.addWorksheet(t('export.sheet_name'));
 
     // Заголовок отчета
     const today = new Date().toLocaleDateString('ru-RU');
-    worksheet.addRow(['СИСТЕМА УЧЕТА РЕЙСОВ - ОТЧЕТ']);
-    worksheet.addRow([`Дата формирования: ${today}`]);
-    worksheet.addRow([`Всего рейсов: ${filteredTrips.length}`]);
+    worksheet.addRow([t('export.report_title')]);
+    worksheet.addRow([`${t('export.generated_date')}: ${today}`]);
+    worksheet.addRow([`${t('export.total_trips')}: ${filteredTrips.length}`]);
     worksheet.addRow([]); // Пустая строка
 
     // Заголовки колонок
     const headers = [
-      'Дата',
-      'Водитель',
-      'Автомобиль',
-      'Маршрут',
-      'Дистанция (км)',
-      'Выручка',
-      'Топливо',
-      'Обслуживание',
-      'Прочие',
-      'Всего расходов',
-      'Прибыль',
-      'Оплата водителю',
-      'Оплата владельцу',
-      'Статус',
-      'Комментарий'
+      t('export.header.date'),
+      t('export.header.driver'),
+      t('export.header.vehicle'),
+      t('export.header.route'),
+      t('export.header.distance'),
+      t('export.header.revenue'),
+      t('export.header.fuel'),
+      t('export.header.maintenance'),
+      t('export.header.other'),
+      t('export.header.total_costs'),
+      t('export.header.profit'),
+      t('export.header.driver_payment'),
+      t('export.header.owner_payment'),
+      t('export.header.status'),
+      t('export.header.comment')
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.font = { bold: true };
@@ -271,7 +270,7 @@ export const Trips: React.FC = () => {
         trip.net_profit,
         trip.driver_payment,
         trip.owner_payment,
-        getStatusLabel(trip.status),
+        t(`status.${trip.status}`),
         trip.comment || ''
       ]);
     });
@@ -285,7 +284,7 @@ export const Trips: React.FC = () => {
       '',
       '',
       '',
-      'ИТОГО:',
+      `${t('export.totals')}:`,
       filteredTrips.reduce((sum, t) => sum + t.revenue, 0),
       filteredTrips.reduce((sum, t) => sum + t.fuel_cost, 0),
       filteredTrips.reduce((sum, t) => sum + t.maintenance_cost, 0),
@@ -488,7 +487,7 @@ export const Trips: React.FC = () => {
           <div className="space-y-4">
             {/* Первая строка: поиск */}
             <Input
-              placeholder="Поиск по водителю, автомобилю или маршруту..."
+              placeholder={t('trips.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               icon={<Search size={20} />}
@@ -501,10 +500,10 @@ export const Trips: React.FC = () => {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'Все статусы' },
-                  { value: 'completed', label: 'Завершён' },
-                  { value: 'in_progress', label: 'В пути' },
-                  { value: 'cancelled', label: 'Отменён' },
+                  { value: 'all', label: t('filter.all_statuses') },
+                  { value: 'completed', label: t('status.completed') },
+                  { value: 'in_progress', label: t('status.in_progress') },
+                  { value: 'cancelled', label: t('status.cancelled') },
                 ]}
               />
 
@@ -513,7 +512,7 @@ export const Trips: React.FC = () => {
                 value={driverFilter}
                 onChange={(e) => setDriverFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'Все водители' },
+                  { value: 'all', label: t('filter.all_drivers') },
                   ...drivers.map((d) => ({
                     value: d.id,
                     label: d.full_name,
@@ -526,7 +525,7 @@ export const Trips: React.FC = () => {
                 value={vehicleFilter}
                 onChange={(e) => setVehicleFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'Весь транспорт' },
+                  { value: 'all', label: t('filter.all_vehicles') },
                   ...vehicles.map((v) => ({
                     value: v.id,
                     label: `${v.brand} ${v.model} (${v.license_plate})`,
@@ -571,7 +570,7 @@ export const Trips: React.FC = () => {
                     setDateToFilter('');
                   }}
                 >
-                  Сбросить фильтры
+                  {t('common.reset_filters')}
                 </Button>
               </div>
             )}
@@ -583,15 +582,15 @@ export const Trips: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Дата</TableHead>
-                <TableHead>Водитель</TableHead>
-                <TableHead>Автомобиль</TableHead>
-                <TableHead>Маршрут</TableHead>
-                <TableHead>Выручка</TableHead>
-                <TableHead>Расходы</TableHead>
-                <TableHead>Прибыль</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('trips.date')}</TableHead>
+                <TableHead>{t('trips.driver')}</TableHead>
+                <TableHead>{t('trips.vehicle')}</TableHead>
+                <TableHead>{t('trips.route')}</TableHead>
+                <TableHead>{t('trips.revenue')}</TableHead>
+                <TableHead>{t('trips.expenses')}</TableHead>
+                <TableHead>{t('trips.profit')}</TableHead>
+                <TableHead>{t('trips.status')}</TableHead>
+                <TableHead>{t('trips.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -619,7 +618,7 @@ export const Trips: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(trip.status)}>
-                        {getStatusLabel(trip.status)}
+                        {t(`status.${trip.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -630,7 +629,7 @@ export const Trips: React.FC = () => {
                           onClick={() => openEditModal(trip)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -638,7 +637,7 @@ export const Trips: React.FC = () => {
                           onClick={() => handleDelete(trip.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -647,7 +646,7 @@ export const Trips: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-12 text-secondary-500">
-                    {searchQuery ? 'Рейсы не найдены' : 'Нет рейсов'}
+                    {searchQuery ? t('empty.trips_search') : t('empty.trips')}
                   </TableCell>
                 </TableRow>
               )}
@@ -658,7 +657,7 @@ export const Trips: React.FC = () => {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6 pt-6 border-t border-secondary-200">
               <p className="text-sm text-secondary-600">
-                Страница {currentPage} из {totalPages}
+                {t('common.page')} {currentPage} {t('common.of')} {totalPages}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -668,7 +667,7 @@ export const Trips: React.FC = () => {
                   disabled={currentPage === 1}
                   icon={<ChevronLeft size={16} />}
                 >
-                  Назад
+                  {t('common.back')}
                 </Button>
                 <Button
                   variant="outline"
@@ -677,7 +676,7 @@ export const Trips: React.FC = () => {
                   disabled={currentPage === totalPages}
                   icon={<ChevronRight size={16} />}
                 >
-                  Вперед
+                  {t('common.forward')}
                 </Button>
               </div>
             </div>
