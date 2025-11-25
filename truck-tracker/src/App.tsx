@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -14,6 +14,27 @@ import { Routes as RoutesPage } from './pages/Routes';
 import { Settings } from './pages/Settings';
 import { Users } from './pages/Users';
 import { DriverForm } from './pages/DriverForm';
+import { LoadingSpinner } from './components/ui/LoadingSpinner';
+
+// Smart redirect based on user role
+const RoleBasedRedirect = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Drivers go to trips, others go to dashboard
+  if (user.role === 'driver') {
+    return <Navigate to="/trips" replace />;
+  }
+
+  return <Navigate to="/dashboard" replace />;
+};
 
 function App() {
   return (
@@ -32,7 +53,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'dispatcher']}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -48,7 +69,7 @@ function App() {
           <Route
             path="/drivers"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'dispatcher']}>
                 <Drivers />
               </ProtectedRoute>
             }
@@ -56,7 +77,7 @@ function App() {
           <Route
             path="/vehicles"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'dispatcher']}>
                 <Vehicles />
               </ProtectedRoute>
             }
@@ -64,7 +85,7 @@ function App() {
           <Route
             path="/routes"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'dispatcher']}>
                 <RoutesPage />
               </ProtectedRoute>
             }
@@ -72,7 +93,7 @@ function App() {
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin']}>
                 <Settings />
               </ProtectedRoute>
             }
@@ -80,17 +101,17 @@ function App() {
           <Route
             path="/users"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin']}>
                 <Users />
               </ProtectedRoute>
             }
           />
 
-          {/* Redirect root to dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Redirect root based on user role */}
+          <Route path="/" element={<RoleBasedRedirect />} />
 
-          {/* 404 - redirect to dashboard */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* 404 - redirect based on user role */}
+          <Route path="*" element={<RoleBasedRedirect />} />
           </Routes>
             </SidebarProvider>
           </AuthProvider>
