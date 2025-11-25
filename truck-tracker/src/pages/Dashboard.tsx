@@ -16,12 +16,16 @@ import { ru } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
-// Иконка сома (KGS)
-const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">с</text>
-  </svg>
-);
+// Иконка валюты (динамическая)
+const CurrencyIcon: React.FC<{ className?: string }> = ({ className }) => {
+  const currency = localStorage.getItem('currency') || 'KGS';
+  const symbols: Record<string, string> = { KGS: 'с', USD: '$', RUB: '₽' };
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">{symbols[currency] || 'с'}</text>
+    </svg>
+  );
+};
 
 // Цвета для графиков в зависимости от темы
 const getChartColors = (isDark: boolean) => ({
@@ -601,7 +605,7 @@ export const Dashboard: React.FC = () => {
             <KPICard
               title={t('dashboard.total_revenue')}
               value={formatCurrency(stats.totalRevenue)}
-              icon={SomIcon}
+              icon={CurrencyIcon}
               iconColor="text-success-600"
               iconBgColor="bg-success-100 dark:bg-success-900/30"
             />

@@ -7,12 +7,16 @@ import { Select } from '../components/ui/Select';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { CheckCircle, Truck } from 'lucide-react';
 
-// Иконка сома (KGS)
-const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">с</text>
-  </svg>
-);
+// Иконка валюты (динамическая)
+const CurrencyIcon: React.FC<{ className?: string }> = ({ className }) => {
+  const currency = localStorage.getItem('currency') || 'KGS';
+  const symbols: Record<string, string> = { KGS: 'с', USD: '$', RUB: '₽' };
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">{symbols[currency] || 'с'}</text>
+    </svg>
+  );
+};
 import { supabase } from '../lib/supabase';
 import { formatCurrency, calculateTripFinancials } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -183,32 +187,32 @@ export const DriverForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 flex items-center justify-center p-4">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
             <Truck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-secondary-900 mb-2">
+          <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
             {t('driver_form.title')}
           </h1>
-          <p className="text-secondary-600">
+          <p className="text-secondary-600 dark:text-secondary-400">
             {t('driver_form.subtitle')}
           </p>
         </div>
 
         {/* Success Message */}
         {success && (
-          <Card className="mb-6 bg-success-50 border-2 border-success-500 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3 text-success-700">
+          <Card className="mb-6 bg-success-50 dark:bg-success-900/20 border-2 border-success-500 dark:border-success-700 animate-in fade-in duration-300">
+            <div className="flex items-center gap-3 text-success-700 dark:text-success-400">
               <CheckCircle className="w-6 h-6 flex-shrink-0" />
               <div>
                 <p className="font-semibold">{t('driver_form.success')}</p>
@@ -220,8 +224,8 @@ export const DriverForm: React.FC = () => {
 
         {/* Error Message */}
         {error && (
-          <Card className="mb-6 bg-error-50 border-2 border-error-500">
-            <p className="text-error-700 font-medium">{error}</p>
+          <Card className="mb-6 bg-error-50 dark:bg-error-900/20 border-2 border-error-500 dark:border-error-700">
+            <p className="text-error-700 dark:text-error-400 font-medium">{error}</p>
           </Card>
         )}
 
@@ -301,32 +305,32 @@ export const DriverForm: React.FC = () => {
             />
 
             {/* Calculated Driver Payment */}
-            <Card className="bg-primary-50 border-2 border-primary-200">
+            <Card className="bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-200 dark:border-primary-800">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-primary-600 rounded-xl">
-                    <SomIcon className="w-6 h-6 text-white" />
+                    <CurrencyIcon className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-secondary-600 font-medium">
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400 font-medium">
                       {t('driver_form.your_payment')}
                     </p>
-                    <p className="text-2xl font-bold text-primary-700 font-mono">
+                    <p className="text-2xl font-bold text-primary-700 dark:text-primary-400 font-mono">
                       {formatCurrency(calculatedValues.driverPayment)}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-primary-200 grid grid-cols-2 gap-4 text-sm">
+              <div className="mt-4 pt-4 border-t border-primary-200 dark:border-primary-800 grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-secondary-600">{t('driver_form.net_profit')}</p>
-                  <p className="font-mono font-semibold text-success-700">
+                  <p className="text-secondary-600 dark:text-secondary-400">{t('driver_form.net_profit')}</p>
+                  <p className="font-mono font-semibold text-success-700 dark:text-success-400">
                     {formatCurrency(calculatedValues.netProfit)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-secondary-600">{t('driver_form.total_costs')}</p>
-                  <p className="font-mono font-semibold text-error-700">
+                  <p className="text-secondary-600 dark:text-secondary-400">{t('driver_form.total_costs')}</p>
+                  <p className="font-mono font-semibold text-error-700 dark:text-error-400">
                     {formatCurrency(calculatedValues.totalCosts)}
                   </p>
                 </div>
@@ -346,7 +350,7 @@ export const DriverForm: React.FC = () => {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-sm text-secondary-500 mt-6">
+        <p className="text-center text-sm text-secondary-500 dark:text-secondary-400 mt-6">
           {t('driver_form.footer')}
         </p>
       </div>
