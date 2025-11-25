@@ -76,10 +76,18 @@ export const Vehicles: React.FC = () => {
 
   useEffect(() => {
     // Filter vehicles by status
+    // Машины без статуса или с неизвестным статусом считаются как "available"
+    const normalizeStatusForFilter = (status: string | null | undefined) => {
+      if (!status || !['available', 'in_trip', 'maintenance'].includes(status)) {
+        return 'available';
+      }
+      return status;
+    };
+
     if (statusFilter === 'all') {
       setFilteredVehicles(vehicles);
     } else {
-      setFilteredVehicles(vehicles.filter((v) => v.status === statusFilter));
+      setFilteredVehicles(vehicles.filter((v) => normalizeStatusForFilter(v.status) === statusFilter));
     }
   }, [statusFilter, vehicles]);
 
@@ -218,11 +226,19 @@ export const Vehicles: React.FC = () => {
   };
 
   // Status counts for filter buttons
+  // Машины без статуса или с неизвестным статусом считаются как "available"
+  const normalizeStatus = (status: string | null | undefined) => {
+    if (!status || !['available', 'in_trip', 'maintenance'].includes(status)) {
+      return 'available';
+    }
+    return status;
+  };
+
   const statusCounts = {
     all: vehicles.length,
-    available: vehicles.filter((v) => v.status === 'available').length,
-    in_trip: vehicles.filter((v) => v.status === 'in_trip').length,
-    maintenance: vehicles.filter((v) => v.status === 'maintenance').length,
+    available: vehicles.filter((v) => normalizeStatus(v.status) === 'available').length,
+    in_trip: vehicles.filter((v) => normalizeStatus(v.status) === 'in_trip').length,
+    maintenance: vehicles.filter((v) => normalizeStatus(v.status) === 'maintenance').length,
   };
 
   if (loading) {
@@ -341,8 +357,8 @@ export const Vehicles: React.FC = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(vehicle.status)}>
-                        {t(`status.${vehicle.status}`)}
+                      <Badge className={getStatusColor(vehicle.status || 'unknown')}>
+                        {t(`status.${vehicle.status || 'unknown'}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
