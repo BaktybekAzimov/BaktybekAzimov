@@ -12,7 +12,7 @@ import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, Truck, Car } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
+import { formatCurrency, formatDate, getStatusColor } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface Vehicle {
@@ -342,7 +342,7 @@ export const Vehicles: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(vehicle.status)}>
-                        {getStatusLabel(vehicle.status)}
+                        {t(`status.${vehicle.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>

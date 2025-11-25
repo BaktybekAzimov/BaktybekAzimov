@@ -9,7 +9,7 @@ import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { TrendingUp, Truck, TrendingDown, Calendar, LayoutDashboard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel, cn } from '../lib/utils';
+import { formatCurrency, formatDate, getDateRange, getStatusColor, cn } from '../lib/utils';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -973,7 +973,7 @@ export const Dashboard: React.FC = () => {
                       </td>
                       <td className="py-2 px-3 text-center">
                         <Badge className={`text-xs ${getStatusColor(trip.status)}`}>
-                          {getStatusLabel(trip.status)}
+                          {t(`status.${trip.status}`)}
                         </Badge>
                       </td>
                     </tr>

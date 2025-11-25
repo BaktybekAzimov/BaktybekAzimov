@@ -12,7 +12,7 @@ import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, User, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
+import { formatCurrency, formatDate, getStatusColor } from '../lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -334,7 +334,7 @@ export const Drivers: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(driver.status)}>
-                        {getStatusLabel(driver.status)}
+                        {t(`status.${driver.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
