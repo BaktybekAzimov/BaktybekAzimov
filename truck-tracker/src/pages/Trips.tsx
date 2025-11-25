@@ -13,6 +13,7 @@ import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight, Download, Truck as TruckIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import ExcelJS from 'exceljs';
 import {
   formatCurrency,
@@ -90,6 +91,7 @@ interface TripFormData {
 
 export const Trips: React.FC = () => {
   const { t } = useLanguage();
+  const { user, isDriver } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -183,12 +185,20 @@ export const Trips: React.FC = () => {
       setLoading(true);
       setError(null);
 
+      // Build trips query - filter by driver_id for driver role
+      let tripsQuery = supabase
+        .from('trips')
+        .select('*, driver:drivers(*), vehicle:vehicles(*), route:routes(*)')
+        .order('trip_date', { ascending: false });
+
+      // If user is a driver, filter to show only their trips
+      if (isDriver && user?.driver_id) {
+        tripsQuery = tripsQuery.eq('driver_id', user.driver_id);
+      }
+
       // Fetch all data in parallel
       const [tripsRes, driversRes, vehiclesRes, routesRes] = await Promise.all([
-        supabase
-          .from('trips')
-          .select('*, driver:drivers(*), vehicle:vehicles(*), route:routes(*)')
-          .order('trip_date', { ascending: false }),
+        tripsQuery,
         supabase.from('drivers').select('*').eq('status', 'active'),
         supabase.from('vehicles').select('*'),
         supabase.from('routes').select('*'),
@@ -512,9 +522,11 @@ export const Trips: React.FC = () => {
             >
               {t('export.excel')}
             </Button>
-            <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-              {t('trips.add')}
-            </Button>
+            {!isDriver && (
+              <Button onClick={openCreateModal} icon={<Plus size={20} />}>
+                {t('trips.add')}
+              </Button>
+            )}
           </div>
         }
       />
@@ -634,7 +646,7 @@ export const Trips: React.FC = () => {
                 <TableHead>{t('trips.expenses')}</TableHead>
                 <TableHead>{t('trips.profit')}</TableHead>
                 <TableHead>{t('trips.status')}</TableHead>
-                <TableHead>{t('trips.actions')}</TableHead>
+                {!isDriver && <TableHead>{t('trips.actions')}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -665,31 +677,33 @@ export const Trips: React.FC = () => {
                         {t(`status.${trip.status}`)}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEditModal(trip)}
-                          icon={<Edit size={16} />}
-                        >
-                          {t('button.edit')}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(trip.id)}
-                          icon={<Trash2 size={16} />}
-                        >
-                          {t('button.delete')}
-                        </Button>
-                      </div>
-                    </TableCell>
+                    {!isDriver && (
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditModal(trip)}
+                            icon={<Edit size={16} />}
+                          >
+                            {t('button.edit')}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(trip.id)}
+                            icon={<Trash2 size={16} />}
+                          >
+                            {t('button.delete')}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-12 text-secondary-500">
+                  <TableCell colSpan={isDriver ? 8 : 9} className="text-center py-12 text-secondary-500">
                     {searchQuery ? t('empty.trips_search') : t('empty.trips')}
                   </TableCell>
                 </TableRow>

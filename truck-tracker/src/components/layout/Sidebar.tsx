@@ -14,12 +14,20 @@ import { useSidebar } from '../../contexts/SidebarContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { cn } from '../../lib/utils';
 
-const navigationKeys = [
-  { key: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+type AllowedRole = 'admin' | 'dispatcher' | 'driver';
+
+const navigationKeys: Array<{
+  key: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  adminOnly?: boolean;
+  allowedRoles?: AllowedRole[];
+}> = [
+  { key: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard, allowedRoles: ['admin', 'dispatcher'] },
   { key: 'nav.trips', href: '/trips', icon: Truck },
-  { key: 'nav.drivers', href: '/drivers', icon: Users },
-  { key: 'nav.vehicles', href: '/vehicles', icon: Car },
-  { key: 'nav.routes', href: '/routes', icon: MapPin },
+  { key: 'nav.drivers', href: '/drivers', icon: Users, allowedRoles: ['admin', 'dispatcher'] },
+  { key: 'nav.vehicles', href: '/vehicles', icon: Car, allowedRoles: ['admin', 'dispatcher'] },
+  { key: 'nav.routes', href: '/routes', icon: MapPin, allowedRoles: ['admin', 'dispatcher'] },
   { key: 'nav.users', href: '/users', icon: Users, adminOnly: true },
   { key: 'nav.settings', href: '/settings', icon: SettingsIcon, adminOnly: true },
 ];
@@ -67,7 +75,15 @@ export const Sidebar: React.FC = () => {
       {/* Navigation - всегда показывается */}
       <nav className="flex-1 px-2 py-6 space-y-2 overflow-y-auto">
         {navigationKeys
-          .filter((item) => !item.adminOnly || isAdmin)
+          .filter((item) => {
+            // Check adminOnly
+            if (item.adminOnly && !isAdmin) return false;
+            // Check allowedRoles
+            if (item.allowedRoles && user?.role) {
+              return item.allowedRoles.includes(user.role as AllowedRole);
+            }
+            return true;
+          })
           .map((item) => (
             <NavLink
               key={item.key}
