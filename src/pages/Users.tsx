@@ -52,7 +52,6 @@ export const Users: React.FC = () => {
 
   // Верификация email
   const [verificationStep, setVerificationStep] = useState<'form' | 'verify'>('form');
-  const [verificationCode, setVerificationCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
   const [enteredCode, setEnteredCode] = useState('');
 
