@@ -12,34 +12,38 @@ interface Notification {
 }
 
 export const Notifications: React.FC = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
+
+  // Demo notifications using translations
+  const getDemoNotifications = (): Notification[] => [
     {
       id: '1',
       type: 'trip',
-      title: 'Новый рейс создан',
-      message: 'Рейс #123 на маршрут Бишкек - Ош',
-      timestamp: new Date(Date.now() - 5 * 60000), // 5 минут назад
+      title: t('notifications.demo_new_trip'),
+      message: t('notifications.demo_new_trip_msg'),
+      timestamp: new Date(Date.now() - 5 * 60000),
       read: false,
     },
     {
       id: '2',
       type: 'trip',
-      title: 'Рейс завершён',
-      message: 'Рейс #122 успешно завершён. Прибыль: 15,000 с',
-      timestamp: new Date(Date.now() - 30 * 60000), // 30 минут назад
+      title: t('notifications.demo_trip_completed'),
+      message: t('notifications.demo_trip_completed_msg'),
+      timestamp: new Date(Date.now() - 30 * 60000),
       read: false,
     },
     {
       id: '3',
       type: 'vehicle',
-      title: 'ТО транспорта',
-      message: 'МАЗ 6430 (01KG456BB) требует техобслуживания',
-      timestamp: new Date(Date.now() - 2 * 3600000), // 2 часа назад
+      title: t('notifications.demo_maintenance'),
+      message: t('notifications.demo_maintenance_msg'),
+      timestamp: new Date(Date.now() - 2 * 3600000),
       read: true,
     },
-  ]);
+  ];
+
+  const [notifications, setNotifications] = useState<Notification[]>(getDemoNotifications());
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -83,10 +87,10 @@ export const Notifications: React.FC = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return language === 'ru' ? 'только что' : 'эми эле';
-    if (minutes < 60) return language === 'ru' ? `${minutes} мин назад` : `${minutes} мүн. мурун`;
-    if (hours < 24) return language === 'ru' ? `${hours} ч назад` : `${hours} с. мурун`;
-    return language === 'ru' ? `${days} д назад` : `${days} к. мурун`;
+    if (minutes < 1) return t('notifications.just_now');
+    if (minutes < 60) return `${minutes} ${t('notifications.min_ago')}`;
+    if (hours < 24) return `${hours} ${t('notifications.hours_ago')}`;
+    return `${days} ${t('notifications.days_ago')}`;
   };
 
   const getIcon = (type: string) => {

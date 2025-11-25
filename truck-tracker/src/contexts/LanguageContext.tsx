@@ -233,6 +233,16 @@ const translations: Record<Language, Record<string, string>> = {
     'notifications.mark_all': 'Отметить все',
     'notifications.no_notifications': 'Нет уведомлений',
     'notifications.view_all': 'Посмотреть все',
+    'notifications.just_now': 'только что',
+    'notifications.min_ago': 'мин назад',
+    'notifications.hours_ago': 'ч назад',
+    'notifications.days_ago': 'д назад',
+    'notifications.demo_new_trip': 'Новый рейс создан',
+    'notifications.demo_new_trip_msg': 'Рейс #123 на маршрут Бишкек - Ош',
+    'notifications.demo_trip_completed': 'Рейс завершён',
+    'notifications.demo_trip_completed_msg': 'Рейс #122 успешно завершён. Прибыль: 15,000 с',
+    'notifications.demo_maintenance': 'ТО транспорта',
+    'notifications.demo_maintenance_msg': 'МАЗ 6430 (01KG456BB) требует техобслуживания',
 
     // Роли
     'role.admin': 'Администратор',
@@ -661,6 +671,16 @@ const translations: Record<Language, Record<string, string>> = {
     'notifications.mark_all': 'Баарын белгилөө',
     'notifications.no_notifications': 'Билдирүүлөр жок',
     'notifications.view_all': 'Баарын көрүү',
+    'notifications.just_now': 'эми эле',
+    'notifications.min_ago': 'мүн. мурун',
+    'notifications.hours_ago': 'с. мурун',
+    'notifications.days_ago': 'к. мурун',
+    'notifications.demo_new_trip': 'Жаңы рейс түзүлдү',
+    'notifications.demo_new_trip_msg': 'Рейс #123 Бишкек - Ош маршрутуна',
+    'notifications.demo_trip_completed': 'Рейс аяктады',
+    'notifications.demo_trip_completed_msg': 'Рейс #122 ийгиликтүү аяктады. Пайда: 15,000 с',
+    'notifications.demo_maintenance': 'Транспортту тейлөө',
+    'notifications.demo_maintenance_msg': 'МАЗ 6430 (01KG456BB) техникалык тейлөө талап кылат',
 
     // Роли
     'role.admin': 'Администратор',
