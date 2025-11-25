@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { CheckCircle, Truck } from 'lucide-react';
+import { CheckCircle, Truck, Lock, Shield } from 'lucide-react';
 
 // Иконка валюты (динамическая)
 const CurrencyIcon: React.FC<{ className?: string }> = ({ className }) => {
@@ -20,6 +20,9 @@ const CurrencyIcon: React.FC<{ className?: string }> = ({ className }) => {
 import { supabase } from '../lib/supabase';
 import { formatCurrency, calculateTripFinancials } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
+
+// Секретный PIN-код для доступа к форме (можно изменить в настройках)
+const DRIVER_FORM_PIN = '2024';
 
 interface Driver {
   id: string;
@@ -58,6 +61,13 @@ export const DriverForm: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
 
+  // PIN-код защита
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [pinCode, setPinCode] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinAttempts, setPinAttempts] = useState(0);
+  const MAX_PIN_ATTEMPTS = 5;
+
   const {
     register,
     handleSubmit,
@@ -86,8 +96,37 @@ export const DriverForm: React.FC = () => {
   );
 
   useEffect(() => {
-    fetchData();
+    // Check if already authenticated in this session
+    const savedAuth = sessionStorage.getItem('driverFormAuth');
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+      fetchData();
+    } else {
+      setLoading(false);
+    }
   }, []);
+
+  // Verify PIN code
+  const handlePinSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinError(null);
+
+    if (pinAttempts >= MAX_PIN_ATTEMPTS) {
+      setPinError(t('driver_form.too_many_attempts') || 'Слишком много попыток. Попробуйте позже.');
+      return;
+    }
+
+    if (pinCode === DRIVER_FORM_PIN) {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('driverFormAuth', 'true');
+      setLoading(true);
+      fetchData();
+    } else {
+      setPinAttempts(prev => prev + 1);
+      setPinError(t('driver_form.wrong_pin') || `Неверный PIN-код. Осталось попыток: ${MAX_PIN_ATTEMPTS - pinAttempts - 1}`);
+      setPinCode('');
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -189,6 +228,76 @@ export const DriverForm: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 flex items-center justify-center p-4">
         <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // PIN-код экран входа
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <Card className="shadow-strong">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
+                {t('driver_form.access_title') || 'Доступ к форме'}
+              </h1>
+              <p className="text-secondary-600 dark:text-secondary-400">
+                {t('driver_form.enter_pin') || 'Введите PIN-код для доступа'}
+              </p>
+            </div>
+
+            {pinError && (
+              <div className="mb-4 p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 rounded-lg">
+                <p className="text-error-700 dark:text-error-400 text-sm font-medium">{pinError}</p>
+              </div>
+            )}
+
+            {pinAttempts >= MAX_PIN_ATTEMPTS ? (
+              <div className="text-center py-8">
+                <Lock className="w-12 h-12 text-error-500 mx-auto mb-4" />
+                <p className="text-secondary-700 dark:text-secondary-300">
+                  {t('driver_form.blocked') || 'Форма заблокирована. Обратитесь к администратору.'}
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handlePinSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                    PIN-код
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
+                    placeholder="••••"
+                    autoFocus
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={pinCode.length < 4}
+                  icon={<Lock size={20} />}
+                >
+                  {t('driver_form.verify') || 'Войти'}
+                </Button>
+              </form>
+            )}
+
+            <p className="text-center text-xs text-secondary-500 dark:text-secondary-400 mt-6">
+              {t('driver_form.pin_hint') || 'PIN-код предоставляется администратором'}
+            </p>
+          </Card>
+        </div>
       </div>
     );
   }
