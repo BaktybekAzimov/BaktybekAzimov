@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Truck, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
@@ -12,6 +13,7 @@ export const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,7 +25,7 @@ export const Login: React.FC = () => {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Ошибка входа. Проверьте email и пароль.');
+      setError(err.message || t('auth.login_error'));
     } finally {
       setLoading(false);
     }
@@ -40,7 +42,7 @@ export const Login: React.FC = () => {
             TruckTrack
           </h1>
           <p className="text-secondary-600">
-            Система учёта рейсов грузовиков
+            {t('auth.subtitle')}
           </p>
         </div>
 
@@ -63,7 +65,7 @@ export const Login: React.FC = () => {
           />
 
           <Input
-            label="Пароль"
+            label={t('auth.password')}
             type="password"
             placeholder="••••••••"
             value={password}
@@ -79,16 +81,16 @@ export const Login: React.FC = () => {
             className="w-full"
             isLoading={loading}
           >
-            Войти
+            {t('auth.login')}
           </Button>
         </form>
 
         <div className="mt-6 p-4 bg-secondary-50 rounded-lg">
           <p className="text-xs text-secondary-600 text-center">
-            Демо доступ:<br />
-            admin@demo.com / password (Администратор)<br />
-            dispatcher@demo.com / password (Диспетчер)<br />
-            driver@demo.com / password (Водитель)
+            {t('auth.demo_access')}:<br />
+            admin@demo.com / password ({t('auth.demo_admin')})<br />
+            dispatcher@demo.com / password ({t('auth.demo_dispatcher')})<br />
+            driver@demo.com / password ({t('auth.demo_driver')})
           </p>
         </div>
       </Card>

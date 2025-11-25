@@ -15,6 +15,7 @@ const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 import { supabase } from '../lib/supabase';
 import { formatCurrency, calculateTripFinancials } from '../lib/utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Driver {
   id: string;
@@ -45,6 +46,7 @@ interface DriverTripFormData {
 }
 
 export const DriverForm: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -101,7 +103,7 @@ export const DriverForm: React.FC = () => {
       setRoutes(routesRes.data || []);
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError('Не удалось загрузить данные');
+      setError(t('driver_form.load_error'));
     } finally {
       setLoading(false);
     }
@@ -123,7 +125,7 @@ export const DriverForm: React.FC = () => {
       // Find the driver by name to get the ID
       const driver = drivers.find((d) => d.full_name === data.driver_name);
       if (!driver) {
-        throw new Error('Водитель не найден');
+        throw new Error(t('driver_form.driver_not_found'));
       }
 
       // For now, we'll use a default vehicle (you might want to add vehicle selection)
@@ -135,7 +137,7 @@ export const DriverForm: React.FC = () => {
         .limit(1);
 
       if (!vehicles || vehicles.length === 0) {
-        throw new Error('Нет доступных автомобилей');
+        throw new Error(t('driver_form.no_vehicles'));
       }
 
       const tripData = {
@@ -152,7 +154,7 @@ export const DriverForm: React.FC = () => {
         driver_payment: calculated.driverPayment,
         owner_payment: calculated.ownerPayment,
         status: 'completed',
-        comment: 'Создано водителем через форму',
+        comment: t('driver_form.created_by_driver'),
       };
 
       const { error } = await supabase.from('trips').insert([tripData]);
@@ -173,7 +175,7 @@ export const DriverForm: React.FC = () => {
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
       console.error('Error saving trip:', err);
-      setError(err.message || 'Не удалось сохранить рейс');
+      setError(err.message || t('driver_form.save_error'));
     } finally {
       setSubmitting(false);
     }
@@ -196,10 +198,10 @@ export const DriverForm: React.FC = () => {
             <Truck className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-secondary-900 mb-2">
-            Форма рейса
+            {t('driver_form.title')}
           </h1>
           <p className="text-secondary-600">
-            Быстрое добавление нового рейса
+            {t('driver_form.subtitle')}
           </p>
         </div>
 
@@ -209,8 +211,8 @@ export const DriverForm: React.FC = () => {
             <div className="flex items-center gap-3 text-success-700">
               <CheckCircle className="w-6 h-6 flex-shrink-0" />
               <div>
-                <p className="font-semibold">Рейс успешно добавлен!</p>
-                <p className="text-sm">Данные сохранены в системе.</p>
+                <p className="font-semibold">{t('driver_form.success')}</p>
+                <p className="text-sm">{t('driver_form.success_desc')}</p>
               </div>
             </div>
           </Card>
@@ -228,8 +230,8 @@ export const DriverForm: React.FC = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Driver Selection */}
             <Select
-              label="Водитель"
-              {...register('driver_name', { required: 'Выберите водителя' })}
+              label={t('driver_form.driver')}
+              {...register('driver_name', { required: t('driver_form.select_driver') })}
               options={drivers.map((d) => ({
                 value: d.full_name,
                 label: d.full_name,
@@ -239,61 +241,61 @@ export const DriverForm: React.FC = () => {
 
             {/* Date */}
             <Input
-              label="Дата рейса"
+              label={t('driver_form.trip_date')}
               type="date"
-              {...register('trip_date', { required: 'Дата обязательна' })}
+              {...register('trip_date', { required: t('driver_form.date_required') })}
               error={errors.trip_date?.message}
             />
 
             {/* Route */}
             <Select
-              label="Маршрут"
-              {...register('route_id', { required: 'Выберите маршрут' })}
+              label={t('driver_form.route')}
+              {...register('route_id', { required: t('driver_form.select_route') })}
               options={routes.map((r) => ({
                 value: r.id,
-                label: `${r.name} (${r.distance_km} км)`,
+                label: `${r.name} (${r.distance_km} ${t('routes.km')})`,
               }))}
               error={errors.route_id?.message}
             />
 
             {/* Revenue */}
             <Input
-              label="Выручка"
+              label={t('driver_form.revenue')}
               type="number"
               step="0.01"
               min="0"
               placeholder="0.00"
               {...register('revenue', {
-                required: 'Выручка обязательна',
-                min: { value: 0, message: 'Выручка должна быть положительной' },
+                required: t('driver_form.revenue_required'),
+                min: { value: 0, message: t('driver_form.revenue_positive') },
               })}
               error={errors.revenue?.message}
             />
 
             {/* Fuel Cost */}
             <Input
-              label="Расход на топливо"
+              label={t('driver_form.fuel_cost')}
               type="number"
               step="0.01"
               min="0"
               placeholder="0.00"
               {...register('fuel_cost', {
-                required: 'Расход на топливо обязателен',
-                min: { value: 0, message: 'Расход должен быть положительным' },
+                required: t('driver_form.fuel_required'),
+                min: { value: 0, message: t('driver_form.cost_positive') },
               })}
               error={errors.fuel_cost?.message}
             />
 
             {/* Other Costs */}
             <Input
-              label="Прочие расходы"
+              label={t('driver_form.other_costs')}
               type="number"
               step="0.01"
               min="0"
               placeholder="0.00"
-              helperText="Парковка, питание, и т.д."
+              helperText={t('driver_form.other_costs_hint')}
               {...register('other_costs', {
-                min: { value: 0, message: 'Расход должен быть положительным' },
+                min: { value: 0, message: t('driver_form.cost_positive') },
               })}
               error={errors.other_costs?.message}
             />
@@ -307,7 +309,7 @@ export const DriverForm: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-secondary-600 font-medium">
-                      Ваша выплата (30%)
+                      {t('driver_form.your_payment')}
                     </p>
                     <p className="text-2xl font-bold text-primary-700 font-mono">
                       {formatCurrency(calculatedValues.driverPayment)}
@@ -317,13 +319,13 @@ export const DriverForm: React.FC = () => {
               </div>
               <div className="mt-4 pt-4 border-t border-primary-200 grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-secondary-600">Чистая прибыль:</p>
+                  <p className="text-secondary-600">{t('driver_form.net_profit')}</p>
                   <p className="font-mono font-semibold text-success-700">
                     {formatCurrency(calculatedValues.netProfit)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-secondary-600">Всего расходы:</p>
+                  <p className="text-secondary-600">{t('driver_form.total_costs')}</p>
                   <p className="font-mono font-semibold text-error-700">
                     {formatCurrency(calculatedValues.totalCosts)}
                   </p>
@@ -338,14 +340,14 @@ export const DriverForm: React.FC = () => {
               className="w-full text-lg py-4"
               size="lg"
             >
-              Отправить рейс
+              {t('driver_form.submit')}
             </Button>
           </form>
         </Card>
 
         {/* Footer */}
         <p className="text-center text-sm text-secondary-500 mt-6">
-          Заполните все поля для добавления рейса в систему
+          {t('driver_form.footer')}
         </p>
       </div>
     </div>

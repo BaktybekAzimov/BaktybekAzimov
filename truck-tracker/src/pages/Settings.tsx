@@ -86,7 +86,7 @@ export const Settings: React.FC = () => {
 
       if (fetchError) {
         // Если таблицы нет, показать предупреждение
-        throw new Error('Таблица settings не найдена. Выполните SQL скрипт create-settings-table.sql');
+        throw new Error(t('settings.table_not_found'));
       }
 
       setSettings(data);
@@ -203,7 +203,7 @@ export const Settings: React.FC = () => {
             <h3 className="text-error-900 dark:text-error-300 font-semibold mb-2">{t('error.loading')}</h3>
             <p className="text-error-700 dark:text-error-400 text-sm mb-4">{error}</p>
             <p className="text-error-600 dark:text-error-500 text-xs">
-              Выполните SQL скрипт: <code className="bg-error-100 dark:bg-error-900/30 px-2 py-1 rounded">supabase/create-settings-table.sql</code>
+              {t('settings.run_sql')}: <code className="bg-error-100 dark:bg-error-900/30 px-2 py-1 rounded">supabase/create-settings-table.sql</code>
             </p>
           </Card>
         </div>
