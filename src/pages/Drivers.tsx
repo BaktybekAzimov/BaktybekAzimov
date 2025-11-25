@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { ErrorModal } from '../components/ui/ErrorModal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, User, Users } from 'lucide-react';
@@ -71,6 +72,8 @@ export const Drivers: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const {
     register,
@@ -146,10 +149,58 @@ export const Drivers: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const showError = (message: string) => {
+    setErrorMessage(message);
+    setErrorModalOpen(true);
+  };
+
+  const getErrorMessage = (err: any): string => {
+    if (err?.code === '23505' || err?.message?.includes('duplicate') || err?.message?.includes('unique')) {
+      return 'Водитель с таким номером телефона уже существует в системе';
+    }
+    if (err?.code === '42501' || err?.message?.includes('permission') || err?.message?.includes('policy')) {
+      return 'Нет прав для выполнения этой операции. Обратитесь к администратору';
+    }
+    if (err?.code === 'PGRST301' || err?.message?.includes('JWT')) {
+      return 'Сессия истекла. Пожалуйста, войдите в систему заново';
+    }
+    return 'Не удалось сохранить водителя. Попробуйте еще раз';
+  };
+
+  // Нормализация телефона - оставляем только цифры
+  const normalizePhone = (phone: string): string => {
+    return phone.replace(/\D/g, '');
+  };
+
   const onSubmit = async (data: DriverFormData) => {
     try {
       setSubmitting(true);
       setError(null);
+
+      // Проверка на дубликат телефона
+      const phoneNormalized = normalizePhone(data.phone);
+
+      const { data: existingDrivers, error: checkError } = await supabase
+        .from('drivers')
+        .select('id, phone');
+
+      if (checkError) {
+        console.error('Error checking for duplicate:', checkError);
+      }
+
+      // Проверяем на совпадение нормализованных телефонов
+      const duplicates = existingDrivers?.filter(d => {
+        const existingNormalized = normalizePhone(d.phone);
+        // Если редактируем - исключаем текущего водителя из проверки
+        if (editingDriver && d.id === editingDriver.id) return false;
+        return existingNormalized === phoneNormalized;
+      });
+
+      if (duplicates && duplicates.length > 0) {
+        showError(`Водитель с телефоном "${data.phone}" уже существует в системе`);
+        setSubmitting(false);
+        return;
+      }
 
       const driverData = {
         full_name: data.full_name,
@@ -176,9 +227,9 @@ export const Drivers: React.FC = () => {
 
       setIsModalOpen(false);
       fetchDrivers();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving driver:', err);
-      setError(t('error.save_failed'));
+      showError(getErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -437,6 +488,13 @@ export const Drivers: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={errorModalOpen}
+        onClose={() => setErrorModalOpen(false)}
+        message={errorMessage}
+      />
     </MainLayout>
   );
 };

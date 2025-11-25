@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { ErrorModal } from '../components/ui/ErrorModal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight, Download, Truck as TruckIcon } from 'lucide-react';
@@ -109,6 +110,8 @@ export const Trips: React.FC = () => {
   const [dateToFilter, setDateToFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const itemsPerPage = 20;
 
   const {
@@ -378,6 +381,27 @@ export const Trips: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const showError = (message: string) => {
+    setErrorMessage(message);
+    setErrorModalOpen(true);
+  };
+
+  const getErrorMessage = (err: any): string => {
+    if (err?.code === '23503' || err?.message?.includes('foreign key')) {
+      return 'Невозможно создать рейс: выбранный водитель, транспорт или маршрут не найден в системе';
+    }
+    if (err?.code === '42501' || err?.message?.includes('permission') || err?.message?.includes('policy')) {
+      return 'Нет прав для выполнения этой операции. Обратитесь к администратору';
+    }
+    if (err?.code === 'PGRST301' || err?.message?.includes('JWT')) {
+      return 'Сессия истекла. Пожалуйста, войдите в систему заново';
+    }
+    if (err?.message?.includes('total_costs') || err?.message?.includes('GENERATED')) {
+      return 'Ошибка базы данных: поля total_costs/net_profit настроены как GENERATED. Обратитесь к администратору для исправления';
+    }
+    return 'Не удалось сохранить рейс. Попробуйте еще раз';
+  };
+
   const onSubmit = async (data: TripFormData) => {
     try {
       setSubmitting(true);
@@ -454,9 +478,9 @@ export const Trips: React.FC = () => {
 
       setIsModalOpen(false);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving trip:', err);
-      setError(t('error.save_failed'));
+      showError(getErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -878,6 +902,13 @@ export const Trips: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={errorModalOpen}
+        onClose={() => setErrorModalOpen(false)}
+        message={errorMessage}
+      />
     </MainLayout>
   );
 };
