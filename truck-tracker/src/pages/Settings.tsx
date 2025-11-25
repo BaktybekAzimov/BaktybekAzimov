@@ -8,7 +8,6 @@ import { Button } from '../components/ui/Button';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import {
   Settings as SettingsIcon,
-  DollarSign,
   Percent,
   Globe,
   Save,
@@ -19,6 +18,13 @@ import {
   Check,
   Type,
 } from 'lucide-react';
+
+// Иконка сома (KGS)
+const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">с</text>
+  </svg>
+);
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useFontSize } from '../contexts/FontSizeContext';
@@ -242,7 +248,7 @@ export const Settings: React.FC = () => {
         <Card>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-success-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-success-600" />
+              <SomIcon className="w-6 h-6 text-success-600" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-900">
@@ -375,11 +381,11 @@ export const Settings: React.FC = () => {
                   <div className="text-xs font-medium text-secondary-900 dark:text-secondary-100 mb-1">
                     Маленький
                   </div>
-                  <div className="text-xl font-bold text-secondary-700 dark:text-secondary-300">
+                  <div className="text-lg font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
                   </div>
                   <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
-                    14px
+                    13px
                   </div>
                 </div>
               </button>
@@ -396,11 +402,11 @@ export const Settings: React.FC = () => {
                   <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-1">
                     Средний
                   </div>
-                  <div className="text-2xl font-bold text-secondary-700 dark:text-secondary-300">
+                  <div className="text-xl font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
                   </div>
                   <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
-                    16px
+                    15px
                   </div>
                 </div>
               </button>
@@ -417,7 +423,7 @@ export const Settings: React.FC = () => {
                   <div className="text-base font-medium text-secondary-900 dark:text-secondary-100 mb-1">
                     Большой
                   </div>
-                  <div className="text-3xl font-bold text-secondary-700 dark:text-secondary-300">
+                  <div className="text-2xl font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
                   </div>
                   <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">

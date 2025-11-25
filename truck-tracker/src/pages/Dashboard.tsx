@@ -7,12 +7,31 @@ import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
-import { TrendingUp, Truck, DollarSign, TrendingDown, Calendar, LayoutDashboard } from 'lucide-react';
+import { TrendingUp, Truck, TrendingDown, Calendar, LayoutDashboard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel, cn } from '../lib/utils';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useTheme } from '../contexts/ThemeContext';
+
+// Иконка сома (KGS)
+const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">с</text>
+  </svg>
+);
+
+// Цвета для графиков в зависимости от темы
+const getChartColors = (isDark: boolean) => ({
+  grid: isDark ? '#374151' : '#f1f5f9',
+  axis: isDark ? '#9ca3af' : '#94a3b8',
+  tick: isDark ? '#d1d5db' : '#64748b',
+  tooltipBg: isDark ? '#1f2937' : '#fff',
+  tooltipBorder: isDark ? '#374151' : '#e2e8f0',
+  text: isDark ? '#e5e7eb' : '#374151',
+  textMuted: isDark ? '#9ca3af' : '#64748b',
+});
 
 // Local type definitions
 type DateFilter = 'today' | 'month' | 'all' | 'custom';
@@ -69,6 +88,9 @@ interface Trip {
 }
 
 export const Dashboard: React.FC = () => {
+  const { theme } = useTheme();
+  const chartColors = getChartColors(theme === 'dark');
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
@@ -576,9 +598,9 @@ export const Dashboard: React.FC = () => {
             <KPICard
               title="Общая выручка"
               value={formatCurrency(stats.totalRevenue)}
-              icon={DollarSign}
+              icon={SomIcon}
               iconColor="text-success-600"
-              iconBgColor="bg-success-100"
+              iconBgColor="bg-success-100 dark:bg-success-900/30"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
@@ -587,7 +609,7 @@ export const Dashboard: React.FC = () => {
               value={stats.totalTrips}
               icon={Truck}
               iconColor="text-primary-600"
-              iconBgColor="bg-primary-100"
+              iconBgColor="bg-primary-100 dark:bg-primary-900/30"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
@@ -596,7 +618,7 @@ export const Dashboard: React.FC = () => {
               value={formatCurrency(stats.netProfit)}
               icon={TrendingUp}
               iconColor="text-warning-600"
-              iconBgColor="bg-warning-100"
+              iconBgColor="bg-warning-100 dark:bg-warning-900/30"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
@@ -605,7 +627,7 @@ export const Dashboard: React.FC = () => {
               value={formatCurrency(stats.avgProfitPerTrip)}
               icon={TrendingDown}
               iconColor="text-secondary-600"
-              iconBgColor="bg-secondary-100"
+              iconBgColor="bg-secondary-100 dark:bg-secondary-800"
             />
           </div>
         </div>
@@ -622,25 +644,27 @@ export const Dashboard: React.FC = () => {
             {revenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={revenueData.slice(-10)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
                   <XAxis
                     dataKey="date"
-                    stroke="#94a3b8"
+                    stroke={chartColors.axis}
                     style={{ fontSize: '10px' }}
-                    tick={{ fill: '#64748b' }}
+                    tick={{ fill: chartColors.tick }}
                   />
                   <YAxis
-                    stroke="#94a3b8"
+                    stroke={chartColors.axis}
                     style={{ fontSize: '10px' }}
-                    tick={{ fill: '#64748b' }}
+                    tick={{ fill: chartColors.tick }}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
+                      backgroundColor: chartColors.tooltipBg,
+                      border: `1px solid ${chartColors.tooltipBorder}`,
                       borderRadius: '6px',
                       fontSize: '12px',
+                      color: chartColors.text,
                     }}
+                    labelStyle={{ color: chartColors.text }}
                   />
                   <Bar
                     dataKey="profit"
@@ -696,11 +720,13 @@ export const Dashboard: React.FC = () => {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
+                      backgroundColor: chartColors.tooltipBg,
+                      border: `1px solid ${chartColors.tooltipBorder}`,
                       borderRadius: '6px',
                       fontSize: '12px',
+                      color: chartColors.text,
                     }}
+                    labelStyle={{ color: chartColors.text }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -721,11 +747,11 @@ export const Dashboard: React.FC = () => {
                           className="w-2 h-2 rounded-full"
                           style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         />
-                        <span className="text-secondary-600 truncate max-w-[120px]">
+                        <span className="text-secondary-600 dark:text-secondary-400 truncate max-w-[120px]">
                           {route.name}
                         </span>
                       </div>
-                      <span className="font-medium text-secondary-900">{route.trips}</span>
+                      <span className="font-medium text-secondary-900 dark:text-secondary-100">{route.trips}</span>
                     </div>
                   );
                 })}
@@ -751,17 +777,17 @@ export const Dashboard: React.FC = () => {
                   <div className="space-y-3">
                     {vehicleUtilization.map((item) => {
                       const statusInfo = {
-                        active: { label: 'В рейсе', color: 'bg-success-500', textColor: 'text-success-700', icon: '✅' },
-                        maintenance: { label: 'На ремонте', color: 'bg-warning-500', textColor: 'text-warning-700', icon: '🔧' },
-                        inactive: { label: 'Свободно', color: 'bg-secondary-400', textColor: 'text-secondary-700', icon: '⏸️' },
-                      }[item.status] || { label: item.status, color: 'bg-gray-500', textColor: 'text-gray-700', icon: '❓' };
+                        active: { label: 'В рейсе', color: 'bg-success-500', textColor: 'text-success-600 dark:text-success-400', icon: '✅' },
+                        maintenance: { label: 'На ремонте', color: 'bg-warning-500', textColor: 'text-warning-600 dark:text-warning-400', icon: '🔧' },
+                        inactive: { label: 'Свободно', color: 'bg-secondary-400', textColor: 'text-secondary-600 dark:text-secondary-400', icon: '⏸️' },
+                      }[item.status] || { label: item.status, color: 'bg-gray-500', textColor: 'text-gray-600 dark:text-gray-400', icon: '❓' };
 
                       return (
                         <div key={item.status} className="space-y-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span className="text-lg">{statusInfo.icon}</span>
-                              <span className="text-sm font-medium text-secondary-900">
+                              <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
                                 {statusInfo.label}
                               </span>
                             </div>
@@ -770,7 +796,7 @@ export const Dashboard: React.FC = () => {
                             </span>
                           </div>
                           {/* Прогресс бар */}
-                          <div className="w-full bg-secondary-200 rounded-full h-2">
+                          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
                             <div
                               className={`${statusInfo.color} h-2 rounded-full transition-all duration-300`}
                               style={{ width: `${item.percentage}%` }}
@@ -780,17 +806,17 @@ export const Dashboard: React.FC = () => {
                       );
                     })}
                     {/* Итого */}
-                    <div className="pt-3 border-t border-secondary-200">
+                    <div className="pt-3 border-t border-secondary-200 dark:border-secondary-700">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-secondary-900">Всего транспорта:</span>
-                        <span className="text-sm font-bold text-primary-600">
+                        <span className="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Всего транспорта:</span>
+                        <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
                           {vehicleUtilization.reduce((sum, item) => sum + item.count, 0)}
                         </span>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="py-8 text-center text-sm text-secondary-400">
+                  <div className="py-8 text-center text-sm text-secondary-400 dark:text-secondary-500">
                     Нет данных о транспорте
                   </div>
                 )}
@@ -807,31 +833,31 @@ export const Dashboard: React.FC = () => {
                     {topDrivers.map((driver, index) => (
                       <div
                         key={driver.driver_id}
-                        className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary-50"
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-700"
                       >
                         <div className="flex items-center gap-3">
                           <div
                             className={cn(
                               "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
-                              index === 0 && "bg-yellow-100 text-yellow-700",
-                              index === 1 && "bg-gray-100 text-gray-700",
-                              index === 2 && "bg-orange-100 text-orange-700",
-                              index > 2 && "bg-secondary-100 text-secondary-700"
+                              index === 0 && "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
+                              index === 1 && "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
+                              index === 2 && "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400",
+                              index > 2 && "bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300"
                             )}
                           >
                             {index + 1}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-secondary-900">
+                            <p className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
                               {driver.driver_name}
                             </p>
-                            <p className="text-xs text-secondary-500">
+                            <p className="text-xs text-secondary-500 dark:text-secondary-400">
                               {driver.total_trips} рейсов
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-semibold text-success-600">
+                          <p className="text-sm font-semibold text-success-600 dark:text-success-400">
                             {formatCurrency(driver.total_profit)}
                           </p>
                         </div>
@@ -839,7 +865,7 @@ export const Dashboard: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="py-8 text-center text-sm text-secondary-400">
+                  <div className="py-8 text-center text-sm text-secondary-400 dark:text-secondary-500">
                     Нет данных о водителях
                   </div>
                 )}
@@ -855,25 +881,27 @@ export const Dashboard: React.FC = () => {
                 {monthComparison.length > 0 ? (
                   <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={monthComparison}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
                       <XAxis
                         dataKey="month"
-                        stroke="#94a3b8"
+                        stroke={chartColors.axis}
                         style={{ fontSize: '10px' }}
-                        tick={{ fill: '#64748b' }}
+                        tick={{ fill: chartColors.tick }}
                       />
                       <YAxis
-                        stroke="#94a3b8"
+                        stroke={chartColors.axis}
                         style={{ fontSize: '10px' }}
-                        tick={{ fill: '#64748b' }}
+                        tick={{ fill: chartColors.tick }}
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#fff',
-                          border: '1px solid #e2e8f0',
+                          backgroundColor: chartColors.tooltipBg,
+                          border: `1px solid ${chartColors.tooltipBorder}`,
                           borderRadius: '6px',
                           fontSize: '12px',
+                          color: chartColors.text,
                         }}
+                        labelStyle={{ color: chartColors.text }}
                       />
                       <Bar
                         dataKey="revenue"
@@ -890,7 +918,7 @@ export const Dashboard: React.FC = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-[220px] flex items-center justify-center text-sm text-secondary-400">
+                  <div className="h-[220px] flex items-center justify-center text-sm text-secondary-400 dark:text-secondary-500">
                     Нет данных для сравнения
                   </div>
                 )}
@@ -903,12 +931,12 @@ export const Dashboard: React.FC = () => {
         {widgetSettings.widget_recent_trips_enabled && (
           <Card>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-secondary-900">
+            <h3 className="text-base font-semibold text-secondary-900 dark:text-secondary-100">
               Последние рейсы
             </h3>
             <a
               href="/trips"
-              className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+              className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
               Все рейсы →
             </a>
@@ -917,27 +945,27 @@ export const Dashboard: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-secondary-200">
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600">Дата</th>
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600">Водитель</th>
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600">Маршрут</th>
-                    <th className="text-right py-2 px-3 text-xs font-semibold text-secondary-600">Прибыль</th>
-                    <th className="text-center py-2 px-3 text-xs font-semibold text-secondary-600">Статус</th>
+                  <tr className="border-b border-secondary-200 dark:border-secondary-700">
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Дата</th>
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Водитель</th>
+                    <th className="text-left py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Маршрут</th>
+                    <th className="text-right py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Прибыль</th>
+                    <th className="text-center py-2 px-3 text-xs font-semibold text-secondary-600 dark:text-secondary-400">Статус</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentTrips.slice(0, 5).map((trip) => (
-                    <tr key={trip.id} className="border-b border-secondary-100 hover:bg-secondary-50">
-                      <td className="py-2 px-3 text-xs text-secondary-700">
+                    <tr key={trip.id} className="border-b border-secondary-100 dark:border-secondary-700 hover:bg-secondary-50 dark:hover:bg-secondary-700">
+                      <td className="py-2 px-3 text-xs text-secondary-700 dark:text-secondary-300">
                         {formatDate(trip.trip_date)}
                       </td>
-                      <td className="py-2 px-3 text-xs font-medium text-secondary-900">
+                      <td className="py-2 px-3 text-xs font-medium text-secondary-900 dark:text-secondary-100">
                         {trip.driver?.full_name || 'N/A'}
                       </td>
-                      <td className="py-2 px-3 text-xs text-secondary-700">
+                      <td className="py-2 px-3 text-xs text-secondary-700 dark:text-secondary-300">
                         {trip.route?.name || 'N/A'}
                       </td>
-                      <td className="py-2 px-3 text-xs text-right font-semibold text-success-600">
+                      <td className="py-2 px-3 text-xs text-right font-semibold text-success-600 dark:text-success-400">
                         {formatCurrency(trip.net_profit)}
                       </td>
                       <td className="py-2 px-3 text-center">
@@ -951,7 +979,7 @@ export const Dashboard: React.FC = () => {
               </table>
             </div>
           ) : (
-            <div className="py-8 text-center text-sm text-secondary-400">
+            <div className="py-8 text-center text-sm text-secondary-400 dark:text-secondary-500">
               Нет рейсов
             </div>
           )}
