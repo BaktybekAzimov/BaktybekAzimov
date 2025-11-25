@@ -1,170 +1,367 @@
-# KELECHEK - Premium Mineral Water Website
+# 🚚 TruckTrack - Система учёта рейсов грузовиков
 
-Премиум веб-сайт для ЗАО «КЕЛЕЧЕК» - крупнейшего производителя минеральной воды в Кыргызстане.
+Профессиональное веб-приложение для транспортной компании в Кыргызстане для учёта и управления рейсами грузовиков.
 
-## 🏔️ О проекте
+![Tech Stack](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e)
 
-KELECHEK - компания с 30-летней историей, производитель премиальной лечебно-столовой минеральной воды из источника №27 в Жалал-Абаде, Кыргызстан.
+## ✨ Особенности
 
-### Бренды:
-- **KELECHEK №27** - Премиальная лечебно-столовая минеральная вода
-- **ADYGENE** - Ледниковая вода с высоты 4,216 метров
-- **GIMALAI** - Живая вода для всей семьи
-- **ЛИМОНАДЫ** - Яркие газированные напитки
+### 🎯 Основной функционал
 
-## 🚀 Tech Stack
+- **Dashboard** - Визуализация ключевых метрик с KPI карточками и интерактивными графиками
+- **Управление рейсами** - Полный CRUD для рейсов с автоматическими расчётами прибыли
+- **Управление водителями** - Учёт водителей со статистикой и рейтингом
+- **Управление машинами** - Отслеживание статуса транспорта и истории рейсов
+- **Маршруты** - База маршрутов с расстояниями и средней стоимостью
+- **Мобильная форма** - Упрощённая форма для водителей (без аутентификации)
 
-- **Frontend:** React 18.2
-- **Build Tool:** Vite 5.0.8
-- **Styling:** Tailwind CSS 3.4
-- **Animations:** GSAP 3.12.4
-- **Routing:** React Router DOM 6.20.1
-- **Fonts:** Bebas Neue (заголовки) + Montserrat (текст)
+### 🔐 Система ролей
 
-## 📦 Установка
+- **Администратор** - Полный доступ ко всем функциям
+- **Диспетчер** - Просмотр и редактирование всех данных
+- **Водитель** - Просмотр только своих рейсов
+
+### 💎 Дизайн и UX
+
+- Профессиональный дизайн уровня премиум Etsy шаблонов
+- Адаптивная вёрстка (Desktop, Tablet, Mobile)
+- Плавные анимации и переходы
+- Интуитивная навигация
+- Цветовые индикаторы статусов
+- Skeleton loaders при загрузке
+
+### 📊 Аналитика
+
+- Общий доход за период
+- Количество рейсов
+- Чистая прибыль
+- Средняя прибыль на рейс
+- График динамики доходов
+- Распределение рейсов по маршрутам
+- ТОП-10 водителей по прибыльности
+
+### 🧮 Автоматические расчёты
+
+- Общие расходы = Топливо + ТО + Прочие
+- Чистая прибыль = Доход - Общие расходы
+- Выплата водителю (30% от прибыли)
+- Выплата владельцу (70% от прибыли)
+
+## 🛠 Технологический стек
+
+### Frontend
+- **React 18** - UI библиотека
+- **TypeScript** - Типизация
+- **Tailwind CSS** - Стилизация
+- **React Router** - Навигация
+- **React Hook Form** - Управление формами
+- **Zod** - Валидация данных
+- **Recharts** - Графики и визуализация
+- **Lucide React** - Иконки
+- **date-fns** - Работа с датами
+
+### Backend
+- **Supabase** - Backend as a Service
+  - PostgreSQL база данных
+  - Row Level Security (RLS)
+  - Аутентификация
+  - Realtime подписки
+
+### Инструменты разработки
+- **Vite** - Сборщик и dev сервер
+- **ESLint** - Линтер
+- **PostCSS** - CSS процессор
+
+## 📋 Требования
+
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+- Аккаунт Supabase (бесплатный план подходит)
+
+## 🚀 Быстрый старт
+
+### 1. Клонирование репозитория
 
 ```bash
-# Клонировать репозиторий
 git clone <repository-url>
+cd truck-tracker
+```
 
-# Перейти в директорию
-cd kelechek-website
+### 2. Установка зависимостей
 
-# Установить зависимости
+```bash
 npm install
 ```
 
-## 💻 Разработка
+### 3. Настройка Supabase
+
+#### 3.1 Создание проекта Supabase
+
+1. Зарегистрируйтесь на [supabase.com](https://supabase.com)
+2. Создайте новый проект
+3. Дождитесь инициализации базы данных
+
+#### 3.2 Создание схемы БД
+
+1. Откройте SQL Editor в Supabase Dashboard
+2. Скопируйте содержимое файла `supabase-schema.sql`
+3. Выполните SQL скрипт
+4. Проверьте, что созданы таблицы: `drivers`, `vehicles`, `routes`, `trips`
+
+#### 3.3 Создание тестовых пользователей
+
+В Supabase Dashboard перейдите в Authentication > Users и создайте пользователей:
+
+**Администратор:**
+```
+Email: admin@demo.com
+Password: password123
+User Metadata:
+{
+  "role": "admin"
+}
+```
+
+**Диспетчер:**
+```
+Email: dispatcher@demo.com
+Password: password123
+User Metadata:
+{
+  "role": "dispatcher"
+}
+```
+
+**Водитель:**
+```
+Email: driver@demo.com
+Password: password123
+User Metadata:
+{
+  "role": "driver",
+  "driver_id": "<UUID_одного_из_водителей>"
+}
+```
+
+### 4. Настройка переменных окружения
+
+Создайте файл `.env` в корне проекта:
 
 ```bash
-# Запустить dev server (откроется на http://localhost:3000)
-npm run dev
-
-# Собрать для production
-npm run build
-
-# Предпросмотр production build
-npm preview
-
-# Запустить линтер
-npm run lint
+cp .env.example .env
 ```
+
+Откройте `.env` и заполните данными из Supabase:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+Найти эти данные можно в Supabase Dashboard:
+Settings > API > Project URL и anon/public key
+
+### 5. Запуск проекта
+
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу: `http://localhost:5173`
+
+## 📱 Использование
+
+### Веб-приложение
+
+1. Откройте `http://localhost:5173`
+2. Войдите используя один из тестовых аккаунтов
+3. Изучите Dashboard с метриками
+4. Добавьте новый рейс через страницу "Рейсы"
+
+### Мобильная форма для водителей
+
+1. Откройте `http://localhost:5173/driver-form` на смартфоне
+2. Заполните форму (аутентификация не требуется)
+3. Система автоматически рассчитает выплату водителю
 
 ## 📁 Структура проекта
 
 ```
-kelechek-website/
-├── public/                 # Статические файлы
+truck-tracker/
 ├── src/
 │   ├── components/
-│   │   ├── brands/        # Компоненты брендов
-│   │   ├── common/        # Общие компоненты
-│   │   ├── layout/        # Header, Footer, Navigation
-│   │   └── ui/            # UI компоненты (Button, Card)
-│   ├── pages/             # Страницы
-│   │   ├── brands/        # Страницы брендов
-│   │   ├── About.jsx
-│   │   ├── Home.jsx
-│   │   ├── Contacts.jsx
-│   │   └── ...
-│   ├── styles/
-│   │   └── globals.css    # Глобальные стили
-│   ├── App.jsx            # Главный компонент
-│   └── main.jsx           # Entry point
-├── index.html
-├── package.json
-├── tailwind.config.js     # Цветовая система брендов
-└── vite.config.js
+│   │   ├── ui/              # Переиспользуемые UI компоненты
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Table.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── KPICard.tsx
+│   │   │   └── LoadingSpinner.tsx
+│   │   ├── layout/          # Layout компоненты
+│   │   │   ├── MainLayout.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── Header.tsx
+│   │   └── ProtectedRoute.tsx
+│   ├── contexts/
+│   │   └── AuthContext.tsx  # Контекст аутентификации
+│   ├── lib/
+│   │   ├── supabase.ts      # Supabase клиент
+│   │   └── utils.ts         # Утилиты
+│   ├── pages/
+│   │   ├── Login.tsx        # Страница входа
+│   │   ├── Dashboard.tsx    # Главная страница
+│   │   ├── Trips.tsx        # Управление рейсами
+│   │   ├── Drivers.tsx      # Управление водителями
+│   │   ├── Vehicles.tsx     # Управление машинами
+│   │   ├── Routes.tsx       # Управление маршрутами
+│   │   └── DriverForm.tsx   # Мобильная форма
+│   ├── types/
+│   │   └── index.ts         # TypeScript типы
+│   ├── App.tsx              # Главный компонент
+│   ├── main.tsx             # Точка входа
+│   └── index.css            # Глобальные стили
+├── supabase-schema.sql      # SQL схема БД
+├── .env.example             # Пример переменных окружения
+├── tailwind.config.js       # Конфигурация Tailwind
+├── tsconfig.json            # Конфигурация TypeScript
+├── vite.config.ts           # Конфигурация Vite
+└── package.json             # Зависимости проекта
 ```
 
-## 🎨 Цветовая система
+## 🗄 Схема базы данных
 
-Все цвета взяты с реальных этикеток продукции!
+### Таблицы
 
-### KELECHEK №27
-- Primary: `#C8102E` (красный)
-- Dark: `#2C3E50` (графитовый)
-- Background: `#F5F5F5` (серебристо-белый)
+- **drivers** - Водители
+- **vehicles** - Транспортные средства
+- **routes** - Маршруты
+- **trips** - Рейсы
 
-### ADYGENE
-- Primary: `#4A90B5` (холодный синий)
-- Light: `#E0F7FF` (ледяной голубой)
-- Mint: `#00BFA5` (бирюзовая мята)
+### Views (представления)
 
-### GIMALAI
-- Primary: `#87CEEB` (небесно-голубой)
-- Aqua: `#00CED1` (аква)
+- **driver_stats** - Статистика по водителям
+- **vehicle_stats** - Статистика по машинам
+- **route_stats** - Статистика по маршрутам
 
-### ЛИМОНАДЫ
-Каждый вкус имеет свой уникальный цвет:
-- Классический: `#FFD700` (желтый)
-- Буратино: `#FF8C00` (оранжевый)
-- Тархун: `#98FB98` (зеленый)
-- K+ Витамины: `#7CFC00` (яркий зеленый)
-- И другие...
+### Автоматические вычисления
 
-## 🔧 Конфигурация
+В таблице `trips` есть computed columns:
+- `total_costs` - Сумма всех расходов
+- `net_profit` - Чистая прибыль
+- `driver_payment` - 30% от прибыли
+- `owner_payment` - 70% от прибыли
 
-### Tailwind CSS
-Полная цветовая система настроена в `tailwind.config.js` с учетом всех брендов.
+## 🔒 Безопасность
 
-### GSAP Анимации
-- Scroll-triggered анимации
-- Плавные переходы
-- Hover эффекты
-- Glow эффекты для текста
+### Row Level Security (RLS)
 
-## 📱 Responsive Design
+- Водители видят только свои рейсы
+- Диспетчеры и администраторы видят все данные
+- Только администраторы могут удалять записи
+- Все операции проходят проверку на уровне БД
 
-- **Mobile-first** подход
-- Breakpoints: 375px, 640px, 768px, 1024px, 1280px, 1536px
-- 60%+ трафика с мобильных устройств
+### Аутентификация
 
-## ⚡ Performance
+- Email/Password через Supabase Auth
+- Защищённые роуты с ProtectedRoute
+- Автоматический редирект при отсутствии авторизации
 
-- Lighthouse Score target: 85+
-- Code splitting для оптимизации
-- Lazy loading изображений
-- Оптимизированные анимации (60fps)
+## 🎨 Цветовая палитра
 
-## 🌐 i18n (Planned)
+```js
+Primary: #1E3A8A (глубокий синий)
+Secondary: #64748B (серый сланец)
+Success: #059669 (зелёный)
+Warning: #F59E0B (янтарный)
+Error: #DC2626 (малиновый)
+Background: #F8FAFC (светло-серый)
+```
 
-Поддержка 3 языков:
-- Русский (основной)
-- English
-- Кыргызский
+## 🔧 Скрипты
 
-## 📄 Страницы
+```bash
+# Разработка
+npm run dev
 
-- `/` - Главная
-- `/about` - О компании
-- `/brands/kelechek` - KELECHEK №27
-- `/brands/adygene` - ADYGENE
-- `/brands/gimalai` - GIMALAI
-- `/brands/lemonads` - ЛИМОНАДЫ
-- `/where-to-buy` - Где купить
-- `/partners` - Партнерам
-- `/contacts` - Контакты
+# Сборка для production
+npm run build
 
-## 🚧 В разработке
+# Предпросмотр production сборки
+npm run preview
 
-- [ ] Интеграция с backend API
-- [ ] Форма обратной связи
-- [ ] Карта точек продаж
-- [ ] Интернационализация (i18next)
-- [ ] SEO оптимизация
-- [ ] Добавление реальных изображений продукции
+# Линтинг
+npm run lint
+```
 
-## 📝 Лицензия
+## 📊 Тестовые данные
 
-UNLICENSED - Proprietary
+После выполнения `supabase-schema.sql` автоматически создаются:
 
-## 👥 Контакты
+- 10 водителей
+- 10 машин
+- 15 маршрутов
+- 50 тестовых рейсов за последние 30 дней
 
-**ЗАО «КЕЛЕЧЕК»**
-Жалал-Абад, Кыргызстан
-Email: info@kelechek27.com
+## 🚀 Деплой
+
+### Vercel (рекомендуется)
+
+```bash
+npm install -g vercel
+vercel
+```
+
+### Netlify
+
+```bash
+npm run build
+# Загрузите папку dist в Netlify
+```
+
+### Docker
+
+```bash
+# TODO: Добавить Dockerfile
+```
+
+## 🤝 Вклад в проект
+
+1. Fork проекта
+2. Создайте feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit изменения (`git commit -m 'Add some AmazingFeature'`)
+4. Push в branch (`git push origin feature/AmazingFeature`)
+5. Откройте Pull Request
+
+## 📝 Roadmap
+
+- [ ] Экспорт в Excel
+- [ ] Тёмная тема
+- [ ] Push уведомления
+- [ ] Расширенная аналитика
+- [ ] Мобильное приложение (React Native)
+- [ ] Интеграция с GPS трекерами
+- [ ] Автоматическое построение маршрутов
+
+## 📄 Лицензия
+
+MIT License - свободно используйте для коммерческих и личных проектов
+
+## 👨‍💻 Автор
+
+Создано для транспортной компании в Кыргызстане
+
+## 🙏 Благодарности
+
+- Supabase за отличный BaaS
+- Tailwind CSS за удобную стилизацию
+- Recharts за красивые графики
+- Lucide за иконки
 
 ---
 
-© 2025 KELECHEK. 30 лет совершенства.
+**Создано с ❤️ для транспортной индустрии Кыргызстана**
