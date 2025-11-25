@@ -375,11 +375,11 @@ export const Settings: React.FC = () => {
                   <div className="text-xs font-medium text-secondary-900 dark:text-secondary-100 mb-1">
                     Маленький
                   </div>
-                  <div className="text-xl font-bold text-secondary-700 dark:text-secondary-300">
+                  <div className="text-lg font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
                   </div>
                   <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
-                    14px
+                    13px
                   </div>
                 </div>
               </button>
@@ -396,11 +396,11 @@ export const Settings: React.FC = () => {
                   <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-1">
                     Средний
                   </div>
-                  <div className="text-2xl font-bold text-secondary-700 dark:text-secondary-300">
+                  <div className="text-xl font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
                   </div>
                   <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
-                    16px
+                    15px
                   </div>
                 </div>
               </button>
@@ -417,7 +417,7 @@ export const Settings: React.FC = () => {
                   <div className="text-base font-medium text-secondary-900 dark:text-secondary-100 mb-1">
                     Большой
                   </div>
-                  <div className="text-3xl font-bold text-secondary-700 dark:text-secondary-300">
+                  <div className="text-2xl font-bold text-secondary-700 dark:text-secondary-300">
                     Aa
                   </div>
                   <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
