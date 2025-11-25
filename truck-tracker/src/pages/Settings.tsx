@@ -160,14 +160,14 @@ export const Settings: React.FC = () => {
   };
 
   const currencyOptions = [
-    { value: 'KGS', label: '🇰🇬 Сом (KGS)' },
-    { value: 'USD', label: '🇺🇸 Доллар (USD)' },
-    { value: 'RUB', label: '🇷🇺 Рубль (RUB)' },
+    { value: 'KGS', label: t('settings.currency_kgs') },
+    { value: 'USD', label: t('settings.currency_usd') },
+    { value: 'RUB', label: t('settings.currency_rub') },
   ];
 
   const languageOptions = [
-    { value: 'ru', label: '🇷🇺 Русский' },
-    { value: 'ky', label: '🇰🇬 Кыргызча' },
+    { value: 'ru', label: t('settings.lang_ru') },
+    { value: 'ky', label: t('settings.lang_ky') },
   ];
 
   if (!isAdmin) {

@@ -411,6 +411,15 @@ const translations: Record<Language, Record<string, string>> = {
     // Settings (дополнительные)
     'settings.table_not_found': 'Таблица settings не найдена. Выполните SQL скрипт create-settings-table.sql',
     'settings.run_sql': 'Выполните SQL скрипт:',
+    'settings.currency_kgs': '🇰🇬 Сом (KGS)',
+    'settings.currency_usd': '🇺🇸 Доллар (USD)',
+    'settings.currency_rub': '🇷🇺 Рубль (RUB)',
+    'settings.lang_ru': '🇷🇺 Русский',
+    'settings.lang_ky': '🇰🇬 Кыргызча',
+
+    // Export
+    'export.filename_prefix': 'Отчет_рейсы',
+    'export.error': 'Ошибка при создании отчёта',
 
     // Dashboard (дополнительные)
     'dashboard.filters_active': '✓ Фильтры активны',
@@ -830,6 +839,15 @@ const translations: Record<Language, Record<string, string>> = {
     // Settings (кошумча)
     'settings.table_not_found': 'settings таблицасы табылган жок. create-settings-table.sql SQL скриптин аткарыңыз',
     'settings.run_sql': 'SQL скриптин аткарыңыз:',
+    'settings.currency_kgs': '🇰🇬 Сом (KGS)',
+    'settings.currency_usd': '🇺🇸 Доллар (USD)',
+    'settings.currency_rub': '🇷🇺 Рубль (RUB)',
+    'settings.lang_ru': '🇷🇺 Орусча',
+    'settings.lang_ky': '🇰🇬 Кыргызча',
+
+    // Export
+    'export.filename_prefix': 'Отчет_рейстер',
+    'export.error': 'Отчет түзүүдө ката',
 
     // Dashboard (кошумча)
     'dashboard.filters_active': '✓ Чыпкалар активдүү',

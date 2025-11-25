@@ -218,117 +218,120 @@ export const Trips: React.FC = () => {
       return;
     }
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(t('export.sheet_name'));
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(t('export.sheet_name'));
 
-    // Заголовок отчета
-    const today = new Date().toLocaleDateString('ru-RU');
-    worksheet.addRow([t('export.report_title')]);
-    worksheet.addRow([`${t('export.generated_date')}: ${today}`]);
-    worksheet.addRow([`${t('export.total_trips')}: ${filteredTrips.length}`]);
-    worksheet.addRow([]); // Пустая строка
+      // Заголовок отчета
+      const today = new Date().toLocaleDateString('ru-RU');
+      worksheet.addRow([t('export.report_title')]);
+      worksheet.addRow([`${t('export.generated_date')}: ${today}`]);
+      worksheet.addRow([`${t('export.total_trips')}: ${filteredTrips.length}`]);
+      worksheet.addRow([]);
 
-    // Заголовки колонок
-    const headers = [
-      t('export.header.date'),
-      t('export.header.driver'),
-      t('export.header.vehicle'),
-      t('export.header.route'),
-      t('export.header.distance'),
-      t('export.header.revenue'),
-      t('export.header.fuel'),
-      t('export.header.maintenance'),
-      t('export.header.other'),
-      t('export.header.total_costs'),
-      t('export.header.profit'),
-      t('export.header.driver_payment'),
-      t('export.header.owner_payment'),
-      t('export.header.status'),
-      t('export.header.comment')
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.font = { bold: true };
-    headerRow.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFE0E0E0' }
-    };
+      // Заголовки колонок
+      const headers = [
+        t('export.header.date'),
+        t('export.header.driver'),
+        t('export.header.vehicle'),
+        t('export.header.route'),
+        t('export.header.distance'),
+        t('export.header.revenue'),
+        t('export.header.fuel'),
+        t('export.header.maintenance'),
+        t('export.header.other'),
+        t('export.header.total_costs'),
+        t('export.header.profit'),
+        t('export.header.driver_payment'),
+        t('export.header.owner_payment'),
+        t('export.header.status'),
+        t('export.header.comment')
+      ];
+      const headerRow = worksheet.addRow(headers);
+      headerRow.font = { bold: true };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
 
-    // Данные
-    filteredTrips.forEach((trip) => {
-      worksheet.addRow([
-        formatDate(trip.trip_date),
-        trip.driver?.full_name || 'N/A',
-        trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model} (${trip.vehicle.license_plate})` : 'N/A',
-        trip.route?.name || 'N/A',
-        trip.route?.distance_km || 0,
-        trip.revenue,
-        trip.fuel_cost,
-        trip.maintenance_cost,
-        trip.other_costs,
-        trip.total_costs,
-        trip.net_profit,
-        trip.driver_payment,
-        trip.owner_payment,
-        t(`status.${trip.status}`),
-        trip.comment || ''
+      // Данные
+      filteredTrips.forEach((trip) => {
+        worksheet.addRow([
+          formatDate(trip.trip_date),
+          trip.driver?.full_name || 'N/A',
+          trip.vehicle ? `${trip.vehicle.brand} ${trip.vehicle.model} (${trip.vehicle.license_plate})` : 'N/A',
+          trip.route?.name || 'N/A',
+          trip.route?.distance_km || 0,
+          trip.revenue,
+          trip.fuel_cost,
+          trip.maintenance_cost,
+          trip.other_costs,
+          trip.total_costs,
+          trip.net_profit,
+          trip.driver_payment,
+          trip.owner_payment,
+          t(`status.${trip.status}`),
+          trip.comment || ''
+        ]);
+      });
+
+      // Пустая строка
+      worksheet.addRow([]);
+
+      // Итоговые суммы
+      const totalsRow = worksheet.addRow([
+        '',
+        '',
+        '',
+        '',
+        `${t('export.totals')}:`,
+        filteredTrips.reduce((sum, trip) => sum + trip.revenue, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.fuel_cost, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.maintenance_cost, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.other_costs, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.total_costs, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.net_profit, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.driver_payment, 0),
+        filteredTrips.reduce((sum, trip) => sum + trip.owner_payment, 0),
+        '',
+        ''
       ]);
-    });
+      totalsRow.font = { bold: true };
 
-    // Пустая строка
-    worksheet.addRow([]);
+      // Настройка ширины колонок
+      worksheet.columns = [
+        { width: 12 },
+        { width: 20 },
+        { width: 30 },
+        { width: 25 },
+        { width: 14 },
+        { width: 12 },
+        { width: 12 },
+        { width: 14 },
+        { width: 10 },
+        { width: 14 },
+        { width: 12 },
+        { width: 16 },
+        { width: 16 },
+        { width: 12 },
+        { width: 30 },
+      ];
 
-    // Итоговые суммы
-    const totalsRow = worksheet.addRow([
-      '',
-      '',
-      '',
-      '',
-      `${t('export.totals')}:`,
-      filteredTrips.reduce((sum, t) => sum + t.revenue, 0),
-      filteredTrips.reduce((sum, t) => sum + t.fuel_cost, 0),
-      filteredTrips.reduce((sum, t) => sum + t.maintenance_cost, 0),
-      filteredTrips.reduce((sum, t) => sum + t.other_costs, 0),
-      filteredTrips.reduce((sum, t) => sum + t.total_costs, 0),
-      filteredTrips.reduce((sum, t) => sum + t.net_profit, 0),
-      filteredTrips.reduce((sum, t) => sum + t.driver_payment, 0),
-      filteredTrips.reduce((sum, t) => sum + t.owner_payment, 0),
-      '',
-      ''
-    ]);
-    totalsRow.font = { bold: true };
-
-    // Настройка ширины колонок
-    worksheet.columns = [
-      { width: 12 },  // Дата
-      { width: 20 },  // Водитель
-      { width: 30 },  // Автомобиль
-      { width: 25 },  // Маршрут
-      { width: 14 },  // Дистанция
-      { width: 12 },  // Выручка
-      { width: 12 },  // Топливо
-      { width: 14 },  // Обслуживание
-      { width: 10 },  // Прочие
-      { width: 14 },  // Всего расходов
-      { width: 12 },  // Прибыль
-      { width: 16 },  // Оплата водителю
-      { width: 16 },  // Оплата владельцу
-      { width: 12 },  // Статус
-      { width: 30 },  // Комментарий
-    ];
-
-    // Генерация имени файла
-    const filename = `Отчет_рейсы_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    // Скачивание
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    window.URL.revokeObjectURL(url);
+      // Генерация имени файла и скачивание
+      const filename = `${t('export.filename_prefix')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting to Excel:', err);
+      alert(t('export.error'));
+    }
   };
 
   const openCreateModal = () => {
