@@ -65,39 +65,41 @@ export const Modal: React.FC<ModalProps> = ({
       />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
         <div
           className={cn(
-            'relative bg-white dark:bg-secondary-800 rounded-xl shadow-strong dark:shadow-none dark:border dark:border-secondary-700 w-full',
+            'relative bg-white dark:bg-secondary-800 shadow-strong dark:shadow-none dark:border dark:border-secondary-700 w-full',
             'transform transition-all duration-300 ease-out',
             'animate-in zoom-in-95 slide-in-from-bottom-4',
+            'rounded-t-2xl sm:rounded-xl',
+            'max-h-[90vh] sm:max-h-none',
             sizes[size]
           )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 dark:border-secondary-700">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-secondary-200 dark:border-secondary-700">
             {title && (
-              <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
+              <h2 className="text-base sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 pr-2">
                 {title}
               </h2>
             )}
             <button
               onClick={onClose}
-              className="ml-auto text-secondary-400 hover:text-secondary-600 dark:text-secondary-500 dark:hover:text-secondary-300 transition-colors"
+              className="ml-auto text-secondary-400 hover:text-secondary-600 dark:text-secondary-500 dark:hover:text-secondary-300 transition-colors p-1"
             >
-              <X size={24} />
+              <X size={20} className="sm:w-6 sm:h-6" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="px-6 py-4 max-h-[calc(100vh-16rem)] overflow-y-auto custom-scrollbar">
+          <div className="px-4 sm:px-6 py-4 max-h-[calc(90vh-8rem)] sm:max-h-[calc(100vh-16rem)] overflow-y-auto custom-scrollbar">
             {children}
           </div>
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-4 border-t border-secondary-200 dark:border-secondary-700">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-secondary-200 dark:border-secondary-700">
               {footer}
             </div>
           )}

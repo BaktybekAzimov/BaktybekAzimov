@@ -555,7 +555,7 @@ export const Trips: React.FC = () => {
         }
       />
 
-      <div className="p-8 space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
         {error && (
           <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
             <p className="text-error-700 dark:text-error-400">{error}</p>

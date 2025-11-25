@@ -9,8 +9,8 @@ interface TableProps {
 
 export const Table: React.FC<TableProps> = ({ children, className }) => {
   return (
-    <div className="w-full overflow-x-auto custom-scrollbar">
-      <table className={cn('w-full', className)}>
+    <div className="w-full overflow-x-auto custom-scrollbar -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
+      <table className={cn('w-full min-w-[600px]', className)}>
         {children}
       </table>
     </div>
@@ -76,7 +76,7 @@ export const TableHead: React.FC<TableHeadProps> = ({
   return (
     <th
       className={cn(
-        'px-6 py-3 text-left text-xs font-semibold text-secondary-700 dark:text-secondary-300 uppercase tracking-wider',
+        'px-2 sm:px-3 md:px-4 lg:px-6 py-2 md:py-3 text-left text-[10px] sm:text-xs font-semibold text-secondary-700 dark:text-secondary-300 uppercase tracking-wider whitespace-nowrap',
         sortable && 'cursor-pointer select-none hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors',
         className
       )}
@@ -115,7 +115,7 @@ interface TableCellProps {
 
 export const TableCell: React.FC<TableCellProps> = ({ children, className, colSpan }) => {
   return (
-    <td className={cn('px-6 py-4 text-sm text-secondary-900 dark:text-secondary-100', className)} colSpan={colSpan}>
+    <td className={cn('px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 md:py-4 text-xs sm:text-sm text-secondary-900 dark:text-secondary-100', className)} colSpan={colSpan}>
       {children}
     </td>
   );

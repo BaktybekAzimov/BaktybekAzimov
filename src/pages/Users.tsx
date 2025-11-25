@@ -353,7 +353,7 @@ export const Users: React.FC = () => {
         }
       />
 
-      <div className="p-8 space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
         {/* Фильтры */}
         <Card>
           <div className="flex flex-col sm:flex-row gap-4">

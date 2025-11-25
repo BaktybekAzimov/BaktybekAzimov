@@ -503,7 +503,7 @@ export const Dashboard: React.FC = () => {
         }
       />
 
-      <div className="p-6 space-y-4">
+      <div className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
         {/* Расширенные фильтры */}
         {showAdvancedFilters && (
           <Card className="animate-slide-up">
