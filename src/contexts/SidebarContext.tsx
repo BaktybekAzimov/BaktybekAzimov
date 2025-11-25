@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 interface SidebarContextType {
   isOpen: boolean;
+  isMobile: boolean;
   toggle: () => void;
   close: () => void;
   open: () => void;
@@ -22,14 +23,30 @@ interface SidebarProviderProps {
 }
 
 export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // На десктопе открыт по умолчанию, на мобиле закрыт
+      if (!mobile && !isOpen) {
+        setIsOpen(true);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggle = () => setIsOpen(!isOpen);
   const close = () => setIsOpen(false);
   const open = () => setIsOpen(true);
 
   return (
-    <SidebarContext.Provider value={{ isOpen, toggle, close, open }}>
+    <SidebarContext.Provider value={{ isOpen, isMobile, toggle, close, open }}>
       {children}
     </SidebarContext.Provider>
   );

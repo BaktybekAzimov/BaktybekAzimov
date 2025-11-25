@@ -8,6 +8,7 @@ import {
   MapPin,
   LogOut,
   Settings as SettingsIcon,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSidebar } from '../../contexts/SidebarContext';
@@ -34,7 +35,7 @@ const navigationKeys: Array<{
 
 export const Sidebar: React.FC = () => {
   const { signOut, user, isAdmin } = useAuth();
-  const { isOpen, toggle } = useSidebar();
+  const { isOpen, isMobile, toggle, close } = useSidebar();
   const { t } = useLanguage();
 
   const handleSignOut = async () => {
@@ -45,6 +46,108 @@ export const Sidebar: React.FC = () => {
     }
   };
 
+  const handleNavClick = () => {
+    // Закрываем сайдбар на мобильных при клике на ссылку
+    if (isMobile) {
+      close();
+    }
+  };
+
+  // Мобильная версия - overlay
+  if (isMobile) {
+    return (
+      <>
+        {/* Backdrop */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+            onClick={close}
+          />
+        )}
+
+        {/* Sidebar */}
+        <aside
+          className={cn(
+            "fixed top-0 left-0 h-full w-72 bg-white dark:bg-secondary-900 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl",
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          {/* Header with close button */}
+          <div className="flex items-center justify-between p-4 border-b border-secondary-200 dark:border-secondary-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
+                <Truck className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-sm font-bold text-secondary-900 dark:text-secondary-100 leading-tight">
+                  {t('sidebar.system_title')}
+                </h1>
+                <p className="text-xs text-secondary-500">{t('sidebar.system_subtitle')}</p>
+              </div>
+            </div>
+            <button
+              onClick={close}
+              className="p-2 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-800"
+            >
+              <X className="h-5 w-5 text-secondary-500" />
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            {navigationKeys
+              .filter((item) => {
+                if (item.adminOnly && !isAdmin) return false;
+                if (item.allowedRoles && user?.role) {
+                  return item.allowedRoles.includes(user.role as AllowedRole);
+                }
+                return true;
+              })
+              .map((item) => (
+                <NavLink
+                  key={item.key}
+                  to={item.href}
+                  onClick={handleNavClick}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+                      'text-base font-medium',
+                      isActive
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400'
+                        : 'text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                    )
+                  }
+                >
+                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  <span>{t(item.key)}</span>
+                </NavLink>
+              ))}
+          </nav>
+
+          {/* User Info & Logout */}
+          <div className="p-4 border-t border-secondary-200 dark:border-secondary-700">
+            <div className="mb-3 px-2">
+              <p className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate">{user?.email}</p>
+              <p className="text-xs text-secondary-500 dark:text-secondary-400 capitalize">
+                {user?.role === 'admin' && t('role.admin')}
+                {user?.role === 'dispatcher' && t('role.dispatcher')}
+                {user?.role === 'driver' && t('role.driver')}
+              </p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20 transition-all"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>{t('nav.logout')}</span>
+            </button>
+          </div>
+        </aside>
+      </>
+    );
+  }
+
+  // Desktop версия
   return (
     <aside
       className={cn(
@@ -72,13 +175,11 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Navigation - всегда показывается */}
+      {/* Navigation */}
       <nav className="flex-1 px-2 py-6 space-y-2 overflow-y-auto">
         {navigationKeys
           .filter((item) => {
-            // Check adminOnly
             if (item.adminOnly && !isAdmin) return false;
-            // Check allowedRoles
             if (item.allowedRoles && user?.role) {
               return item.allowedRoles.includes(user.role as AllowedRole);
             }
