@@ -231,12 +231,15 @@ const translations: Record<Language, Record<string, string>> = {
     'status.available': 'Свободна',
     'status.in_trip': 'В рейсе',
     'status.maintenance': 'На ремонте',
+    'status.unknown': 'Не указан',
 
     // Уведомления
     'notifications.title': 'Уведомления',
     'notifications.mark_all': 'Отметить все',
     'notifications.no_notifications': 'Нет уведомлений',
     'notifications.view_all': 'Посмотреть все',
+    'notifications.all_read': 'Все уведомления прочитаны',
+    'notifications.clear_all': 'Очистить все',
     'notifications.just_now': 'только что',
     'notifications.min_ago': 'мин назад',
     'notifications.hours_ago': 'ч назад',
@@ -674,12 +677,15 @@ const translations: Record<Language, Record<string, string>> = {
     'status.available': 'Бош',
     'status.in_trip': 'Рейсте',
     'status.maintenance': 'Оңдоодо',
+    'status.unknown': 'Көрсөтүлгөн эмес',
 
     // Уведомления
     'notifications.title': 'Билдирүүлөр',
     'notifications.mark_all': 'Баарын белгилөө',
     'notifications.no_notifications': 'Билдирүүлөр жок',
     'notifications.view_all': 'Баарын көрүү',
+    'notifications.all_read': 'Бардык билдирүүлөр окулду',
+    'notifications.clear_all': 'Баарын тазалоо',
     'notifications.just_now': 'эми эле',
     'notifications.min_ago': 'мүн. мурун',
     'notifications.hours_ago': 'с. мурун',

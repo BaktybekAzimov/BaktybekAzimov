@@ -190,15 +190,24 @@ export const Notifications: React.FC = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-secondary-200 dark:border-secondary-700">
+            <div className="px-4 py-2 border-t border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
+              {unreadCount === 0 ? (
+                <span className="text-xs text-success-600 dark:text-success-400">
+                  ✓ {t('notifications.all_read')}
+                </span>
+              ) : (
+                <span className="text-xs text-secondary-500 dark:text-secondary-400">
+                  {unreadCount} {t('notifications.title').toLowerCase()}
+                </span>
+              )}
               <button
                 onClick={() => {
-                  markAllAsRead();
+                  setNotifications([]);
                   setIsOpen(false);
                 }}
-                className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors duration-200"
+                className="text-xs text-error-600 dark:text-error-400 hover:text-error-700 dark:hover:text-error-300 font-medium transition-colors duration-200"
               >
-                {t('notifications.view_all')} →
+                {t('notifications.clear_all')}
               </button>
             </div>
           )}
