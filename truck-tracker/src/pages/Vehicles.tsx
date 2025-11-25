@@ -323,21 +323,21 @@ export const Vehicles: React.FC = () => {
                     </TableCell>
                     <TableCell>{vehicle.year}</TableCell>
                     <TableCell>
-                      <span className="font-semibold text-primary-700">
+                      <span className="font-semibold text-primary-700 dark:text-primary-400">
                         {vehicle.total_trips || 0}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(vehicle.total_revenue || 0)}
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(vehicle.avg_profit_per_trip || 0)}
                     </TableCell>
                     <TableCell>
                       {vehicle.last_trip_date ? (
                         formatDate(vehicle.last_trip_date)
                       ) : (
-                        <span className="text-secondary-400">{t('common.no_data')}</span>
+                        <span className="text-secondary-400 dark:text-secondary-500">{t('common.no_data')}</span>
                       )}
                     </TableCell>
                     <TableCell>

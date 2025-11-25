@@ -238,22 +238,22 @@ export const Routes: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="font-semibold text-secondary-700">
+                      <span className="font-semibold text-secondary-700 dark:text-secondary-400">
                         {route.distance_km} {t('routes.km')}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(route.avg_cost)}
                     </TableCell>
                     <TableCell>
-                      <span className="font-semibold text-primary-700">
+                      <span className="font-semibold text-primary-700 dark:text-primary-400">
                         {route.trip_count || 0}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(route.total_revenue || 0)}
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(route.avg_revenue || 0)}
                     </TableCell>
                     <TableCell>

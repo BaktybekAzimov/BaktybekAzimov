@@ -610,13 +610,13 @@ export const Trips: React.FC = () => {
                         : 'N/A'}
                     </TableCell>
                     <TableCell>{trip.route?.name || 'N/A'}</TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(trip.revenue)}
                     </TableCell>
-                    <TableCell className="font-mono text-error-700">
+                    <TableCell className="font-mono text-error-700 dark:text-error-400">
                       {formatCurrency(trip.total_costs)}
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-primary-700">
+                    <TableCell className="font-mono font-semibold text-primary-700 dark:text-primary-400">
                       {formatCurrency(trip.net_profit)}
                     </TableCell>
                     <TableCell>
@@ -658,8 +658,8 @@ export const Trips: React.FC = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t border-secondary-200">
-              <p className="text-sm text-secondary-600">
+            <div className="flex items-center justify-between mt-6 pt-6 border-t border-secondary-200 dark:border-secondary-700">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">
                 {t('common.page')} {currentPage} {t('common.of')} {totalPages}
               </p>
               <div className="flex gap-2">

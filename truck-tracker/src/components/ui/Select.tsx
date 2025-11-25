@@ -1,15 +1,18 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
   helperText?: string;
   options: Array<{ value: string | number; label: string }>;
+  placeholder?: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, options, className, ...props }, ref) => {
+  ({ label, error, helperText, options, placeholder, className, ...props }, ref) => {
+    const { t } = useLanguage();
     return (
       <div className="w-full">
         {label && (
@@ -32,7 +35,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           )}
           {...props}
         >
-          <option value="">Выберите...</option>
+          <option value="">{placeholder || t('common.select')}</option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

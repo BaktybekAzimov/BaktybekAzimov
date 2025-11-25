@@ -322,14 +322,14 @@ export const Drivers: React.FC = () => {
                     <TableCell>{driver.phone}</TableCell>
                     <TableCell>{formatDate(driver.hire_date)}</TableCell>
                     <TableCell>
-                      <span className="font-semibold text-primary-700">
+                      <span className="font-semibold text-primary-700 dark:text-primary-400">
                         {driver.total_trips || 0}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-success-700">
+                    <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(driver.total_payment || 0)}
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700">
+                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
                       {formatCurrency(driver.avg_profit_per_trip || 0)}
                     </TableCell>
                     <TableCell>
@@ -389,7 +389,13 @@ export const Drivers: React.FC = () => {
             label={t('drivers.phone')}
             type="tel"
             placeholder={t('drivers.phone_placeholder')}
-            {...register('phone', { required: t('validation.phone_required') })}
+            {...register('phone', {
+              required: t('validation.phone_required'),
+              pattern: {
+                value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+                message: t('validation.phone_invalid')
+              }
+            })}
             error={errors.phone?.message}
           />
 
