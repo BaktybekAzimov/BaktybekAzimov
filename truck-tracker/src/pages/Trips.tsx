@@ -594,7 +594,7 @@ export const Trips: React.FC = () => {
                 type="date"
                 value={dateFromFilter}
                 onChange={(e) => setDateFromFilter(e.target.value)}
-                placeholder="От"
+                placeholder={t('filter.from')}
               />
 
               {/* Дата ДО */}
@@ -602,7 +602,7 @@ export const Trips: React.FC = () => {
                 type="date"
                 value={dateToFilter}
                 onChange={(e) => setDateToFilter(e.target.value)}
-                placeholder="До"
+                placeholder={t('filter.to')}
               />
             </div>
 

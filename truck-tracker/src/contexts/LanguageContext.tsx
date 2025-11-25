@@ -148,6 +148,10 @@ const translations: Record<Language, Record<string, string>> = {
     'users.delete_error': 'Ошибка при удалении пользователя',
     'users.save_error': 'Ошибка при сохранении пользователя',
     'users.full_name': 'Полное имя',
+    'users.role': 'Роль',
+
+    // Модальные окна (дополнительно)
+    'modal.edit_user': 'Редактировать пользователя',
 
     // Настройки
     'settings.title': 'Настройки системы',
@@ -587,6 +591,10 @@ const translations: Record<Language, Record<string, string>> = {
     'users.delete_error': 'Колдонуучуну өчүрүүдө ката',
     'users.save_error': 'Колдонуучуну сактоодо ката',
     'users.full_name': 'Толук аты',
+    'users.role': 'Ролу',
+
+    // Модальные окна (дополнительно)
+    'modal.edit_user': 'Колдонуучуну өзгөртүү',
 
     // Настройки
     'settings.title': 'Системанын жөндөөлөрү',
