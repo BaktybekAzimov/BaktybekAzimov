@@ -20,6 +20,7 @@ const navigationKeys = [
   { key: 'nav.drivers', href: '/drivers', icon: Users },
   { key: 'nav.vehicles', href: '/vehicles', icon: Car },
   { key: 'nav.routes', href: '/routes', icon: MapPin },
+  { key: 'nav.users', href: '/users', icon: Users, adminOnly: true },
   { key: 'nav.settings', href: '/settings', icon: SettingsIcon, adminOnly: true },
 ];
 
