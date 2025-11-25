@@ -405,11 +405,41 @@ export const Trips: React.FC = () => {
           .eq('id', editingTrip.id);
 
         if (error) throw error;
+
+        // Update vehicle status based on trip status change
+        if (data.status === 'in_progress') {
+          // If vehicle changed, set old vehicle to available
+          if (editingTrip.vehicle_id !== data.vehicle_id) {
+            await supabase
+              .from('vehicles')
+              .update({ status: 'available' })
+              .eq('id', editingTrip.vehicle_id);
+          }
+          // Set new vehicle to in_trip
+          await supabase
+            .from('vehicles')
+            .update({ status: 'in_trip' })
+            .eq('id', data.vehicle_id);
+        } else if (data.status === 'completed' || data.status === 'cancelled') {
+          // Set vehicle to available when trip is completed or cancelled
+          await supabase
+            .from('vehicles')
+            .update({ status: 'available' })
+            .eq('id', data.vehicle_id);
+        }
       } else {
         // Create new trip
         const { error } = await supabase.from('trips').insert([tripData]);
 
         if (error) throw error;
+
+        // Update vehicle status for new trip
+        if (data.status === 'in_progress') {
+          await supabase
+            .from('vehicles')
+            .update({ status: 'in_trip' })
+            .eq('id', data.vehicle_id);
+        }
       }
 
       setIsModalOpen(false);
@@ -426,9 +456,20 @@ export const Trips: React.FC = () => {
     if (!confirm(t('confirm.delete_trip'))) return;
 
     try {
+      // Get trip data before deleting to update vehicle status
+      const tripToDelete = trips.find(trip => trip.id === id);
+
       const { error } = await supabase.from('trips').delete().eq('id', id);
 
       if (error) throw error;
+
+      // If trip was in_progress, set vehicle to available
+      if (tripToDelete && tripToDelete.status === 'in_progress') {
+        await supabase
+          .from('vehicles')
+          .update({ status: 'available' })
+          .eq('id', tripToDelete.vehicle_id);
+      }
 
       fetchData();
     } catch (err) {

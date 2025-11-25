@@ -91,6 +91,11 @@ export const Settings: React.FC = () => {
 
       setSettings(data);
 
+      // Синхронизировать валюту в localStorage
+      if (data.currency) {
+        localStorage.setItem('currency', data.currency);
+      }
+
       // Синхронизировать язык
       if (data.language && data.language !== language) {
         setLanguage(data.language as 'ru' | 'ky');
@@ -138,6 +143,9 @@ export const Settings: React.FC = () => {
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
+
+      // Синхронизировать валюту в localStorage
+      localStorage.setItem('currency', settings.currency);
 
       // Обновить язык если изменился
       if (settings.language !== language) {
