@@ -55,7 +55,7 @@ export const Login: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Email"
+            label={t('auth.email')}
             type="email"
             placeholder="your@email.com"
             value={email}

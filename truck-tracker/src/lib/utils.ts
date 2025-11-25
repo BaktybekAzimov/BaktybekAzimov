@@ -94,22 +94,6 @@ export function getStatusColor(status: string): string {
   return colors[status] || 'bg-secondary-100 text-secondary-700';
 }
 
-// Get status label
-export function getStatusLabel(status: string): string {
-  const labels: Record<string, string> = {
-    completed: 'Завершён',
-    in_progress: 'В пути',
-    cancelled: 'Отменён',
-    active: 'Активен',
-    inactive: 'Неактивен',
-    available: 'Свободна',
-    in_trip: 'В рейсе',
-    maintenance: 'На ремонте',
-  };
-
-  return labels[status] || status;
-}
-
 // Debounce function
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
