@@ -213,6 +213,11 @@ const translations: Record<Language, Record<string, string>> = {
     'error.loading': 'Ошибка загрузки данных',
     'error.no_data': 'Нет данных для отображения',
     'error.no_access': 'У вас нет прав для доступа',
+    'error.save_failed': 'Не удалось сохранить',
+    'error.delete_failed': 'Не удалось удалить',
+    'error.load_failed': 'Не удалось загрузить данные',
+    'error.has_active_trips': 'Невозможно удалить: есть активные рейсы',
+    'error.has_linked_trips': 'Невозможно удалить: есть связанные рейсы',
 
     // Общие
     'common.loading': 'Загрузка...',
@@ -220,6 +225,71 @@ const translations: Record<Language, Record<string, string>> = {
     'common.total': 'Итого',
     'common.select': 'Выберите',
     'common.parking_food_etc': 'Парковка, питание, и т.д.',
+    'common.confirm_delete': 'Вы уверены, что хотите удалить?',
+    'common.no_data': 'Нет данных',
+    'common.page': 'Страница',
+    'common.of': 'из',
+    'common.back': 'Назад',
+    'common.forward': 'Вперед',
+    'common.reset_filters': 'Сбросить фильтры',
+    'common.all': 'Все',
+    'common.auto_calc': 'Автоматический расчёт',
+    'common.total_costs': 'Общие расходы',
+    'common.net_profit': 'Чистая прибыль',
+    'common.driver_share': 'Водителю',
+    'common.owner_share': 'Владельцу',
+    'common.last_trip': 'Последний рейс',
+
+    // Подтверждения
+    'confirm.delete_trip': 'Вы уверены, что хотите удалить этот рейс?',
+    'confirm.delete_driver': 'Вы уверены, что хотите удалить этого водителя?',
+    'confirm.delete_vehicle': 'Вы уверены, что хотите удалить этот автомобиль?',
+    'confirm.delete_route': 'Вы уверены, что хотите удалить этот маршрут?',
+
+    // Модальные окна
+    'modal.add_trip': 'Добавить рейс',
+    'modal.edit_trip': 'Редактировать рейс',
+    'modal.add_driver': 'Добавить водителя',
+    'modal.edit_driver': 'Редактировать водителя',
+    'modal.add_vehicle': 'Добавить автомобиль',
+    'modal.edit_vehicle': 'Редактировать автомобиль',
+    'modal.add_route': 'Добавить маршрут',
+    'modal.edit_route': 'Редактировать маршрут',
+
+    // Sidebar
+    'sidebar.system_title': 'Система учета',
+    'sidebar.system_subtitle': 'рейсов',
+
+    // Пустые состояния
+    'empty.trips': 'Нет рейсов',
+    'empty.trips_search': 'Рейсы не найдены',
+    'empty.drivers': 'Нет водителей',
+    'empty.vehicles': 'Нет автомобилей',
+    'empty.vehicles_status': 'Нет автомобилей с таким статусом',
+    'empty.routes': 'Нет маршрутов',
+
+    // Фильтры (дополнительные)
+    'filter.all_statuses': 'Все статусы',
+    'filter.all_drivers': 'Все водители',
+    'filter.all_vehicles': 'Весь транспорт',
+    'filter.free': 'Свободны',
+    'filter.in_trip': 'В рейсе',
+    'filter.maintenance': 'На ремонте',
+
+    // Экспорт
+    'export.excel': 'Экспорт в Excel',
+    'export.no_data': 'Нет данных для экспорта',
+
+    // Водители (дополнительные)
+    'drivers.top_by_payments': 'Топ 10 водителей по выплатам',
+    'drivers.phone_placeholder': '+996 XXX XXX XXX',
+
+    // Транспорт (дополнительные)
+    'vehicles.last_trip': 'Последний рейс',
+    'vehicles.avg_profit': 'Средняя прибыль',
+
+    // Маршруты (дополнительные)
+    'routes.trip_count': 'Кол-во рейсов',
   },
   ky: {
     // Общие
@@ -414,6 +484,11 @@ const translations: Record<Language, Record<string, string>> = {
     'error.loading': 'Маалыматтарды жүктөөдө ката',
     'error.no_data': 'Көрсөтүү үчүн маалымат жок',
     'error.no_access': 'Сизде кирүү укугу жок',
+    'error.save_failed': 'Сактоо мүмкүн болбоду',
+    'error.delete_failed': 'Өчүрүү мүмкүн болбоду',
+    'error.load_failed': 'Маалыматтарды жүктөө мүмкүн болбоду',
+    'error.has_active_trips': 'Өчүрүү мүмкүн эмес: активдүү рейстер бар',
+    'error.has_linked_trips': 'Өчүрүү мүмкүн эмес: байланышкан рейстер бар',
 
     // Общие
     'common.loading': 'Жүктөлүүдө...',
@@ -421,6 +496,71 @@ const translations: Record<Language, Record<string, string>> = {
     'common.total': 'Жыйынтыгы',
     'common.select': 'Тандаңыз',
     'common.parking_food_etc': 'Токтоочу жай, тамак-аш ж.б.',
+    'common.confirm_delete': 'Өчүрүүнү каалайсызбы?',
+    'common.no_data': 'Маалымат жок',
+    'common.page': 'Барак',
+    'common.of': 'ичинен',
+    'common.back': 'Артка',
+    'common.forward': 'Алдыга',
+    'common.reset_filters': 'Чыпкаларды тазалоо',
+    'common.all': 'Баары',
+    'common.auto_calc': 'Автоматтык эсептөө',
+    'common.total_costs': 'Жалпы чыгымдар',
+    'common.net_profit': 'Таза пайда',
+    'common.driver_share': 'Айдоочуга',
+    'common.owner_share': 'Ээсине',
+    'common.last_trip': 'Акыркы рейс',
+
+    // Подтверждения
+    'confirm.delete_trip': 'Бул рейсти өчүргүңүз келеби?',
+    'confirm.delete_driver': 'Бул айдоочуну өчүргүңүз келеби?',
+    'confirm.delete_vehicle': 'Бул унааны өчүргүңүз келеби?',
+    'confirm.delete_route': 'Бул маршрутту өчүргүңүз келеби?',
+
+    // Модальные окна
+    'modal.add_trip': 'Рейс кошуу',
+    'modal.edit_trip': 'Рейсти өзгөртүү',
+    'modal.add_driver': 'Айдоочу кошуу',
+    'modal.edit_driver': 'Айдоочуну өзгөртүү',
+    'modal.add_vehicle': 'Унаа кошуу',
+    'modal.edit_vehicle': 'Унааны өзгөртүү',
+    'modal.add_route': 'Маршрут кошуу',
+    'modal.edit_route': 'Маршрутту өзгөртүү',
+
+    // Sidebar
+    'sidebar.system_title': 'Рейстерди эсепке',
+    'sidebar.system_subtitle': 'алуу системасы',
+
+    // Пустые состояния
+    'empty.trips': 'Рейстер жок',
+    'empty.trips_search': 'Рейстер табылган жок',
+    'empty.drivers': 'Айдоочулар жок',
+    'empty.vehicles': 'Унаалар жок',
+    'empty.vehicles_status': 'Мындай абалдагы унаалар жок',
+    'empty.routes': 'Маршруттар жок',
+
+    // Фильтры (дополнительные)
+    'filter.all_statuses': 'Бардык абалдар',
+    'filter.all_drivers': 'Бардык айдоочулар',
+    'filter.all_vehicles': 'Бардык унаалар',
+    'filter.free': 'Бош',
+    'filter.in_trip': 'Рейсте',
+    'filter.maintenance': 'Оңдоодо',
+
+    // Экспорт
+    'export.excel': 'Excel\'ге экспорт',
+    'export.no_data': 'Экспорт үчүн маалымат жок',
+
+    // Водители (дополнительные)
+    'drivers.top_by_payments': 'Төлөмдөр боюнча топ 10 айдоочу',
+    'drivers.phone_placeholder': '+996 XXX XXX XXX',
+
+    // Транспорт (дополнительные)
+    'vehicles.last_trip': 'Акыркы рейс',
+    'vehicles.avg_profit': 'Орточо пайда',
+
+    // Маршруты (дополнительные)
+    'routes.trip_count': 'Рейстер саны',
   },
 };
 

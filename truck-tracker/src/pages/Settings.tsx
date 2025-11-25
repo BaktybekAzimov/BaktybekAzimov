@@ -173,10 +173,10 @@ export const Settings: React.FC = () => {
   if (!isAdmin) {
     return (
       <MainLayout>
-        <Header title={t('settings.title')} />
+        <Header title={t('settings.title')} icon={SettingsIcon} />
         <div className="p-8">
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">У вас нет прав для доступа к настройкам</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{t('error.no_access')}</p>
           </Card>
         </div>
       </MainLayout>
@@ -186,7 +186,7 @@ export const Settings: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title={t('settings.title')} />
+        <Header title={t('settings.title')} icon={SettingsIcon} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -197,13 +197,13 @@ export const Settings: React.FC = () => {
   if (error) {
     return (
       <MainLayout>
-        <Header title={t('settings.title')} />
+        <Header title={t('settings.title')} icon={SettingsIcon} />
         <div className="p-8">
-          <Card className="bg-error-50 border-2 border-error-200">
-            <h3 className="text-error-900 font-semibold mb-2">Ошибка загрузки настроек</h3>
-            <p className="text-error-700 text-sm mb-4">{error}</p>
-            <p className="text-error-600 text-xs">
-              Выполните SQL скрипт: <code className="bg-error-100 px-2 py-1 rounded">supabase/create-settings-table.sql</code>
+          <Card className="bg-error-50 dark:bg-error-900/20 border-2 border-error-200 dark:border-error-800">
+            <h3 className="text-error-900 dark:text-error-300 font-semibold mb-2">{t('error.loading')}</h3>
+            <p className="text-error-700 dark:text-error-400 text-sm mb-4">{error}</p>
+            <p className="text-error-600 dark:text-error-500 text-xs">
+              Выполните SQL скрипт: <code className="bg-error-100 dark:bg-error-900/30 px-2 py-1 rounded">supabase/create-settings-table.sql</code>
             </p>
           </Card>
         </div>

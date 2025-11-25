@@ -10,8 +10,9 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight, Download, Truck as TruckIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useLanguage } from '../contexts/LanguageContext';
 import ExcelJS from 'exceljs';
 import {
   formatCurrency,
@@ -89,6 +90,7 @@ interface TripFormData {
 }
 
 export const Trips: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -205,7 +207,7 @@ export const Trips: React.FC = () => {
       setRoutes(routesRes.data || []);
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError('Не удалось загрузить данные');
+      setError(t('error.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -213,7 +215,7 @@ export const Trips: React.FC = () => {
 
   const exportToExcel = async () => {
     if (filteredTrips.length === 0) {
-      alert('Нет данных для экспорта');
+      alert(t('export.no_data'));
       return;
     }
 
@@ -412,14 +414,14 @@ export const Trips: React.FC = () => {
       fetchData();
     } catch (err) {
       console.error('Error saving trip:', err);
-      setError('Не удалось сохранить рейс');
+      setError(t('error.save_failed'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этот рейс?')) return;
+    if (!confirm(t('confirm.delete_trip'))) return;
 
     try {
       const { error } = await supabase.from('trips').delete().eq('id', id);
@@ -429,7 +431,7 @@ export const Trips: React.FC = () => {
       fetchData();
     } catch (err) {
       console.error('Error deleting trip:', err);
-      setError('Не удалось удалить рейс');
+      setError(t('error.delete_failed'));
     }
   };
 
@@ -443,7 +445,7 @@ export const Trips: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Рейсы" />
+        <Header title={t('trips.title')} icon={TruckIcon} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -454,8 +456,9 @@ export const Trips: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Рейсы"
-        subtitle={`Всего рейсов: ${filteredTrips.length}`}
+        title={t('trips.title')}
+        subtitle={`${t('trips.total')}: ${filteredTrips.length}`}
+        icon={TruckIcon}
         actions={
           <div className="flex gap-3">
             <Button
@@ -464,10 +467,10 @@ export const Trips: React.FC = () => {
               icon={<Download size={20} />}
               disabled={filteredTrips.length === 0}
             >
-              Экспорт в Excel
+              {t('export.excel')}
             </Button>
             <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-              Добавить рейс
+              {t('trips.add')}
             </Button>
           </div>
         }
@@ -475,8 +478,8 @@ export const Trips: React.FC = () => {
 
       <div className="p-8 space-y-6">
         {error && (
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">{error}</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{error}</p>
           </Card>
         )}
 

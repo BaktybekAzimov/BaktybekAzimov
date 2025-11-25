@@ -57,7 +57,7 @@ export const Sidebar: React.FC = () => {
           {isOpen && (
             <div className="flex flex-col overflow-hidden">
               <h1 className="text-base font-bold text-secondary-900 dark:text-secondary-100 leading-tight">
-                Система учета<br />рейсов
+                {t('sidebar.system_title')}<br />{t('sidebar.system_subtitle')}
               </h1>
             </div>
           )}

@@ -10,9 +10,10 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, Truck } from 'lucide-react';
+import { Plus, Edit, Trash2, Truck, Car } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Vehicle {
   id: string;
@@ -52,6 +53,7 @@ interface VehicleStats {
 }
 
 export const Vehicles: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<VehicleStats[]>([]);
@@ -98,7 +100,7 @@ export const Vehicles: React.FC = () => {
       setFilteredVehicles(data || []);
     } catch (err) {
       console.error('Error fetching vehicles:', err);
-      setError('Не удалось загрузить данные автомобилей');
+      setError(t('error.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -163,16 +165,29 @@ export const Vehicles: React.FC = () => {
       fetchVehicles();
     } catch (err) {
       console.error('Error saving vehicle:', err);
-      setError('Не удалось сохранить автомобиль');
+      setError(t('error.save_failed'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этот автомобиль?')) return;
+    if (!confirm(t('confirm.delete_vehicle'))) return;
 
     try {
+      // Проверка на активные рейсы
+      const { data: activeTrips } = await supabase
+        .from('trips')
+        .select('id')
+        .eq('vehicle_id', id)
+        .in('status', ['in_progress', 'planned'])
+        .limit(1);
+
+      if (activeTrips && activeTrips.length > 0) {
+        setError(t('error.has_active_trips'));
+        return;
+      }
+
       const { error } = await supabase.from('vehicles').delete().eq('id', id);
 
       if (error) throw error;
@@ -180,7 +195,7 @@ export const Vehicles: React.FC = () => {
       fetchVehicles();
     } catch (err) {
       console.error('Error deleting vehicle:', err);
-      setError('Не удалось удалить автомобиль');
+      setError(t('error.delete_failed'));
     }
   };
 
@@ -195,7 +210,7 @@ export const Vehicles: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Header title="Автомобили" />
+        <Header title={t('vehicles.title')} icon={Car} />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -206,19 +221,20 @@ export const Vehicles: React.FC = () => {
   return (
     <MainLayout>
       <Header
-        title="Автомобили"
-        subtitle={`Всего автомобилей: ${vehicles.length}`}
+        title={t('vehicles.title')}
+        subtitle={`${t('vehicles.total')}: ${vehicles.length}`}
+        icon={Car}
         actions={
           <Button onClick={openCreateModal} icon={<Plus size={20} />}>
-            Добавить автомобиль
+            {t('vehicles.add')}
           </Button>
         }
       />
 
       <div className="p-8 space-y-6">
         {error && (
-          <Card className="bg-error-50 border border-error-200">
-            <p className="text-error-700">{error}</p>
+          <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
+            <p className="text-error-700 dark:text-error-400">{error}</p>
           </Card>
         )}
 
