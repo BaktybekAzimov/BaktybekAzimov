@@ -155,18 +155,39 @@ export const Users: React.FC = () => {
 
         if (error) throw error;
       } else {
-        // Создание нового пользователя (через Supabase Auth)
-        const { error } = await supabase.auth.admin.createUser({
-          email: formData.email,
-          email_confirm: true,
-          user_metadata: {
+        // Проверка на дубликат email
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', formData.email)
+          .single();
+
+        if (existingUser) {
+          alert('Пользователь с таким email уже существует!');
+          return;
+        }
+
+        // Создание нового профиля пользователя
+        // Примечание: пользователь должен будет зарегистрироваться через Auth отдельно
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            email: formData.email,
             role: formData.role,
             full_name: formData.full_name,
             phone: formData.phone,
-          }
-        });
+          });
 
-        if (error) throw error;
+        if (error) {
+          // Если ошибка связана с уникальностью email
+          if (error.code === '23505') {
+            alert('Пользователь с таким email уже существует!');
+            return;
+          }
+          throw error;
+        }
+
+        alert('Профиль создан! Пользователь должен зарегистрироваться через страницу входа.');
       }
 
       setIsModalOpen(false);

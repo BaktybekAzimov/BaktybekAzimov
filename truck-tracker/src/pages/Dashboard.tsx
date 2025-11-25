@@ -7,12 +7,19 @@ import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
-import { TrendingUp, Truck, DollarSign, TrendingDown, Calendar, LayoutDashboard } from 'lucide-react';
+import { TrendingUp, Truck, TrendingDown, Calendar, LayoutDashboard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getDateRange, getStatusColor, getStatusLabel, cn } from '../lib/utils';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
+
+// Иконка сома (KGS)
+const SomIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">с</text>
+  </svg>
+);
 
 // Local type definitions
 type DateFilter = 'today' | 'month' | 'all' | 'custom';
@@ -576,9 +583,9 @@ export const Dashboard: React.FC = () => {
             <KPICard
               title="Общая выручка"
               value={formatCurrency(stats.totalRevenue)}
-              icon={DollarSign}
+              icon={SomIcon}
               iconColor="text-success-600"
-              iconBgColor="bg-success-100"
+              iconBgColor="bg-success-100 dark:bg-success-900/30"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
@@ -587,7 +594,7 @@ export const Dashboard: React.FC = () => {
               value={stats.totalTrips}
               icon={Truck}
               iconColor="text-primary-600"
-              iconBgColor="bg-primary-100"
+              iconBgColor="bg-primary-100 dark:bg-primary-900/30"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
@@ -596,7 +603,7 @@ export const Dashboard: React.FC = () => {
               value={formatCurrency(stats.netProfit)}
               icon={TrendingUp}
               iconColor="text-warning-600"
-              iconBgColor="bg-warning-100"
+              iconBgColor="bg-warning-100 dark:bg-warning-900/30"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
@@ -605,7 +612,7 @@ export const Dashboard: React.FC = () => {
               value={formatCurrency(stats.avgProfitPerTrip)}
               icon={TrendingDown}
               iconColor="text-secondary-600"
-              iconBgColor="bg-secondary-100"
+              iconBgColor="bg-secondary-100 dark:bg-secondary-800"
             />
           </div>
         </div>

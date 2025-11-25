@@ -72,13 +72,30 @@ export const Drivers: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch driver stats from the view
-      const { data, error: fetchError } = await supabase
+      // Сначала пробуем view driver_stats
+      let { data, error: fetchError } = await supabase
         .from('driver_stats')
         .select('*')
         .order('total_payment', { ascending: false });
 
-      if (fetchError) throw fetchError;
+      // Если view не существует, используем обычную таблицу drivers
+      if (fetchError) {
+        console.log('View driver_stats not found, using drivers table');
+        const { data: driversData, error: driversError } = await supabase
+          .from('drivers')
+          .select('*')
+          .order('full_name', { ascending: true });
+
+        if (driversError) throw driversError;
+
+        // Преобразуем данные в формат DriverStats
+        data = (driversData || []).map(driver => ({
+          ...driver,
+          total_trips: 0,
+          total_payment: 0,
+          avg_profit_per_trip: 0,
+        }));
+      }
 
       setDrivers(data || []);
     } catch (err) {

@@ -61,13 +61,30 @@ export const Routes: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch route stats from the view
-      const { data, error: fetchError } = await supabase
+      // Сначала пробуем view route_stats
+      let { data, error: fetchError } = await supabase
         .from('route_stats')
         .select('*')
         .order('trip_count', { ascending: false });
 
-      if (fetchError) throw fetchError;
+      // Если view не существует, используем обычную таблицу routes
+      if (fetchError) {
+        console.log('View route_stats not found, using routes table');
+        const { data: routesData, error: routesError } = await supabase
+          .from('routes')
+          .select('*')
+          .order('name', { ascending: true });
+
+        if (routesError) throw routesError;
+
+        // Преобразуем данные в формат RouteStats
+        data = (routesData || []).map(route => ({
+          ...route,
+          trip_count: 0,
+          total_revenue: 0,
+          avg_revenue: 0,
+        }));
+      }
 
       setRoutes(data || []);
     } catch (err) {
