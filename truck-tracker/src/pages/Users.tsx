@@ -347,7 +347,7 @@ export const Users: React.FC = () => {
                     {t('users.user')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
-                    {t('trips.status')}
+                    {t('users.role')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
                     {t('users.contacts')}
@@ -442,7 +442,7 @@ export const Users: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingUser ? t('modal.edit_driver') : t('users.add')}
+        title={editingUser ? t('modal.edit_user') : t('users.add')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -460,7 +460,7 @@ export const Users: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              {t('trips.status')}
+              {t('users.role')}
             </label>
             <Select
               value={formData.role}
