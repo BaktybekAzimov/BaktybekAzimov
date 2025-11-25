@@ -140,10 +140,38 @@ export const Users: React.FC = () => {
     }
   };
 
+  // Валидация email
+  const validateEmail = (email: string): string | null => {
+    // Проверка формата
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return t('users.invalid_email_format') || 'Неверный формат email';
+    }
+
+    // Белый список доменов (можно расширить)
+    const allowedDomains = ['gmail.com', 'mail.ru', 'yandex.ru', 'outlook.com', 'icloud.com', 'yahoo.com'];
+    const domain = email.split('@')[1]?.toLowerCase();
+
+    if (!allowedDomains.includes(domain)) {
+      return t('users.email_domain_not_allowed') || `Домен @${domain} не разрешён. Используйте: ${allowedDomains.join(', ')}`;
+    }
+
+    return null; // OK
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
+      // Валидация email при создании
+      if (!editingUser) {
+        const emailError = validateEmail(formData.email);
+        if (emailError) {
+          alert(emailError);
+          return;
+        }
+      }
+
       if (editingUser) {
         // Обновление существующего пользователя
         const { error } = await supabase
