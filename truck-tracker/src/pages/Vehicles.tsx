@@ -246,28 +246,28 @@ export const Vehicles: React.FC = () => {
               size="sm"
               onClick={() => setStatusFilter('all')}
             >
-              Все ({statusCounts.all})
+              {t('common.all')} ({statusCounts.all})
             </Button>
             <Button
               variant={statusFilter === 'available' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('available')}
             >
-              Свободны ({statusCounts.available})
+              {t('filter.free')} ({statusCounts.available})
             </Button>
             <Button
               variant={statusFilter === 'in_trip' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('in_trip')}
             >
-              В рейсе ({statusCounts.in_trip})
+              {t('filter.in_trip')} ({statusCounts.in_trip})
             </Button>
             <Button
               variant={statusFilter === 'maintenance' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('maintenance')}
             >
-              На ремонте ({statusCounts.maintenance})
+              {t('filter.maintenance')} ({statusCounts.maintenance})
             </Button>
           </div>
         </Card>
@@ -277,15 +277,15 @@ export const Vehicles: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Автомобиль</TableHead>
-                <TableHead>Номер</TableHead>
-                <TableHead>Год</TableHead>
-                <TableHead>Всего рейсов</TableHead>
-                <TableHead>Общая выручка</TableHead>
-                <TableHead>Средняя прибыль</TableHead>
-                <TableHead>Последний рейс</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('trips.vehicle')}</TableHead>
+                <TableHead>{t('vehicles.plate')}</TableHead>
+                <TableHead>{t('vehicles.year')}</TableHead>
+                <TableHead>{t('vehicles.total_trips')}</TableHead>
+                <TableHead>{t('vehicles.revenue')}</TableHead>
+                <TableHead>{t('vehicles.avg_profit')}</TableHead>
+                <TableHead>{t('vehicles.last_trip')}</TableHead>
+                <TableHead>{t('vehicles.status')}</TableHead>
+                <TableHead>{t('trips.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -319,7 +319,7 @@ export const Vehicles: React.FC = () => {
                       {vehicle.last_trip_date ? (
                         formatDate(vehicle.last_trip_date)
                       ) : (
-                        <span className="text-secondary-400">Нет данных</span>
+                        <span className="text-secondary-400">{t('common.no_data')}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -335,7 +335,7 @@ export const Vehicles: React.FC = () => {
                           onClick={() => openEditModal(vehicle)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -343,7 +343,7 @@ export const Vehicles: React.FC = () => {
                           onClick={() => handleDelete(vehicle.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -352,7 +352,7 @@ export const Vehicles: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-12 text-secondary-500">
-                    {statusFilter === 'all' ? 'Нет автомобилей' : 'Нет автомобилей с таким статусом'}
+                    {statusFilter === 'all' ? t('empty.vehicles') : t('empty.vehicles_status')}
                   </TableCell>
                 </TableRow>
               )}
@@ -365,60 +365,60 @@ export const Vehicles: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingVehicle ? 'Редактировать автомобиль' : 'Добавить автомобиль'}
+        title={editingVehicle ? t('modal.edit_vehicle') : t('modal.add_vehicle')}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
-            label="Марка"
-            placeholder="Например: Volvo"
-            {...register('brand', { required: 'Марка обязательна' })}
+            label={t('vehicles.brand')}
+            placeholder={t('vehicles.brand_placeholder')}
+            {...register('brand', { required: t('validation.brand_required') })}
             error={errors.brand?.message}
           />
 
           <Input
-            label="Модель"
-            placeholder="Например: FH16"
-            {...register('model', { required: 'Модель обязательна' })}
+            label={t('vehicles.model')}
+            placeholder={t('vehicles.model_placeholder')}
+            {...register('model', { required: t('validation.model_required') })}
             error={errors.model?.message}
           />
 
           <Input
-            label="Номер (госномер)"
-            placeholder="Например: 01ABC123"
-            {...register('license_plate', { required: 'Номер обязателен' })}
+            label={t('vehicles.license_plate')}
+            placeholder={t('vehicles.plate_placeholder')}
+            {...register('license_plate', { required: t('validation.plate_required') })}
             error={errors.license_plate?.message}
           />
 
           <Input
-            label="Год выпуска"
+            label={t('vehicles.year_label')}
             type="number"
             min="1900"
             max={new Date().getFullYear() + 1}
             {...register('year', {
-              required: 'Год обязателен',
-              min: { value: 1900, message: 'Год не может быть меньше 1900' },
+              required: t('validation.year_required'),
+              min: { value: 1900, message: t('validation.year_min') },
               max: {
                 value: new Date().getFullYear() + 1,
-                message: 'Год не может быть больше текущего',
+                message: t('validation.year_max'),
               },
             })}
             error={errors.year?.message}
           />
 
           <Select
-            label="Статус"
-            {...register('status', { required: 'Статус обязателен' })}
+            label={t('vehicles.status')}
+            {...register('status', { required: t('validation.status_required') })}
             options={[
-              { value: 'available', label: 'Свободна' },
-              { value: 'in_trip', label: 'В рейсе' },
-              { value: 'maintenance', label: 'На ремонте' },
+              { value: 'available', label: t('status.available') },
+              { value: 'in_trip', label: t('status.in_trip') },
+              { value: 'maintenance', label: t('status.maintenance') },
             ]}
             error={errors.status?.message}
           />
 
           <Input
-            label="Заметки"
+            label={t('vehicles.notes')}
             {...register('notes')}
             error={errors.notes?.message}
           />
@@ -430,10 +430,10 @@ export const Vehicles: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingVehicle ? 'Сохранить' : 'Создать'}
+              {editingVehicle ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>

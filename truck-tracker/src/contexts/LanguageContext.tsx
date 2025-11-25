@@ -149,6 +149,19 @@ const translations: Record<Language, Record<string, string>> = {
     'settings.font_large': 'Большой',
     'settings.language_switch_active': 'Переключение языка активно! Нажмите "Сохранить изменения".',
     'settings.font_hint': 'Размер шрифта применяется мгновенно ко всему приложению',
+    'settings.financial_desc': 'Настройки расчётов и валюты',
+    'settings.regional_desc': 'Язык интерфейса и форматы',
+    'settings.appearance_desc': 'Настройка отображения интерфейса',
+    'settings.current_share': 'Текущий: {driver}% водителю, {owner}% владельцу',
+    'settings.currency_desc': 'Используется для всех финансовых расчётов',
+    'settings.saved': 'Настройки успешно сохранены!',
+    'settings.info_title': 'Важная информация',
+    'settings.info_1': 'Все настройки сохраняются в Supabase и применяются мгновенно',
+    'settings.info_2': 'Telegram интеграция работает только при наличии токена и Chat ID',
+    'settings.info_3': 'Выключенные виджеты не будут отображаться на Dashboard',
+    'settings.info_4': 'Изменение языка применится после сохранения настроек',
+    'settings.info_5': 'Для настройки Telegram смотрите TELEGRAM_SETUP.md',
+    'settings.get_chat_id': 'Получите через @userinfobot или смотрите TELEGRAM_SETUP.md',
 
     // Telegram
     'telegram.title': 'Telegram Бот',
@@ -172,6 +185,12 @@ const translations: Record<Language, Record<string, string>> = {
     'widgets.vehicle_utilization': 'Загруженность транспорта',
     'widgets.top_drivers': 'Топ-5 водителей',
     'widgets.monthly_comparison': 'Сравнение месяцев',
+    'widgets.revenue_desc': 'Выручка по дням',
+    'widgets.routes_desc': 'Рейсы по маршрутам',
+    'widgets.recent_trips_desc': 'Таблица последних 10',
+    'widgets.vehicle_utilization_desc': 'Статус машин',
+    'widgets.top_drivers_desc': 'Лучшие по прибыли',
+    'widgets.monthly_comparison_desc': 'Текущий vs предыдущий',
 
     // Кнопки
     'button.edit': 'Изменить',
@@ -290,6 +309,24 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Маршруты (дополнительные)
     'routes.trip_count': 'Кол-во рейсов',
+
+    // Валидация
+    'validation.required': 'Обязательное поле',
+    'validation.name_required': 'Название обязательно',
+    'validation.full_name_required': 'Имя обязательно',
+    'validation.phone_required': 'Телефон обязателен',
+    'validation.hire_date_required': 'Дата найма обязательна',
+    'validation.status_required': 'Статус обязателен',
+    'validation.brand_required': 'Марка обязательна',
+    'validation.model_required': 'Модель обязательна',
+    'validation.plate_required': 'Номер обязателен',
+    'validation.year_required': 'Год обязателен',
+    'validation.year_min': 'Год не может быть меньше 1900',
+    'validation.year_max': 'Год не может быть больше текущего',
+    'validation.distance_required': 'Расстояние обязательно',
+    'validation.distance_positive': 'Расстояние должно быть положительным',
+    'validation.price_required': 'Цена обязательна',
+    'validation.price_positive': 'Цена должна быть положительной',
   },
   ky: {
     // Общие
@@ -420,6 +457,19 @@ const translations: Record<Language, Record<string, string>> = {
     'settings.font_large': 'Чоң',
     'settings.language_switch_active': 'Тил которуу иштеп жатат! "Өзгөртүүлөрдү сактоо" баскычын басыңыз.',
     'settings.font_hint': 'Шрифт өлчөмү дароо бүт колдонмого колдонулат',
+    'settings.financial_desc': 'Эсептөө жана валюта жөндөөлөрү',
+    'settings.regional_desc': 'Интерфейс тили жана форматтары',
+    'settings.appearance_desc': 'Интерфейс көрүнүшүн жөндөө',
+    'settings.current_share': 'Учурдагы: {driver}% айдоочуга, {owner}% ээсине',
+    'settings.currency_desc': 'Бардык финансылык эсептөөлөрдө колдонулат',
+    'settings.saved': 'Жөндөөлөр ийгиликтүү сакталды!',
+    'settings.info_title': 'Маанилүү маалымат',
+    'settings.info_1': 'Бардык жөндөөлөр Supabase\'де сакталат жана дароо колдонулат',
+    'settings.info_2': 'Telegram интеграция токен жана Chat ID болгондо гана иштейт',
+    'settings.info_3': 'Өчүрүлгөн виджеттер Dashboard\'до көрүнбөйт',
+    'settings.info_4': 'Тил өзгөртүү жөндөөлөр сакталгандан кийин колдонулат',
+    'settings.info_5': 'Telegram жөндөө үчүн TELEGRAM_SETUP.md караңыз',
+    'settings.get_chat_id': '@userinfobot аркылуу алыңыз же TELEGRAM_SETUP.md караңыз',
 
     // Telegram
     'telegram.title': 'Telegram Бот',
@@ -443,6 +493,12 @@ const translations: Record<Language, Record<string, string>> = {
     'widgets.vehicle_utilization': 'Транспорт жүктөлүшү',
     'widgets.top_drivers': 'Топ-5 айдоочу',
     'widgets.monthly_comparison': 'Айларды салыштыруу',
+    'widgets.revenue_desc': 'Күндөр боюнча киреше',
+    'widgets.routes_desc': 'Маршруттар боюнча рейстер',
+    'widgets.recent_trips_desc': 'Акыркы 10 таблица',
+    'widgets.vehicle_utilization_desc': 'Унаалар абалы',
+    'widgets.top_drivers_desc': 'Пайда боюнча мыктылар',
+    'widgets.monthly_comparison_desc': 'Учурдагы vs мурунку',
 
     // Кнопки
     'button.edit': 'Өзгөртүү',
@@ -561,6 +617,24 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Маршруты (дополнительные)
     'routes.trip_count': 'Рейстер саны',
+
+    // Валидация
+    'validation.required': 'Милдеттүү талаа',
+    'validation.name_required': 'Аталышы милдеттүү',
+    'validation.full_name_required': 'Аты милдеттүү',
+    'validation.phone_required': 'Телефон милдеттүү',
+    'validation.hire_date_required': 'Жалданган күнү милдеттүү',
+    'validation.status_required': 'Абалы милдеттүү',
+    'validation.brand_required': 'Маркасы милдеттүү',
+    'validation.model_required': 'Модели милдеттүү',
+    'validation.plate_required': 'Номери милдеттүү',
+    'validation.year_required': 'Жылы милдеттүү',
+    'validation.year_min': 'Жылы 1900-дөн кем болбошу керек',
+    'validation.year_max': 'Жылы учурдан көп болбошу керек',
+    'validation.distance_required': 'Аралык милдеттүү',
+    'validation.distance_positive': 'Аралык оң болушу керек',
+    'validation.price_required': 'Баа милдеттүү',
+    'validation.price_positive': 'Баа оң болушу керек',
   },
 };
 

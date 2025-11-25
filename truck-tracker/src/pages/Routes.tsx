@@ -216,13 +216,13 @@ export const Routes: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Название маршрута</TableHead>
-                <TableHead>Расстояние (км)</TableHead>
-                <TableHead>Стандартная цена рейса</TableHead>
-                <TableHead>Кол-во рейсов</TableHead>
-                <TableHead>Общая выручка</TableHead>
-                <TableHead>Средняя выручка</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('routes.name')}</TableHead>
+                <TableHead>{t('routes.distance')}</TableHead>
+                <TableHead>{t('routes.standard_price')}</TableHead>
+                <TableHead>{t('routes.trip_count')}</TableHead>
+                <TableHead>{t('routes.total_revenue')}</TableHead>
+                <TableHead>{t('routes.avg_revenue')}</TableHead>
+                <TableHead>{t('trips.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -264,7 +264,7 @@ export const Routes: React.FC = () => {
                           onClick={() => openEditModal(route)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -272,7 +272,7 @@ export const Routes: React.FC = () => {
                           onClick={() => handleDelete(route.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -281,7 +281,7 @@ export const Routes: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-12 text-secondary-500">
-                    Нет маршрутов
+                    {t('empty.routes')}
                   </TableCell>
                 </TableRow>
               )}
@@ -294,40 +294,40 @@ export const Routes: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingRoute ? 'Редактировать маршрут' : 'Добавить маршрут'}
+        title={editingRoute ? t('modal.edit_route') : t('modal.add_route')}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
-            label="Название маршрута"
-            placeholder="Например: Бишкек - Алматы"
-            {...register('name', { required: 'Название обязательно' })}
+            label={t('routes.name')}
+            placeholder={t('routes.name_placeholder')}
+            {...register('name', { required: t('validation.name_required') })}
             error={errors.name?.message}
           />
 
           <Input
-            label="Расстояние (км)"
+            label={t('routes.distance')}
             type="number"
             step="0.01"
             min="0"
-            placeholder="Например: 245.5"
+            placeholder={t('routes.distance_placeholder')}
             {...register('distance_km', {
-              required: 'Расстояние обязательно',
-              min: { value: 0, message: 'Расстояние должно быть положительным' },
+              required: t('validation.distance_required'),
+              min: { value: 0, message: t('validation.distance_positive') },
             })}
             error={errors.distance_km?.message}
           />
 
           <Input
-            label="Стандартная цена рейса"
+            label={t('routes.standard_price')}
             type="number"
             step="0.01"
             min="0"
-            placeholder="Например: 15000"
-            helperText="Базовая цена за рейс по этому маршруту"
+            placeholder={t('routes.price_placeholder')}
+            helperText={t('routes.price_helper')}
             {...register('avg_cost', {
-              required: 'Цена обязательна',
-              min: { value: 0, message: 'Цена должна быть положительной' },
+              required: t('validation.price_required'),
+              min: { value: 0, message: t('validation.price_positive') },
             })}
             error={errors.avg_cost?.message}
           />
@@ -339,10 +339,10 @@ export const Routes: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingRoute ? 'Сохранить' : 'Создать'}
+              {editingRoute ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>

@@ -297,14 +297,14 @@ export const Drivers: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Имя</TableHead>
-                <TableHead>Телефон</TableHead>
-                <TableHead>Дата найма</TableHead>
-                <TableHead>Всего рейсов</TableHead>
-                <TableHead>Общие выплаты</TableHead>
-                <TableHead>Средняя прибыль</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>{t('drivers.name')}</TableHead>
+                <TableHead>{t('drivers.phone')}</TableHead>
+                <TableHead>{t('drivers.hire_date')}</TableHead>
+                <TableHead>{t('drivers.total_trips')}</TableHead>
+                <TableHead>{t('drivers.total_payment')}</TableHead>
+                <TableHead>{t('drivers.avg_profit')}</TableHead>
+                <TableHead>{t('drivers.status')}</TableHead>
+                <TableHead>{t('drivers.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -345,7 +345,7 @@ export const Drivers: React.FC = () => {
                           onClick={() => openEditModal(driver)}
                           icon={<Edit size={16} />}
                         >
-                          Изменить
+                          {t('button.edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -353,7 +353,7 @@ export const Drivers: React.FC = () => {
                           onClick={() => handleDelete(driver.id)}
                           icon={<Trash2 size={16} />}
                         >
-                          Удалить
+                          {t('button.delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -362,7 +362,7 @@ export const Drivers: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-12 text-secondary-500">
-                    Нет водителей
+                    {t('empty.drivers')}
                   </TableCell>
                 </TableRow>
               )}
@@ -375,43 +375,43 @@ export const Drivers: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingDriver ? 'Редактировать водителя' : 'Добавить водителя'}
+        title={editingDriver ? t('modal.edit_driver') : t('modal.add_driver')}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
-            label="Полное имя"
-            {...register('full_name', { required: 'Имя обязательно' })}
+            label={t('drivers.full_name')}
+            {...register('full_name', { required: t('validation.full_name_required') })}
             error={errors.full_name?.message}
           />
 
           <Input
-            label="Телефон"
+            label={t('drivers.phone')}
             type="tel"
-            placeholder="+996 XXX XXX XXX"
-            {...register('phone', { required: 'Телефон обязателен' })}
+            placeholder={t('drivers.phone_placeholder')}
+            {...register('phone', { required: t('validation.phone_required') })}
             error={errors.phone?.message}
           />
 
           <Input
-            label="Дата найма"
+            label={t('drivers.hire_date')}
             type="date"
-            {...register('hire_date', { required: 'Дата найма обязательна' })}
+            {...register('hire_date', { required: t('validation.hire_date_required') })}
             error={errors.hire_date?.message}
           />
 
           <Select
-            label="Статус"
-            {...register('status', { required: 'Статус обязателен' })}
+            label={t('drivers.status')}
+            {...register('status', { required: t('validation.status_required') })}
             options={[
-              { value: 'active', label: 'Активен' },
-              { value: 'inactive', label: 'Неактивен' },
+              { value: 'active', label: t('status.active') },
+              { value: 'inactive', label: t('status.inactive') },
             ]}
             error={errors.status?.message}
           />
 
           <Input
-            label="Заметки"
+            label={t('drivers.notes')}
             {...register('notes')}
             error={errors.notes?.message}
           />
@@ -423,10 +423,10 @@ export const Drivers: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               disabled={submitting}
             >
-              Отмена
+              {t('button.cancel')}
             </Button>
             <Button type="submit" isLoading={submitting}>
-              {editingDriver ? 'Сохранить' : 'Создать'}
+              {editingDriver ? t('button.save') : t('button.create')}
             </Button>
           </div>
         </form>
