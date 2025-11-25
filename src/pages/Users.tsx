@@ -50,6 +50,12 @@ export const Users: React.FC = () => {
     phone: '',
   });
 
+  // Верификация email
+  const [verificationStep, setVerificationStep] = useState<'form' | 'verify'>('form');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [enteredCode, setEnteredCode] = useState('');
+
   useEffect(() => {
     if (isAdmin) {
       loadUsers();
@@ -108,6 +114,9 @@ export const Users: React.FC = () => {
       full_name: '',
       phone: '',
     });
+    setVerificationStep('form');
+    setGeneratedCode('');
+    setEnteredCode('');
     setIsModalOpen(true);
   };
 
@@ -140,7 +149,7 @@ export const Users: React.FC = () => {
     }
   };
 
-  // Валидация email
+  // Валидация email - все домены СНГ
   const validateEmail = (email: string): string | null => {
     // Проверка формата
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -148,30 +157,83 @@ export const Users: React.FC = () => {
       return t('users.invalid_email_format') || 'Неверный формат email';
     }
 
-    // Белый список доменов (можно расширить)
-    const allowedDomains = ['gmail.com', 'mail.ru', 'yandex.ru', 'outlook.com', 'icloud.com', 'yahoo.com'];
+    // Полный список доменов СНГ и международных
+    const allowedDomains = [
+      // Международные
+      'gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'protonmail.com',
+      // Россия
+      'mail.ru', 'yandex.ru', 'ya.ru', 'rambler.ru', 'bk.ru', 'inbox.ru', 'list.ru', 'internet.ru',
+      // Казахстан
+      'mail.kz', 'inbox.kz', 'nur.kz',
+      // Кыргызстан
+      'mail.kg', 'kg.ru',
+      // Узбекистан
+      'mail.uz', 'inbox.uz',
+      // Украина
+      'ukr.net', 'i.ua', 'meta.ua', 'email.ua', 'bigmir.net',
+      // Беларусь
+      'tut.by', 'mail.by', 'yandex.by',
+      // Таджикистан
+      'mail.tj',
+      // Азербайджан
+      'mail.az', 'box.az',
+      // Армения
+      'mail.am',
+      // Грузия
+      'mail.ge', 'posta.ge',
+      // Молдова
+      'mail.md',
+      // Туркменистан
+      'online.tm',
+    ];
+
     const domain = email.split('@')[1]?.toLowerCase();
 
     if (!allowedDomains.includes(domain)) {
-      return t('users.email_domain_not_allowed') || `Домен @${domain} не разрешён. Используйте: ${allowedDomains.join(', ')}`;
+      return `Домен @${domain} не разрешён. Используйте популярные почтовые сервисы (gmail, mail.ru, yandex и др.)`;
     }
 
     return null; // OK
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Генерация кода подтверждения
+  const generateVerificationCode = (): string => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  // Шаг 1: Проверка данных и генерация кода
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      // Валидация email при создании
-      if (!editingUser) {
-        const emailError = validateEmail(formData.email);
-        if (emailError) {
-          alert(emailError);
-          return;
-        }
+    if (!editingUser) {
+      // Валидация email
+      const emailError = validateEmail(formData.email);
+      if (emailError) {
+        alert(emailError);
+        return;
       }
 
+      // Генерируем код и переходим к верификации
+      const code = generateVerificationCode();
+      setGeneratedCode(code);
+      setVerificationStep('verify');
+    } else {
+      // При редактировании сразу сохраняем
+      handleFinalSubmit();
+    }
+  };
+
+  // Шаг 2: Проверка кода и сохранение
+  const handleVerifyCode = () => {
+    if (enteredCode !== generatedCode) {
+      alert('Неверный код подтверждения!');
+      return;
+    }
+    handleFinalSubmit();
+  };
+
+  const handleFinalSubmit = async () => {
+    try {
       if (editingUser) {
         // Обновление существующего пользователя
         const { error } = await supabase
@@ -469,70 +531,134 @@ export const Users: React.FC = () => {
       {/* Модальное окно для добавления/редактирования */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingUser ? t('modal.edit_user') : t('users.add')}
+        onClose={() => { setIsModalOpen(false); setVerificationStep('form'); }}
+        title={
+          editingUser
+            ? t('modal.edit_user')
+            : verificationStep === 'verify'
+              ? 'Подтверждение'
+              : t('users.add')
+        }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              {t('auth.email')}
-            </label>
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              disabled={!!editingUser}
-              required
-            />
-          </div>
+        {verificationStep === 'form' ? (
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                {t('auth.email')}
+              </label>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={!!editingUser}
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              {t('users.role')}
-            </label>
-            <Select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-              options={[
-                { value: 'admin', label: t('role.admin') },
-                { value: 'dispatcher', label: t('role.dispatcher') },
-                { value: 'driver', label: t('role.driver') },
-              ]}
-              required
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                {t('users.role')}
+              </label>
+              <Select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                options={[
+                  { value: 'admin', label: t('role.admin') },
+                  { value: 'dispatcher', label: t('role.dispatcher') },
+                  { value: 'driver', label: t('role.driver') },
+                ]}
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              {t('users.full_name')}
-            </label>
-            <Input
-              type="text"
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                {t('users.full_name')}
+              </label>
+              <Input
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              {t('drivers.phone')}
-            </label>
-            <Input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                {t('drivers.phone')}
+              </label>
+              <Input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
-              {t('button.cancel')}
-            </Button>
-            <Button type="submit">
-              {editingUser ? t('button.save') : t('button.create')}
-            </Button>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+                {t('button.cancel')}
+              </Button>
+              <Button type="submit">
+                {editingUser ? t('button.save') : 'Далее →'}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-6">
+            {/* Информация о пользователе */}
+            <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Email:</p>
+              <p className="font-medium text-secondary-900 dark:text-secondary-100">{formData.email}</p>
+            </div>
+
+            {/* Код подтверждения */}
+            <div className="text-center">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-2">
+                Код подтверждения (сообщите пользователю):
+              </p>
+              <div className="bg-primary-100 dark:bg-primary-900/30 rounded-xl p-4 mb-4">
+                <span className="text-3xl font-mono font-bold text-primary-700 dark:text-primary-300 tracking-widest">
+                  {generatedCode}
+                </span>
+              </div>
+              <p className="text-xs text-secondary-500 dark:text-secondary-400">
+                Попросите пользователя подтвердить этот код
+              </p>
+            </div>
+
+            {/* Ввод кода */}
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                Введите код для подтверждения:
+              </label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={enteredCode}
+                onChange={(e) => setEnteredCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
+                className="text-center text-xl font-mono tracking-widest"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setVerificationStep('form')}
+              >
+                ← Назад
+              </Button>
+              <Button
+                type="button"
+                onClick={handleVerifyCode}
+                disabled={enteredCode.length !== 6}
+              >
+                Подтвердить
+              </Button>
+            </div>
           </div>
-        </form>
+        )}
       </Modal>
     </MainLayout>
   );
