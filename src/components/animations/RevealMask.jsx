@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
@@ -86,6 +87,16 @@ const RevealMask = ({
       </div>
     </div>
   );
+};
+
+RevealMask.propTypes = {
+  children: PropTypes.node.isRequired,
+  direction: PropTypes.oneOf(['up', 'down', 'left', 'right', 'center']),
+  duration: PropTypes.number,
+  delay: PropTypes.number,
+  className: PropTypes.string,
+  stagger: PropTypes.bool,
+  staggerAmount: PropTypes.number
 };
 
 export default RevealMask;

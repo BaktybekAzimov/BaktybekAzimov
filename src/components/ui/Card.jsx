@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
 const Card = ({
@@ -34,4 +35,11 @@ const Card = ({
   );
 };
 
+
+Card.propTypes = {
+  children: PropTypes.node.isRequired,
+  hover: PropTypes.bool,
+  padding: PropTypes.oneOf(['none', 'small', 'medium', 'large']),
+  className: PropTypes.string
+};
 export default Card;

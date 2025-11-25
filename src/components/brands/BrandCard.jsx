@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import gsap from 'gsap';
 
 const BrandCard = ({
@@ -96,6 +97,14 @@ const BrandCard = ({
       </div>
     </Link>
   );
+};
+
+BrandCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string.isRequired,
+  to: PropTypes.string.isRequired,
+  bgClass: PropTypes.string,
+  image: PropTypes.string
 };
 
 export default BrandCard;
