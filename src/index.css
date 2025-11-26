@@ -1,0 +1,395 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-secondary-50 dark:bg-secondary-950 text-secondary-900 dark:text-secondary-100 font-sans antialiased;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl;
+  }
+
+  h2 {
+    @apply text-3xl;
+  }
+
+  h3 {
+    @apply text-2xl;
+  }
+
+  /* Remove number input spinners */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar styles */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-secondary-100 dark:bg-secondary-800 rounded;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-secondary-300 dark:bg-secondary-600 rounded hover:bg-secondary-400 dark:hover:bg-secondary-500 transition-colors;
+  }
+
+  /* Better focus states */
+  .focus-visible-ring:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 dark:ring-primary-400 ring-offset-2 dark:ring-offset-secondary-900;
+  }
+
+  /* Loading animation */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Skeleton loader */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .skeleton {
+    animation: shimmer 2s infinite linear;
+    background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
+    background-size: 1000px 100%;
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Focus utilities */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:ring-offset-2 dark:focus:ring-offset-secondary-900;
+  }
+
+  /* Transition utilities */
+  .transition-base {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Shadow utilities */
+  .shadow-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Gradient utilities */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary-500 to-primary-700;
+  }
+
+  .gradient-success {
+    @apply bg-gradient-to-br from-success-500 to-success-700;
+  }
+
+  .gradient-warning {
+    @apply bg-gradient-to-br from-warning-500 to-warning-700;
+  }
+
+  .gradient-error {
+    @apply bg-gradient-to-br from-error-500 to-error-700;
+  }
+
+  /* Layout utilities */
+  .content-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/80 dark:bg-secondary-800/80 backdrop-blur-lg border border-secondary-200/50 dark:border-secondary-700/50;
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:scale-[1.02] hover:-translate-y-1;
+  }
+}
+
+/* Font Size System */
+:root {
+  --font-size-base: 15px;
+}
+
+[data-font-size="small"] {
+  --font-size-base: 13px;
+}
+
+[data-font-size="medium"] {
+  --font-size-base: 15px;
+}
+
+[data-font-size="large"] {
+  --font-size-base: 18px;
+}
+
+/* Small - маленький шрифт (13px) */
+[data-font-size="small"] body {
+  font-size: 0.8125rem; /* 13px */
+}
+
+/* Medium - средний шрифт (15px) */
+[data-font-size="medium"] body {
+  font-size: 0.9375rem; /* 15px */
+}
+
+/* Large - большой шрифт (18px) */
+[data-font-size="large"] body {
+  font-size: 1.125rem; /* 18px */
+}
+
+[data-font-size="small"] h1 {
+  font-size: 1.5rem;
+}
+
+[data-font-size="medium"] h1 {
+  font-size: 2rem;
+}
+
+[data-font-size="large"] h1 {
+  font-size: 2.5rem;
+}
+
+[data-font-size="small"] h2 {
+  font-size: 1.25rem;
+}
+
+[data-font-size="medium"] h2 {
+  font-size: 1.75rem;
+}
+
+[data-font-size="large"] h2 {
+  font-size: 2rem;
+}
+
+[data-font-size="small"] h3 {
+  font-size: 1rem;
+}
+
+[data-font-size="medium"] h3 {
+  font-size: 1.5rem;
+}
+
+[data-font-size="large"] h3 {
+  font-size: 1.75rem;
+}
+
+/* Paragraph and text */
+[data-font-size="small"] p,
+[data-font-size="small"] span,
+[data-font-size="small"] div {
+  font-size: inherit;
+}
+
+[data-font-size="medium"] p,
+[data-font-size="medium"] span,
+[data-font-size="medium"] div {
+  font-size: inherit;
+}
+
+[data-font-size="large"] p,
+[data-font-size="large"] span,
+[data-font-size="large"] div {
+  font-size: inherit;
+}
+
+/* Labels and inputs */
+[data-font-size="small"] label,
+[data-font-size="small"] input,
+[data-font-size="small"] select,
+[data-font-size="small"] textarea {
+  font-size: 0.8125rem;
+}
+
+[data-font-size="medium"] label,
+[data-font-size="medium"] input,
+[data-font-size="medium"] select,
+[data-font-size="medium"] textarea {
+  font-size: 0.9375rem;
+}
+
+[data-font-size="large"] label,
+[data-font-size="large"] input,
+[data-font-size="large"] select,
+[data-font-size="large"] textarea {
+  font-size: 1.125rem;
+}
+
+/* Buttons */
+[data-font-size="small"] button {
+  font-size: 0.8125rem;
+}
+
+[data-font-size="medium"] button {
+  font-size: 0.9375rem;
+}
+
+[data-font-size="large"] button {
+  font-size: 1.125rem;
+}
+
+/* Table cells */
+[data-font-size="small"] th,
+[data-font-size="small"] td {
+  font-size: 0.75rem;
+}
+
+[data-font-size="medium"] th,
+[data-font-size="medium"] td {
+  font-size: 0.875rem;
+}
+
+[data-font-size="large"] th,
+[data-font-size="large"] td {
+  font-size: 1rem;
+}
+
+/* Small text elements */
+[data-font-size="small"] .text-xs {
+  font-size: 0.65rem;
+}
+
+[data-font-size="medium"] .text-xs {
+  font-size: 0.75rem;
+}
+
+[data-font-size="large"] .text-xs {
+  font-size: 0.85rem;
+}
+
+[data-font-size="small"] .text-sm {
+  font-size: 0.75rem;
+}
+
+[data-font-size="medium"] .text-sm {
+  font-size: 0.875rem;
+}
+
+[data-font-size="large"] .text-sm {
+  font-size: 1rem;
+}
+
+/* Base text sizes */
+[data-font-size="small"] .text-base {
+  font-size: 0.8125rem;
+}
+
+[data-font-size="medium"] .text-base {
+  font-size: 0.9375rem;
+}
+
+[data-font-size="large"] .text-base {
+  font-size: 1.125rem;
+}
+
+/* Large text sizes */
+[data-font-size="small"] .text-lg {
+  font-size: 0.95rem;
+}
+
+[data-font-size="medium"] .text-lg {
+  font-size: 1.125rem;
+}
+
+[data-font-size="large"] .text-lg {
+  font-size: 1.375rem;
+}
+
+[data-font-size="small"] .text-xl {
+  font-size: 1.1rem;
+}
+
+[data-font-size="medium"] .text-xl {
+  font-size: 1.25rem;
+}
+
+[data-font-size="large"] .text-xl {
+  font-size: 1.5rem;
+}
+
+[data-font-size="small"] .text-2xl {
+  font-size: 1.25rem;
+}
+
+[data-font-size="medium"] .text-2xl {
+  font-size: 1.5rem;
+}
+
+[data-font-size="large"] .text-2xl {
+  font-size: 1.875rem;
+}
+
+/* Links */
+[data-font-size="small"] a {
+  font-size: inherit;
+}
+
+[data-font-size="medium"] a {
+  font-size: inherit;
+}
+
+[data-font-size="large"] a {
+  font-size: inherit;
+}
+
+/* Sidebar text */
+[data-font-size="small"] nav {
+  font-size: 0.8125rem;
+}
+
+[data-font-size="medium"] nav {
+  font-size: 0.9375rem;
+}
+
+[data-font-size="large"] nav {
+  font-size: 1.125rem;
+}
