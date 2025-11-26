@@ -17,6 +17,7 @@ import {
   EyeOff,
   Check,
   Type,
+  Fuel,
 } from 'lucide-react';
 
 // Иконка сома (KGS)
@@ -35,6 +36,10 @@ interface SupabaseSettings {
   driver_payment_percentage: number;
   currency: 'KGS' | 'USD' | 'RUB';
   language: 'ru' | 'ky';
+
+  // Топливо
+  fuel_price_per_liter: number;
+  default_fuel_consumption: number;
 
   // Telegram
   telegram_bot_token: string | null;
@@ -122,6 +127,8 @@ export const Settings: React.FC = () => {
           driver_payment_percentage: settings.driver_payment_percentage,
           currency: settings.currency,
           language: settings.language,
+          fuel_price_per_liter: settings.fuel_price_per_liter,
+          default_fuel_consumption: settings.default_fuel_consumption,
           telegram_bot_token: settings.telegram_bot_token,
           telegram_bot_enabled: settings.telegram_bot_enabled,
           telegram_admin_chat_id: settings.telegram_admin_chat_id,
@@ -316,6 +323,84 @@ export const Settings: React.FC = () => {
                 {t('settings.currency_desc')}
               </p>
             </div>
+          </div>
+        </Card>
+
+        {/* Настройки топлива */}
+        <Card>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+              <Fuel className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+                {t('settings.fuel')}
+              </h3>
+              <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                {t('settings.fuel_desc')}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Цена топлива */}
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                {t('settings.fuel_price')}
+              </label>
+              <Input
+                type="number"
+                min="1"
+                max="500"
+                step="0.01"
+                value={settings.fuel_price_per_liter || 58}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    fuel_price_per_liter: Number(e.target.value),
+                  })
+                }
+              />
+              <p className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                {t('settings.fuel_price_hint')}
+              </p>
+            </div>
+
+            {/* Расход по умолчанию */}
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                {t('settings.default_consumption')}
+              </label>
+              <Input
+                type="number"
+                min="5"
+                max="100"
+                step="0.1"
+                value={settings.default_fuel_consumption || 30}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    default_fuel_consumption: Number(e.target.value),
+                  })
+                }
+              />
+              <p className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                {t('settings.default_consumption_hint')}
+              </p>
+            </div>
+          </div>
+
+          {/* Пример расчёта */}
+          <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+            <p className="text-sm font-medium text-orange-800 dark:text-orange-300 mb-2">
+              {t('settings.fuel_calc_example')}
+            </p>
+            <p className="text-sm text-orange-700 dark:text-orange-400">
+              400 km × {settings.default_fuel_consumption || 30} л/100км ÷ 100 = <strong>{((400 * (settings.default_fuel_consumption || 30)) / 100).toFixed(1)}</strong> {t('settings.liters_needed')}
+            </p>
+            <p className="text-sm text-orange-700 dark:text-orange-400 mt-1">
+              {t('settings.fuel_cost_result')} {((400 * (settings.default_fuel_consumption || 30)) / 100).toFixed(1)} л × {settings.fuel_price_per_liter || 58} = <strong>{(((400 * (settings.default_fuel_consumption || 30)) / 100) * (settings.fuel_price_per_liter || 58)).toFixed(0)}</strong> сом
+            </p>
           </div>
         </Card>
 

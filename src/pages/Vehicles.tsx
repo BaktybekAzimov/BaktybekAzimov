@@ -23,6 +23,7 @@ interface Vehicle {
   license_plate: string;
   year: number;
   status: string;
+  fuel_consumption?: number;
   notes?: string;
   created_at?: string;
   updated_at?: string;
@@ -34,6 +35,7 @@ interface VehicleFormData {
   license_plate: string;
   year: number;
   status: string;
+  fuel_consumption?: number;
   notes?: string;
 }
 
@@ -44,6 +46,7 @@ interface VehicleStats {
   license_plate: string;
   year: number;
   status: string;
+  fuel_consumption?: number;
   notes?: string;
   total_trips: number;
   total_revenue: number;
@@ -143,6 +146,7 @@ export const Vehicles: React.FC = () => {
       license_plate: '',
       year: new Date().getFullYear(),
       status: 'available',
+      fuel_consumption: 30,
       notes: '',
     });
     setIsModalOpen(true);
@@ -156,6 +160,7 @@ export const Vehicles: React.FC = () => {
       license_plate: vehicle.license_plate,
       year: vehicle.year,
       status: vehicle.status,
+      fuel_consumption: vehicle.fuel_consumption || 30,
       notes: vehicle.notes || '',
     });
     setIsModalOpen(true);
@@ -213,6 +218,7 @@ export const Vehicles: React.FC = () => {
         license_plate: licensePlateNormalized,
         year: Number(data.year),
         status: data.status,
+        fuel_consumption: Number(data.fuel_consumption) || 30,
         notes: data.notes || null,
       };
 
@@ -493,6 +499,21 @@ export const Vehicles: React.FC = () => {
               { value: 'maintenance', label: t('status.maintenance') },
             ]}
             error={errors.status?.message}
+          />
+
+          <Input
+            label={t('vehicles.fuel_consumption')}
+            type="number"
+            step="0.1"
+            min="5"
+            max="100"
+            placeholder="30"
+            helperText={t('vehicles.fuel_consumption_hint')}
+            {...register('fuel_consumption', {
+              min: { value: 5, message: t('validation.fuel_consumption_min') },
+              max: { value: 100, message: t('validation.fuel_consumption_max') },
+            })}
+            error={errors.fuel_consumption?.message}
           />
 
           <Input

@@ -367,6 +367,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Транспорт (дополнительные)
     'vehicles.last_trip': 'Последний рейс',
     'vehicles.avg_profit': 'Средняя прибыль',
+    'vehicles.fuel_consumption': 'Расход топлива (л/100км)',
+    'vehicles.fuel_consumption_hint': 'Укажите расход топлива на 100 км для этого транспорта',
 
     // Маршруты (дополнительные)
     'routes.trip_count': 'Кол-во рейсов',
@@ -396,6 +398,8 @@ const translations: Record<Language, Record<string, string>> = {
     'validation.route_required': 'Маршрут обязателен',
     'validation.revenue_required': 'Выручка обязательна',
     'validation.fuel_required': 'Расход на топливо обязателен',
+    'validation.fuel_consumption_min': 'Расход топлива не может быть меньше 5 л/100км',
+    'validation.fuel_consumption_max': 'Расход топлива не может быть больше 100 л/100км',
 
     // Форма водителя
     'driver_form.title': 'Форма рейса',
@@ -435,6 +439,17 @@ const translations: Record<Language, Record<string, string>> = {
     'settings.currency_rub': '🇷🇺 Рубль (RUB)',
     'settings.lang_ru': '🇷🇺 Русский',
     'settings.lang_ky': '🇰🇬 Кыргызча',
+
+    // Топливо
+    'settings.fuel': 'Настройки топлива',
+    'settings.fuel_desc': 'Цены и расход для авторасчёта стоимости ГСМ',
+    'settings.fuel_price': 'Цена топлива (за литр)',
+    'settings.fuel_price_hint': 'Стоимость топлива по талонам ГСМ',
+    'settings.default_consumption': 'Расход по умолчанию (л/100км)',
+    'settings.default_consumption_hint': 'Используется если у машины не указан расход',
+    'settings.fuel_calc_example': 'Пример расчёта для маршрута 400 км:',
+    'settings.liters_needed': 'литров потребуется',
+    'settings.fuel_cost_result': 'Стоимость топлива:',
 
     // Export
     'export.filename_prefix': 'Отчет_рейсы',
@@ -814,6 +829,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Транспорт (дополнительные)
     'vehicles.last_trip': 'Акыркы рейс',
     'vehicles.avg_profit': 'Орточо пайда',
+    'vehicles.fuel_consumption': 'Күйүүчү май чыгымы (л/100км)',
+    'vehicles.fuel_consumption_hint': 'Бул унаа үчүн 100 км чыгымын көрсөтүңүз',
 
     // Маршруты (дополнительные)
     'routes.trip_count': 'Рейстер саны',
@@ -843,6 +860,8 @@ const translations: Record<Language, Record<string, string>> = {
     'validation.route_required': 'Маршрут милдеттүү',
     'validation.revenue_required': 'Киреше милдеттүү',
     'validation.fuel_required': 'Күйүүчү майга чыгым милдеттүү',
+    'validation.fuel_consumption_min': 'Күйүүчү май чыгымы 5 л/100км кем болбошу керек',
+    'validation.fuel_consumption_max': 'Күйүүчү май чыгымы 100 л/100км ашпашы керек',
 
     // Форма водителя
     'driver_form.title': 'Рейс формасы',
@@ -882,6 +901,17 @@ const translations: Record<Language, Record<string, string>> = {
     'settings.currency_rub': '🇷🇺 Рубль (RUB)',
     'settings.lang_ru': '🇷🇺 Орусча',
     'settings.lang_ky': '🇰🇬 Кыргызча',
+
+    // Топливо
+    'settings.fuel': 'Күйүүчү май жөндөөлөрү',
+    'settings.fuel_desc': 'ГСМ баасын авторасчёт үчүн баалар жана чыгым',
+    'settings.fuel_price': 'Күйүүчү май баасы (литрине)',
+    'settings.fuel_price_hint': 'ГСМ талондору боюнча күйүүчү май баасы',
+    'settings.default_consumption': 'Демейки чыгым (л/100км)',
+    'settings.default_consumption_hint': 'Унаада чыгым көрсөтүлбөсө колдонулат',
+    'settings.fuel_calc_example': '400 км маршрут үчүн эсептөө мисалы:',
+    'settings.liters_needed': 'литр керек',
+    'settings.fuel_cost_result': 'Күйүүчү май баасы:',
 
     // Export
     'export.filename_prefix': 'Отчет_рейстер',
