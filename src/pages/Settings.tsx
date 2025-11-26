@@ -241,7 +241,7 @@ export const Settings: React.FC = () => {
         }
       />
 
-      <div className="p-8 space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
         {/* Success Message */}
         {success && (
           <Card className="bg-success-50 dark:bg-success-900/20 border-2 border-success-500 animate-in fade-in">

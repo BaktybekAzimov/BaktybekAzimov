@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { ErrorModal } from '../components/ui/ErrorModal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Plus, Edit, Trash2, Truck, Car } from 'lucide-react';
@@ -62,6 +63,8 @@ export const Vehicles: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const {
     register,
@@ -158,15 +161,56 @@ export const Vehicles: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const showError = (message: string) => {
+    setErrorMessage(message);
+    setErrorModalOpen(true);
+  };
+
+  const getErrorMessage = (err: any): string => {
+    if (err?.code === '23505' || err?.message?.includes('duplicate') || err?.message?.includes('unique')) {
+      return 'Транспорт с таким гос. номером уже существует в системе';
+    }
+    if (err?.code === '42501' || err?.message?.includes('permission') || err?.message?.includes('policy')) {
+      return 'Нет прав для выполнения этой операции. Обратитесь к администратору';
+    }
+    if (err?.code === 'PGRST301' || err?.message?.includes('JWT')) {
+      return 'Сессия истекла. Пожалуйста, войдите в систему заново';
+    }
+    return 'Не удалось сохранить транспорт. Попробуйте еще раз';
+  };
+
   const onSubmit = async (data: VehicleFormData) => {
     try {
       setSubmitting(true);
       setError(null);
 
+      // Проверка на дубликат гос. номера
+      const licensePlateNormalized = data.license_plate.trim().toUpperCase();
+
+      const { data: existingVehicles, error: checkError } = await supabase
+        .from('vehicles')
+        .select('id, license_plate')
+        .ilike('license_plate', licensePlateNormalized);
+
+      if (checkError) {
+        console.error('Error checking for duplicate:', checkError);
+      }
+
+      // Если редактируем - исключаем текущий транспорт из проверки
+      const duplicates = existingVehicles?.filter(v =>
+        editingVehicle ? v.id !== editingVehicle.id : true
+      );
+
+      if (duplicates && duplicates.length > 0) {
+        showError(`Транспорт с гос. номером "${licensePlateNormalized}" уже существует в системе`);
+        setSubmitting(false);
+        return;
+      }
+
       const vehicleData = {
         brand: data.brand,
         model: data.model,
-        license_plate: data.license_plate,
+        license_plate: licensePlateNormalized,
         year: Number(data.year),
         status: data.status,
         notes: data.notes || null,
@@ -189,9 +233,9 @@ export const Vehicles: React.FC = () => {
 
       setIsModalOpen(false);
       fetchVehicles();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving vehicle:', err);
-      setError(t('error.save_failed'));
+      showError(getErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -265,7 +309,7 @@ export const Vehicles: React.FC = () => {
         }
       />
 
-      <div className="p-8 space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
         {error && (
           <Card className="bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800">
             <p className="text-error-700 dark:text-error-400">{error}</p>
@@ -472,6 +516,13 @@ export const Vehicles: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={errorModalOpen}
+        onClose={() => setErrorModalOpen(false)}
+        message={errorMessage}
+      />
     </MainLayout>
   );
 };
