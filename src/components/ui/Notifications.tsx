@@ -7,47 +7,77 @@ interface Notification {
   type: 'trip' | 'vehicle' | 'driver';
   title: string;
   message: string;
-  timestamp: Date;
+  timestamp: string; // Changed to string for localStorage serialization
   read: boolean;
 }
+
+const NOTIFICATIONS_KEY = 'trucktracker_notifications';
+const NOTIFICATIONS_INITIALIZED_KEY = 'trucktracker_notifications_init';
 
 export const Notifications: React.FC = () => {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Demo notifications using translations
-  const getDemoNotifications = (): Notification[] => [
-    {
-      id: '1',
-      type: 'trip',
-      title: t('notifications.demo_new_trip'),
-      message: t('notifications.demo_new_trip_msg'),
-      timestamp: new Date(Date.now() - 5 * 60000),
-      read: false,
-    },
-    {
-      id: '2',
-      type: 'trip',
-      title: t('notifications.demo_trip_completed'),
-      message: t('notifications.demo_trip_completed_msg'),
-      timestamp: new Date(Date.now() - 30 * 60000),
-      read: false,
-    },
-    {
-      id: '3',
-      type: 'vehicle',
-      title: t('notifications.demo_maintenance'),
-      message: t('notifications.demo_maintenance_msg'),
-      timestamp: new Date(Date.now() - 2 * 3600000),
-      read: true,
-    },
-  ];
+  // Initialize notifications from localStorage or create demo notifications only once
+  const getInitialNotifications = (): Notification[] => {
+    try {
+      const stored = localStorage.getItem(NOTIFICATIONS_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
 
-  const [notifications, setNotifications] = useState<Notification[]>(getDemoNotifications());
+      // Check if we've already initialized demo notifications before
+      const initialized = localStorage.getItem(NOTIFICATIONS_INITIALIZED_KEY);
+      if (initialized) {
+        return []; // Return empty if already initialized but cleared
+      }
+
+      // First time - create demo notifications
+      const demoNotifications: Notification[] = [
+        {
+          id: '1',
+          type: 'trip',
+          title: 'Новый рейс создан',
+          message: 'Рейс #142 успешно создан',
+          timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+          read: false,
+        },
+        {
+          id: '2',
+          type: 'trip',
+          title: 'Рейс завершен',
+          message: 'Рейс #141 завершен успешно',
+          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
+          read: false,
+        },
+        {
+          id: '3',
+          type: 'vehicle',
+          title: 'Требуется ТО',
+          message: 'Транспорт А123ВС требует обслуживания',
+          timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
+          read: true,
+        },
+      ];
+
+      localStorage.setItem(NOTIFICATIONS_INITIALIZED_KEY, 'true');
+      localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(demoNotifications));
+      return demoNotifications;
+    } catch {
+      return [];
+    }
+  };
+
+  const [notifications, setNotifications] = useState<Notification[]>(getInitialNotifications);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Save notifications to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
+  }, [notifications]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -80,7 +110,13 @@ export const Notifications: React.FC = () => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const formatTimestamp = (date: Date) => {
+  const clearAllNotifications = () => {
+    setNotifications([]);
+    setIsOpen(false);
+  };
+
+  const formatTimestamp = (dateStr: string) => {
+    const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
@@ -197,14 +233,11 @@ export const Notifications: React.FC = () => {
                 </span>
               ) : (
                 <span className="text-xs text-secondary-500 dark:text-secondary-400">
-                  {unreadCount} {t('notifications.title').toLowerCase()}
+                  {unreadCount} {t('notifications.unread')}
                 </span>
               )}
               <button
-                onClick={() => {
-                  setNotifications([]);
-                  setIsOpen(false);
-                }}
+                onClick={clearAllNotifications}
                 className="text-xs text-error-600 dark:text-error-400 hover:text-error-700 dark:hover:text-error-300 font-medium transition-colors duration-200"
               >
                 {t('notifications.clear_all')}
