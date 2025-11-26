@@ -1,5 +1,5 @@
 -- =============================================================================
--- АВТОМАТИЧЕСКАЯ СИСТЕМА СТАТУСОВ ВОДИТЕЛЕЙ И РЕЙСОВ
+-- СИСТЕМА СТАТУСОВ ВОДИТЕЛЕЙ (ПРОСТАЯ И НАДЁЖНАЯ)
 -- =============================================================================
 -- Выполните этот скрипт в Supabase SQL Editor
 -- =============================================================================
@@ -13,58 +13,38 @@ ADD COLUMN IF NOT EXISTS availability VARCHAR(20) DEFAULT 'available';
 -- 'on_trip' - в рейсе
 -- 'off_duty' - не на смене (выходной, отпуск, болезнь)
 
-COMMENT ON COLUMN drivers.availability IS 'Текущий статус занятости водителя: available, on_trip, off_duty';
+COMMENT ON COLUMN drivers.availability IS 'Статус занятости: available, on_trip, off_duty';
 
--- 2. Исправить застрявшие рейсы (старше 48 часов в статусе in_progress)
-UPDATE trips
-SET status = 'completed',
-    comment = COALESCE(comment, '') || ' [Автозавершён системой]'
-WHERE status = 'in_progress'
-  AND trip_date < CURRENT_DATE - INTERVAL '2 days';
-
--- 3. Обновить статус всех водителей на основе их рейсов
--- Водители с активными рейсами → on_trip
-UPDATE drivers d
-SET availability = 'on_trip'
-WHERE EXISTS (
-    SELECT 1 FROM trips t
-    WHERE t.driver_id = d.id
-    AND t.status = 'in_progress'
-);
-
--- Водители без активных рейсов → available (если не off_duty)
-UPDATE drivers d
+-- 2. Установить всем водителям статус "свободен" по умолчанию
+UPDATE drivers
 SET availability = 'available'
-WHERE NOT EXISTS (
-    SELECT 1 FROM trips t
-    WHERE t.driver_id = d.id
-    AND t.status = 'in_progress'
-)
-AND (availability IS NULL OR availability = 'on_trip');
+WHERE availability IS NULL;
 
--- 4. Создать функцию для автоматического обновления статуса водителя
-CREATE OR REPLACE FUNCTION update_driver_availability()
+-- 3. Триггер: при создании/обновлении рейса обновляем статус водителя
+CREATE OR REPLACE FUNCTION update_driver_availability_on_trip()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- При изменении статуса рейса на in_progress
-    IF NEW.status = 'in_progress' AND (OLD.status IS NULL OR OLD.status != 'in_progress') THEN
-        UPDATE drivers SET availability = 'on_trip' WHERE id = NEW.driver_id;
+    -- Рейс стал "в процессе" → водитель "в рейсе"
+    IF NEW.status = 'in_progress' THEN
+        UPDATE drivers
+        SET availability = 'on_trip'
+        WHERE id = NEW.driver_id
+        AND availability != 'off_duty';  -- Не менять если "не на смене"
     END IF;
 
-    -- При изменении статуса рейса на completed или cancelled
-    IF NEW.status IN ('completed', 'cancelled') AND OLD.status = 'in_progress' THEN
-        -- Проверяем, есть ли у водителя другие активные рейсы
+    -- Рейс завершён/отменён → проверяем, есть ли другие активные рейсы
+    IF NEW.status IN ('completed', 'cancelled') THEN
+        -- Если нет других активных рейсов у этого водителя
         IF NOT EXISTS (
             SELECT 1 FROM trips
             WHERE driver_id = NEW.driver_id
             AND status = 'in_progress'
             AND id != NEW.id
         ) THEN
-            -- Если водитель не off_duty, ставим available
             UPDATE drivers
             SET availability = 'available'
             WHERE id = NEW.driver_id
-            AND availability != 'off_duty';
+            AND availability = 'on_trip';  -- Только если был "в рейсе"
         END IF;
     END IF;
 
@@ -72,56 +52,55 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 5. Создать триггер на таблицу trips
+-- Удалить старый триггер если есть
 DROP TRIGGER IF EXISTS trigger_update_driver_availability ON trips;
+
+-- Создать новый триггер
 CREATE TRIGGER trigger_update_driver_availability
     AFTER INSERT OR UPDATE OF status ON trips
     FOR EACH ROW
-    EXECUTE FUNCTION update_driver_availability();
+    EXECUTE FUNCTION update_driver_availability_on_trip();
 
--- 6. Создать функцию для автозавершения старых рейсов (можно вызывать по cron)
-CREATE OR REPLACE FUNCTION auto_complete_old_trips()
-RETURNS INTEGER AS $$
-DECLARE
-    completed_count INTEGER;
-BEGIN
-    WITH updated AS (
-        UPDATE trips
-        SET status = 'completed',
-            comment = COALESCE(comment, '') || ' [Автозавершён системой ' || NOW()::DATE || ']'
-        WHERE status = 'in_progress'
-        AND trip_date < CURRENT_DATE - INTERVAL '2 days'
-        RETURNING driver_id
-    )
-    SELECT COUNT(*) INTO completed_count FROM updated;
+-- 4. Синхронизировать текущие данные:
+-- Водители с активными рейсами → "в рейсе"
+UPDATE drivers d
+SET availability = 'on_trip'
+WHERE EXISTS (
+    SELECT 1 FROM trips t
+    WHERE t.driver_id = d.id
+    AND t.status = 'in_progress'
+)
+AND availability != 'off_duty';
 
-    -- Обновляем статусы водителей
-    UPDATE drivers d
-    SET availability = 'available'
-    WHERE availability = 'on_trip'
-    AND NOT EXISTS (
-        SELECT 1 FROM trips t
-        WHERE t.driver_id = d.id
-        AND t.status = 'in_progress'
-    );
-
-    RETURN completed_count;
-END;
-$$ LANGUAGE plpgsql;
-
--- 7. Проверка результатов
+-- 5. Создать представление для просмотра "долгих" рейсов (для диспетчера)
+CREATE OR REPLACE VIEW long_running_trips AS
 SELECT
-    d.full_name,
-    d.availability,
-    COUNT(CASE WHEN t.status = 'in_progress' THEN 1 END) as active_trips,
-    COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_trips
-FROM drivers d
-LEFT JOIN trips t ON d.id = t.driver_id
-GROUP BY d.id, d.full_name, d.availability
-ORDER BY d.full_name;
+    t.id,
+    t.trip_date,
+    t.status,
+    d.full_name as driver_name,
+    d.phone as driver_phone,
+    r.name as route_name,
+    CURRENT_DATE - t.trip_date as days_since_start,
+    t.comment
+FROM trips t
+JOIN drivers d ON t.driver_id = d.id
+LEFT JOIN routes r ON t.route_id = r.id
+WHERE t.status = 'in_progress'
+AND t.trip_date < CURRENT_DATE - INTERVAL '3 days'
+ORDER BY t.trip_date ASC;
 
--- Показать статистику рейсов по статусам
-SELECT status, COUNT(*) as count
-FROM trips
-GROUP BY status
-ORDER BY count DESC;
+-- Комментарий к представлению
+COMMENT ON VIEW long_running_trips IS 'Рейсы в статусе "в процессе" более 3 дней - для проверки диспетчером';
+
+-- 6. Проверка результатов
+SELECT
+    full_name,
+    phone,
+    availability,
+    status
+FROM drivers
+ORDER BY full_name;
+
+-- Показать долгие рейсы (если есть)
+SELECT * FROM long_running_trips;
