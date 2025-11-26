@@ -257,23 +257,21 @@ export const Drivers: React.FC = () => {
 
         if (error) throw error;
       } else {
-        // Create new driver with generated PIN
-        const newPin = generatePinCode();
+        // Create new driver WITHOUT PIN - driver will create their own on first login
         const driverData = {
           full_name: data.full_name,
           phone: data.phone,
           hire_date: data.hire_date,
           status: data.status,
           notes: data.notes || null,
-          pin_code: newPin,
+          // pin_code остаётся NULL - водитель сам создаст при первом входе
         };
 
         const { error } = await supabase.from('drivers').insert([driverData]);
 
         if (error) throw error;
 
-        // Показываем PIN-код после создания
-        alert(`Водитель "${data.full_name}" создан!\n\nPIN-код для входа: ${newPin}\n\nСообщите этот PIN водителю для доступа к форме отчёта.`);
+        alert(`Водитель "${data.full_name}" создан!\n\nПри первом входе в форму отчёта водитель сам придумает свой PIN-код.`);
       }
 
       setIsModalOpen(false);
@@ -440,19 +438,16 @@ export const Drivers: React.FC = () => {
                           <button
                             onClick={() => regeneratePin(driver.id, driver.full_name)}
                             className="p-1 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded transition-colors"
-                            title="Новый PIN"
+                            title="Сбросить PIN"
                           >
                             <RefreshCw size={14} className="text-secondary-500" />
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => regeneratePin(driver.id, driver.full_name)}
-                          className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
-                        >
+                        <span className="inline-flex items-center gap-1 text-xs text-warning-600 dark:text-warning-400 bg-warning-50 dark:bg-warning-900/20 px-2 py-1 rounded">
                           <Key size={12} />
-                          Создать PIN
-                        </button>
+                          Ожидает создания
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
