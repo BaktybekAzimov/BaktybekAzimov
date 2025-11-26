@@ -41,9 +41,15 @@ interface Vehicle {
   license_plate: string;
   year: number;
   status: string;
+  fuel_consumption?: number;
   notes?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+interface FuelSettings {
+  fuel_price_per_liter: number;
+  default_fuel_consumption: number;
 }
 
 interface Route {
@@ -100,6 +106,10 @@ export const Trips: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
+  const [fuelSettings, setFuelSettings] = useState<FuelSettings>({
+    fuel_price_per_liter: 58,
+    default_fuel_consumption: 30,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -119,6 +129,7 @@ export const Trips: React.FC = () => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<TripFormData>();
 
@@ -127,6 +138,8 @@ export const Trips: React.FC = () => {
   const fuelCost = watch('fuel_cost') || 0;
   const maintenanceCost = watch('maintenance_cost') || 0;
   const otherCosts = watch('other_costs') || 0;
+  const selectedRouteId = watch('route_id');
+  const selectedVehicleId = watch('vehicle_id');
 
   const calculatedValues = calculateTripFinancials(
     Number(revenue),
@@ -134,6 +147,41 @@ export const Trips: React.FC = () => {
     Number(maintenanceCost),
     Number(otherCosts)
   );
+
+  // Calculate fuel cost when route or vehicle changes
+  const calculateFuelCost = (routeId: string, vehicleId: string) => {
+    const route = routes.find(r => r.id === routeId);
+    const vehicle = vehicles.find(v => v.id === vehicleId);
+
+    if (route && route.distance_km > 0) {
+      // Use vehicle's fuel consumption or default
+      const consumption = vehicle?.fuel_consumption || fuelSettings.default_fuel_consumption;
+      // Formula: (distance * consumption / 100) * price_per_liter
+      const calculatedFuel = Math.round((route.distance_km * consumption / 100) * fuelSettings.fuel_price_per_liter);
+      return calculatedFuel;
+    }
+    return 0;
+  };
+
+  // Auto-fill fuel cost when route or vehicle changes (only in create mode)
+  useEffect(() => {
+    if (!editingTrip && selectedRouteId && selectedVehicleId) {
+      const autoFuelCost = calculateFuelCost(selectedRouteId, selectedVehicleId);
+      if (autoFuelCost > 0) {
+        setValue('fuel_cost', autoFuelCost);
+      }
+    }
+  }, [selectedRouteId, selectedVehicleId, routes, vehicles, fuelSettings, editingTrip]);
+
+  // Auto-fill revenue from route's standard price (only in create mode)
+  useEffect(() => {
+    if (!editingTrip && selectedRouteId) {
+      const route = routes.find(r => r.id === selectedRouteId);
+      if (route && route.avg_cost > 0) {
+        setValue('revenue', route.avg_cost);
+      }
+    }
+  }, [selectedRouteId, routes, editingTrip]);
 
   useEffect(() => {
     fetchData();
@@ -200,11 +248,12 @@ export const Trips: React.FC = () => {
       }
 
       // Fetch all data in parallel
-      const [tripsRes, driversRes, vehiclesRes, routesRes] = await Promise.all([
+      const [tripsRes, driversRes, vehiclesRes, routesRes, settingsRes] = await Promise.all([
         tripsQuery,
         supabase.from('drivers').select('*').eq('status', 'active'),
         supabase.from('vehicles').select('*'),
         supabase.from('routes').select('*'),
+        supabase.from('settings').select('fuel_price_per_liter, default_fuel_consumption').single(),
       ]);
 
       if (tripsRes.error) throw tripsRes.error;
@@ -217,6 +266,14 @@ export const Trips: React.FC = () => {
       setDrivers(driversRes.data || []);
       setVehicles(vehiclesRes.data || []);
       setRoutes(routesRes.data || []);
+
+      // Set fuel settings if available
+      if (settingsRes.data) {
+        setFuelSettings({
+          fuel_price_per_liter: settingsRes.data.fuel_price_per_liter || 58,
+          default_fuel_consumption: settingsRes.data.default_fuel_consumption || 30,
+        });
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
       setError(t('error.load_failed'));

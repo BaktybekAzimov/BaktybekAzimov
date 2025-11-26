@@ -41,6 +41,11 @@ interface Route {
   created_at?: string;
 }
 
+interface FuelSettings {
+  fuel_price_per_liter: number;
+  default_fuel_consumption: number;
+}
+
 interface DriverTripFormData {
   trip_date: string;
   route_id: string;
@@ -56,6 +61,10 @@ export const DriverForm: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [routes, setRoutes] = useState<Route[]>([]);
+  const [fuelSettings, setFuelSettings] = useState<FuelSettings>({
+    fuel_price_per_liter: 58,
+    default_fuel_consumption: 30,
+  });
 
   // Авторизация по телефону + PIN
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -75,6 +84,7 @@ export const DriverForm: React.FC = () => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<DriverTripFormData>({
     defaultValues: {
@@ -89,6 +99,7 @@ export const DriverForm: React.FC = () => {
   const revenue = watch('revenue') || 0;
   const fuelCost = watch('fuel_cost') || 0;
   const otherCosts = watch('other_costs') || 0;
+  const selectedRouteId = watch('route_id');
 
   const calculatedValues = calculateTripFinancials(
     Number(revenue),
@@ -96,6 +107,26 @@ export const DriverForm: React.FC = () => {
     0, // No maintenance cost in driver form
     Number(otherCosts)
   );
+
+  // Auto-fill fuel cost and revenue when route changes
+  useEffect(() => {
+    if (selectedRouteId && routes.length > 0) {
+      const route = routes.find(r => r.id === selectedRouteId);
+      if (route) {
+        // Auto-calculate fuel cost
+        const calculatedFuel = Math.round(
+          (route.distance_km * fuelSettings.default_fuel_consumption / 100) * fuelSettings.fuel_price_per_liter
+        );
+        if (calculatedFuel > 0) {
+          setValue('fuel_cost', calculatedFuel);
+        }
+        // Auto-fill revenue from standard price
+        if (route.avg_cost > 0) {
+          setValue('revenue', route.avg_cost);
+        }
+      }
+    }
+  }, [selectedRouteId, routes, fuelSettings]);
 
   useEffect(() => {
     // Check if already authenticated in this session
@@ -301,15 +332,23 @@ export const DriverForm: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch routes
-      const { data: routesData, error: routesError } = await supabase
-        .from('routes')
-        .select('*')
-        .order('name');
+      // Fetch routes and settings in parallel
+      const [routesRes, settingsRes] = await Promise.all([
+        supabase.from('routes').select('*').order('name'),
+        supabase.from('settings').select('fuel_price_per_liter, default_fuel_consumption').single(),
+      ]);
 
-      if (routesError) throw routesError;
+      if (routesRes.error) throw routesRes.error;
 
-      setRoutes(routesData || []);
+      setRoutes(routesRes.data || []);
+
+      // Set fuel settings if available
+      if (settingsRes.data) {
+        setFuelSettings({
+          fuel_price_per_liter: settingsRes.data.fuel_price_per_liter || 58,
+          default_fuel_consumption: settingsRes.data.default_fuel_consumption || 30,
+        });
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
       setError(t('driver_form.load_error'));

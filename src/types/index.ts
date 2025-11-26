@@ -17,6 +17,7 @@ export interface Vehicle {
   license_plate: string;
   year: number;
   status: 'available' | 'in_trip' | 'maintenance';
+  fuel_consumption?: number; // Расход топлива л/100км
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -117,7 +118,14 @@ export interface VehicleFormData {
   license_plate: string;
   year: number;
   status: Vehicle['status'];
+  fuel_consumption?: number; // Расход топлива л/100км
   notes?: string;
+}
+
+// Настройки топлива
+export interface FuelSettings {
+  fuel_price_per_liter: number;     // Цена за литр
+  default_fuel_consumption: number;  // Расход по умолчанию л/100км
 }
 
 export interface RouteFormData {
