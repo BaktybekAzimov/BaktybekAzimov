@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import SplitType from 'split-type';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
@@ -84,6 +85,15 @@ const SplitText = ({
       {children}
     </div>
   );
+};
+
+SplitText.propTypes = {
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  animation: PropTypes.oneOf(['fadeUp', 'fadeIn', 'slideUp', 'reveal']),
+  stagger: PropTypes.number,
+  trigger: PropTypes.bool,
+  delay: PropTypes.number
 };
 
 export default SplitText;

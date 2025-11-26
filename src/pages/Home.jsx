@@ -10,7 +10,6 @@ import TestimonialsSection from '../components/sections/TestimonialsSection';
 import PremiumHero from '../components/hero/PremiumHero';
 import HorizontalProducts from '../components/sections/HorizontalProducts';
 import RevealMask from '../components/animations/RevealMask';
-import ParallaxImage from '../components/animations/ParallaxImage';
 import SplitText from '../components/animations/SplitText';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -341,7 +340,7 @@ const Home = () => {
       </section>
 
       {/* Add twinkle animation to globals.css */}
-      <style jsx global>{`
+      <style>{`
         @keyframes twinkle {
           0%, 100% { opacity: 0.2; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.5); }

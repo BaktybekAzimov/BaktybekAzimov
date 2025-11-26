@@ -209,7 +209,7 @@ const PremiumHero = () => {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes slideUp {
           from {
             transform: translateY(100%);

@@ -1,0 +1,359 @@
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Select } from '../components/ui/Select';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { CheckCircle, Truck } from 'lucide-react';
+
+// Иконка валюты (динамическая)
+const CurrencyIcon: React.FC<{ className?: string }> = ({ className }) => {
+  const currency = localStorage.getItem('currency') || 'KGS';
+  const symbols: Record<string, string> = { KGS: 'с', USD: '$', RUB: '₽' };
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <text x="6" y="17" fontSize="14" fontWeight="bold" stroke="none" fill="currentColor">{symbols[currency] || 'с'}</text>
+    </svg>
+  );
+};
+import { supabase } from '../lib/supabase';
+import { formatCurrency, calculateTripFinancials } from '../lib/utils';
+import { useLanguage } from '../contexts/LanguageContext';
+
+interface Driver {
+  id: string;
+  full_name: string;
+  phone: string;
+  hire_date: string;
+  status: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Route {
+  id: string;
+  name: string;
+  distance_km: number;
+  avg_cost: number;
+  created_at?: string;
+}
+
+interface DriverTripFormData {
+  driver_name: string;
+  trip_date: string;
+  route_id: string;
+  revenue: number;
+  fuel_cost: number;
+  other_costs: number;
+}
+
+export const DriverForm: React.FC = () => {
+  const { t } = useLanguage();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<DriverTripFormData>({
+    defaultValues: {
+      trip_date: new Date().toISOString().split('T')[0],
+      revenue: 0,
+      fuel_cost: 0,
+      other_costs: 0,
+    },
+  });
+
+  // Watch form values for auto-calculation
+  const revenue = watch('revenue') || 0;
+  const fuelCost = watch('fuel_cost') || 0;
+  const otherCosts = watch('other_costs') || 0;
+
+  const calculatedValues = calculateTripFinancials(
+    Number(revenue),
+    Number(fuelCost),
+    0, // No maintenance cost in driver form
+    Number(otherCosts)
+  );
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch drivers and routes in parallel
+      const [driversRes, routesRes] = await Promise.all([
+        supabase.from('drivers').select('*').eq('status', 'active').order('full_name'),
+        supabase.from('routes').select('*').order('name'),
+      ]);
+
+      if (driversRes.error) throw driversRes.error;
+      if (routesRes.error) throw routesRes.error;
+
+      setDrivers(driversRes.data || []);
+      setRoutes(routesRes.data || []);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(t('driver_form.load_error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmit = async (data: DriverTripFormData) => {
+    try {
+      setSubmitting(true);
+      setError(null);
+      setSuccess(false);
+
+      const calculated = calculateTripFinancials(
+        Number(data.revenue),
+        Number(data.fuel_cost),
+        0, // No maintenance cost
+        Number(data.other_costs)
+      );
+
+      // Find the driver by name to get the ID
+      const driver = drivers.find((d) => d.full_name === data.driver_name);
+      if (!driver) {
+        throw new Error(t('driver_form.driver_not_found'));
+      }
+
+      // For now, we'll use a default vehicle (you might want to add vehicle selection)
+      // or handle this differently based on your requirements
+      const { data: vehicles } = await supabase
+        .from('vehicles')
+        .select('id')
+        .eq('status', 'available')
+        .limit(1);
+
+      if (!vehicles || vehicles.length === 0) {
+        throw new Error(t('driver_form.no_vehicles'));
+      }
+
+      const tripData = {
+        trip_date: data.trip_date,
+        driver_id: driver.id,
+        vehicle_id: vehicles[0].id, // Use first available vehicle
+        route_id: data.route_id,
+        revenue: Number(data.revenue),
+        fuel_cost: Number(data.fuel_cost),
+        maintenance_cost: 0,
+        other_costs: Number(data.other_costs),
+        total_costs: calculated.totalCosts,
+        net_profit: calculated.netProfit,
+        driver_payment: calculated.driverPayment,
+        owner_payment: calculated.ownerPayment,
+        status: 'completed',
+        comment: t('driver_form.created_by_driver'),
+      };
+
+      const { error } = await supabase.from('trips').insert([tripData]);
+
+      if (error) throw error;
+
+      setSuccess(true);
+      reset({
+        driver_name: '',
+        trip_date: new Date().toISOString().split('T')[0],
+        route_id: '',
+        revenue: 0,
+        fuel_cost: 0,
+        other_costs: 0,
+      });
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (err: any) {
+      console.error('Error saving trip:', err);
+      setError(err.message || t('driver_form.save_error'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 flex items-center justify-center p-4">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
+            <Truck className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
+            {t('driver_form.title')}
+          </h1>
+          <p className="text-secondary-600 dark:text-secondary-400">
+            {t('driver_form.subtitle')}
+          </p>
+        </div>
+
+        {/* Success Message */}
+        {success && (
+          <Card className="mb-6 bg-success-50 dark:bg-success-900/20 border-2 border-success-500 dark:border-success-700 animate-in fade-in duration-300">
+            <div className="flex items-center gap-3 text-success-700 dark:text-success-400">
+              <CheckCircle className="w-6 h-6 flex-shrink-0" />
+              <div>
+                <p className="font-semibold">{t('driver_form.success')}</p>
+                <p className="text-sm">{t('driver_form.success_desc')}</p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <Card className="mb-6 bg-error-50 dark:bg-error-900/20 border-2 border-error-500 dark:border-error-700">
+            <p className="text-error-700 dark:text-error-400 font-medium">{error}</p>
+          </Card>
+        )}
+
+        {/* Form */}
+        <Card className="shadow-strong">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Driver Selection */}
+            <Select
+              label={t('driver_form.driver')}
+              {...register('driver_name', { required: t('driver_form.select_driver') })}
+              options={drivers.map((d) => ({
+                value: d.full_name,
+                label: d.full_name,
+              }))}
+              error={errors.driver_name?.message}
+            />
+
+            {/* Date */}
+            <Input
+              label={t('driver_form.trip_date')}
+              type="date"
+              {...register('trip_date', { required: t('driver_form.date_required') })}
+              error={errors.trip_date?.message}
+            />
+
+            {/* Route */}
+            <Select
+              label={t('driver_form.route')}
+              {...register('route_id', { required: t('driver_form.select_route') })}
+              options={routes.map((r) => ({
+                value: r.id,
+                label: `${r.name} (${r.distance_km} ${t('routes.km')})`,
+              }))}
+              error={errors.route_id?.message}
+            />
+
+            {/* Revenue */}
+            <Input
+              label={t('driver_form.revenue')}
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              {...register('revenue', {
+                required: t('driver_form.revenue_required'),
+                min: { value: 0, message: t('driver_form.revenue_positive') },
+              })}
+              error={errors.revenue?.message}
+            />
+
+            {/* Fuel Cost */}
+            <Input
+              label={t('driver_form.fuel_cost')}
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              {...register('fuel_cost', {
+                required: t('driver_form.fuel_required'),
+                min: { value: 0, message: t('driver_form.cost_positive') },
+              })}
+              error={errors.fuel_cost?.message}
+            />
+
+            {/* Other Costs */}
+            <Input
+              label={t('driver_form.other_costs')}
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              helperText={t('driver_form.other_costs_hint')}
+              {...register('other_costs', {
+                min: { value: 0, message: t('driver_form.cost_positive') },
+              })}
+              error={errors.other_costs?.message}
+            />
+
+            {/* Calculated Driver Payment */}
+            <Card className="bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-200 dark:border-primary-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-primary-600 rounded-xl">
+                    <CurrencyIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400 font-medium">
+                      {t('driver_form.your_payment')}
+                    </p>
+                    <p className="text-2xl font-bold text-primary-700 dark:text-primary-400 font-mono">
+                      {formatCurrency(calculatedValues.driverPayment)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-primary-200 dark:border-primary-800 grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-secondary-600 dark:text-secondary-400">{t('driver_form.net_profit')}</p>
+                  <p className="font-mono font-semibold text-success-700 dark:text-success-400">
+                    {formatCurrency(calculatedValues.netProfit)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-secondary-600 dark:text-secondary-400">{t('driver_form.total_costs')}</p>
+                  <p className="font-mono font-semibold text-error-700 dark:text-error-400">
+                    {formatCurrency(calculatedValues.totalCosts)}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              isLoading={submitting}
+              className="w-full text-lg py-4"
+              size="lg"
+            >
+              {t('driver_form.submit')}
+            </Button>
+          </form>
+        </Card>
+
+        {/* Footer */}
+        <p className="text-center text-sm text-secondary-500 dark:text-secondary-400 mt-6">
+          {t('driver_form.footer')}
+        </p>
+      </div>
+    </div>
+  );
+};
