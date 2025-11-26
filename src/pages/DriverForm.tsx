@@ -369,6 +369,13 @@ export const DriverForm: React.FC = () => {
 
       if (error) throw error;
 
+      // Убедиться, что водитель помечен как свободный после сдачи отчёта
+      await supabase
+        .from('drivers')
+        .update({ availability: 'available' })
+        .eq('id', authenticatedDriver.id)
+        .neq('availability', 'off_duty'); // Не менять если "Не на смене"
+
       setSuccess(true);
       reset({
         trip_date: new Date().toISOString().split('T')[0],

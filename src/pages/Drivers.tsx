@@ -11,7 +11,7 @@ import { Modal } from '../components/ui/Modal';
 import { ErrorModal } from '../components/ui/ErrorModal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, User, Users, Key, Copy, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Users, Key, Copy, RefreshCw, Truck, Coffee, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getStatusColor } from '../lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -35,6 +35,7 @@ interface Driver {
   phone: string;
   hire_date: string;
   status: string;
+  availability?: 'available' | 'on_trip' | 'off_duty';
   pin_code?: string;
   notes?: string;
   created_at?: string;
@@ -55,6 +56,7 @@ interface DriverStats {
   phone: string;
   hire_date: string;
   status: string;
+  availability?: 'available' | 'on_trip' | 'off_duty';
   pin_code?: string;
   notes?: string;
   total_trips: number;
@@ -189,6 +191,64 @@ export const Drivers: React.FC = () => {
     } catch (err) {
       console.error('Error regenerating PIN:', err);
       showError('Не удалось сгенерировать новый PIN-код');
+    }
+  };
+
+  // Переключение статуса занятости водителя
+  const toggleAvailability = async (driver: DriverStats) => {
+    // Определяем следующий статус
+    let newStatus: 'available' | 'off_duty';
+    let confirmMessage: string;
+
+    if (driver.availability === 'off_duty') {
+      newStatus = 'available';
+      confirmMessage = `Вернуть водителя "${driver.full_name}" на смену?`;
+    } else if (driver.availability === 'on_trip') {
+      // Нельзя менять статус пока в рейсе
+      alert('Водитель в рейсе. Дождитесь завершения рейса.');
+      return;
+    } else {
+      newStatus = 'off_duty';
+      confirmMessage = `Отметить водителя "${driver.full_name}" как "Не на смене"?`;
+    }
+
+    if (!confirm(confirmMessage)) return;
+
+    try {
+      const { error } = await supabase
+        .from('drivers')
+        .update({ availability: newStatus })
+        .eq('id', driver.id);
+
+      if (error) throw error;
+      fetchDrivers();
+    } catch (err) {
+      console.error('Error updating availability:', err);
+      showError('Не удалось обновить статус');
+    }
+  };
+
+  // Получить цвет и иконку для статуса занятости
+  const getAvailabilityInfo = (availability?: string) => {
+    switch (availability) {
+      case 'on_trip':
+        return {
+          label: 'В рейсе',
+          color: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
+          icon: Truck,
+        };
+      case 'off_duty':
+        return {
+          label: 'Не на смене',
+          color: 'bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400',
+          icon: Coffee,
+        };
+      default: // available
+        return {
+          label: 'Свободен',
+          color: 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400',
+          icon: CheckCircle,
+        };
     }
   };
 
@@ -398,6 +458,7 @@ export const Drivers: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('drivers.name')}</TableHead>
+                <TableHead>Занятость</TableHead>
                 <TableHead>{t('drivers.phone')}</TableHead>
                 <TableHead>PIN</TableHead>
                 <TableHead>{t('drivers.total_trips')}</TableHead>
@@ -420,6 +481,22 @@ export const Drivers: React.FC = () => {
                           <div className="text-xs text-secondary-500">{formatDate(driver.hire_date)}</div>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const info = getAvailabilityInfo(driver.availability);
+                        const IconComponent = info.icon;
+                        return (
+                          <button
+                            onClick={() => toggleAvailability(driver)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-opacity hover:opacity-80 ${info.color}`}
+                            title={driver.availability === 'on_trip' ? 'В рейсе' : 'Нажмите для изменения'}
+                          >
+                            <IconComponent size={12} />
+                            {info.label}
+                          </button>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>{driver.phone}</TableCell>
                     <TableCell>
@@ -487,7 +564,7 @@ export const Drivers: React.FC = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-secondary-500">
+                  <TableCell colSpan={8} className="text-center py-12 text-secondary-500">
                     {t('empty.drivers')}
                   </TableCell>
                 </TableRow>
