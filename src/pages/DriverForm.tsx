@@ -59,11 +59,15 @@ export const DriverForm: React.FC = () => {
 
   // Авторизация по телефону + PIN
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authStep, setAuthStep] = useState<'phone' | 'pin' | 'create_pin'>('phone');
   const [authPhone, setAuthPhone] = useState('');
   const [authPin, setAuthPin] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
   const [authAttempts, setAuthAttempts] = useState(0);
   const [authenticatedDriver, setAuthenticatedDriver] = useState<Driver | null>(null);
+  const [foundDriver, setFoundDriver] = useState<Driver | null>(null);
   const MAX_AUTH_ATTEMPTS = 5;
 
   const {
@@ -135,25 +139,20 @@ export const DriverForm: React.FC = () => {
     return phone.replace(/\D/g, '');
   };
 
-  // Verify phone + PIN
-  const handleAuthSubmit = async (e: React.FormEvent) => {
+  // Step 1: Find driver by phone
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
 
-    if (authAttempts >= MAX_AUTH_ATTEMPTS) {
-      setAuthError('Слишком много попыток. Попробуйте позже.');
-      return;
-    }
-
-    if (!authPhone || !authPin) {
-      setAuthError('Введите номер телефона и PIN-код');
+    if (!authPhone) {
+      setAuthError('Введите номер телефона');
       return;
     }
 
     try {
       setLoading(true);
 
-      // Find driver by phone and PIN
+      // Find driver by phone
       const { data: allDrivers, error } = await supabase
         .from('drivers')
         .select('*')
@@ -166,24 +165,108 @@ export const DriverForm: React.FC = () => {
 
       const driver = allDrivers?.find(d => {
         const normalizedDriverPhone = normalizePhone(d.phone);
-        return normalizedDriverPhone === normalizedInputPhone && d.pin_code === authPin;
+        return normalizedDriverPhone === normalizedInputPhone;
       });
 
-      if (driver) {
-        setAuthenticatedDriver(driver);
-        setIsAuthenticated(true);
-        sessionStorage.setItem('driverFormDriverId', driver.id);
-        await fetchData();
-      } else {
-        setAuthAttempts(prev => prev + 1);
-        const remaining = MAX_AUTH_ATTEMPTS - authAttempts - 1;
-        setAuthError(`Неверный телефон или PIN-код. Осталось попыток: ${remaining}`);
-        setAuthPin('');
+      if (!driver) {
+        setAuthError('Водитель с таким номером не найден. Обратитесь к администратору.');
         setLoading(false);
+        return;
       }
+
+      setFoundDriver(driver);
+
+      // Check if driver has PIN
+      if (driver.pin_code) {
+        // Has PIN - go to PIN entry step
+        setAuthStep('pin');
+      } else {
+        // No PIN - go to PIN creation step
+        setAuthStep('create_pin');
+      }
+      setLoading(false);
     } catch (err) {
-      console.error('Auth error:', err);
-      setAuthError('Ошибка авторизации. Попробуйте позже.');
+      console.error('Phone lookup error:', err);
+      setAuthError('Ошибка поиска. Попробуйте позже.');
+      setLoading(false);
+    }
+  };
+
+  // Step 2a: Verify existing PIN
+  const handlePinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+
+    if (authAttempts >= MAX_AUTH_ATTEMPTS) {
+      setAuthError('Слишком много попыток. Попробуйте позже.');
+      return;
+    }
+
+    if (!authPin || authPin.length < 4) {
+      setAuthError('Введите 4-значный PIN-код');
+      return;
+    }
+
+    if (!foundDriver) {
+      setAuthStep('phone');
+      return;
+    }
+
+    if (foundDriver.pin_code === authPin) {
+      // PIN correct - authenticate
+      setAuthenticatedDriver(foundDriver);
+      setIsAuthenticated(true);
+      sessionStorage.setItem('driverFormDriverId', foundDriver.id);
+      await fetchData();
+    } else {
+      setAuthAttempts(prev => prev + 1);
+      const remaining = MAX_AUTH_ATTEMPTS - authAttempts - 1;
+      setAuthError(`Неверный PIN-код. Осталось попыток: ${remaining}`);
+      setAuthPin('');
+    }
+  };
+
+  // Step 2b: Create new PIN
+  const handleCreatePinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+
+    if (!newPin || newPin.length < 4) {
+      setAuthError('PIN-код должен содержать 4 цифры');
+      return;
+    }
+
+    if (newPin !== confirmPin) {
+      setAuthError('PIN-коды не совпадают');
+      setConfirmPin('');
+      return;
+    }
+
+    if (!foundDriver) {
+      setAuthStep('phone');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Save PIN to database
+      const { error } = await supabase
+        .from('drivers')
+        .update({ pin_code: newPin })
+        .eq('id', foundDriver.id);
+
+      if (error) throw error;
+
+      // Update foundDriver with new PIN
+      const updatedDriver = { ...foundDriver, pin_code: newPin };
+      setAuthenticatedDriver(updatedDriver);
+      setIsAuthenticated(true);
+      sessionStorage.setItem('driverFormDriverId', foundDriver.id);
+      await fetchData();
+    } catch (err) {
+      console.error('PIN creation error:', err);
+      setAuthError('Не удалось сохранить PIN-код. Попробуйте позже.');
       setLoading(false);
     }
   };
@@ -193,9 +276,23 @@ export const DriverForm: React.FC = () => {
     sessionStorage.removeItem('driverFormDriverId');
     setIsAuthenticated(false);
     setAuthenticatedDriver(null);
+    setFoundDriver(null);
+    setAuthStep('phone');
     setAuthPhone('');
     setAuthPin('');
+    setNewPin('');
+    setConfirmPin('');
     setAuthAttempts(0);
+    setAuthError(null);
+  };
+
+  // Go back to phone step
+  const handleBackToPhone = () => {
+    setAuthStep('phone');
+    setFoundDriver(null);
+    setAuthPin('');
+    setNewPin('');
+    setConfirmPin('');
     setAuthError(null);
   };
 
@@ -299,84 +396,216 @@ export const DriverForm: React.FC = () => {
     );
   }
 
-  // Экран авторизации по телефону + PIN
+  // Экран авторизации - многошаговый процесс
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           <Card className="shadow-strong">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
-                Вход для водителя
-              </h1>
-              <p className="text-secondary-600 dark:text-secondary-400">
-                Введите ваш номер телефона и PIN-код
-              </p>
-            </div>
+            {/* Шаг 1: Ввод телефона */}
+            {authStep === 'phone' && (
+              <>
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
+                    Вход для водителя
+                  </h1>
+                  <p className="text-secondary-600 dark:text-secondary-400">
+                    Введите ваш номер телефона
+                  </p>
+                </div>
 
-            {authError && (
-              <div className="mb-4 p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 rounded-lg">
-                <p className="text-error-700 dark:text-error-400 text-sm font-medium">{authError}</p>
-              </div>
-            )}
+                {authError && (
+                  <div className="mb-4 p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 rounded-lg">
+                    <p className="text-error-700 dark:text-error-400 text-sm font-medium">{authError}</p>
+                  </div>
+                )}
 
-            {authAttempts >= MAX_AUTH_ATTEMPTS ? (
-              <div className="text-center py-8">
-                <Lock className="w-12 h-12 text-error-500 mx-auto mb-4" />
-                <p className="text-secondary-700 dark:text-secondary-300">
-                  Слишком много неудачных попыток. Обратитесь к администратору.
+                <form onSubmit={handlePhoneSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                      Номер телефона
+                    </label>
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      value={authPhone}
+                      onChange={(e) => setAuthPhone(e.target.value)}
+                      className="w-full px-4 py-3 text-lg border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
+                      placeholder="+996 XXX XXX XXX"
+                      autoFocus
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    size="lg"
+                    disabled={!authPhone}
+                    isLoading={loading}
+                  >
+                    Продолжить
+                  </Button>
+                </form>
+
+                <p className="text-center text-xs text-secondary-500 dark:text-secondary-400 mt-6">
+                  Используйте телефон, указанный при регистрации
                 </p>
-              </div>
-            ) : (
-              <form onSubmit={handleAuthSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                    Номер телефона
-                  </label>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    value={authPhone}
-                    onChange={(e) => setAuthPhone(e.target.value)}
-                    className="w-full px-4 py-3 text-lg border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
-                    placeholder="+996 XXX XXX XXX"
-                    autoFocus
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                    PIN-код (4 цифры)
-                  </label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={4}
-                    value={authPin}
-                    onChange={(e) => setAuthPin(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
-                    placeholder="••••"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={!authPhone || authPin.length < 4}
-                  isLoading={loading}
-                  icon={<Lock size={20} />}
-                >
-                  Войти
-                </Button>
-              </form>
+              </>
             )}
 
-            <p className="text-center text-xs text-secondary-500 dark:text-secondary-400 mt-6">
-              PIN-код предоставляется администратором при регистрации
-            </p>
+            {/* Шаг 2a: Ввод существующего PIN */}
+            {authStep === 'pin' && (
+              <>
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-2xl mb-4">
+                    <Lock className="w-8 h-8 text-white" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
+                    Введите PIN-код
+                  </h1>
+                  {foundDriver && (
+                    <p className="text-primary-600 dark:text-primary-400 font-medium">
+                      {foundDriver.full_name}
+                    </p>
+                  )}
+                </div>
+
+                {authError && (
+                  <div className="mb-4 p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 rounded-lg">
+                    <p className="text-error-700 dark:text-error-400 text-sm font-medium">{authError}</p>
+                  </div>
+                )}
+
+                {authAttempts >= MAX_AUTH_ATTEMPTS ? (
+                  <div className="text-center py-8">
+                    <Lock className="w-12 h-12 text-error-500 mx-auto mb-4" />
+                    <p className="text-secondary-700 dark:text-secondary-300">
+                      Слишком много неудачных попыток. Обратитесь к администратору.
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handlePinSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                        PIN-код (4 цифры)
+                      </label>
+                      <input
+                        type="password"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={4}
+                        value={authPin}
+                        onChange={(e) => setAuthPin(e.target.value.replace(/\D/g, ''))}
+                        className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
+                        placeholder="••••"
+                        autoFocus
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      size="lg"
+                      disabled={authPin.length < 4}
+                      isLoading={loading}
+                      icon={<Lock size={20} />}
+                    >
+                      Войти
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={handleBackToPhone}
+                      className="w-full text-sm text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-300"
+                    >
+                      ← Другой номер
+                    </button>
+                  </form>
+                )}
+              </>
+            )}
+
+            {/* Шаг 2b: Создание нового PIN */}
+            {authStep === 'create_pin' && (
+              <>
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-success-600 rounded-2xl mb-4">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
+                    Создайте PIN-код
+                  </h1>
+                  {foundDriver && (
+                    <p className="text-primary-600 dark:text-primary-400 font-medium mb-2">
+                      {foundDriver.full_name}
+                    </p>
+                  )}
+                  <p className="text-secondary-600 dark:text-secondary-400 text-sm">
+                    Придумайте 4-значный PIN для быстрого входа
+                  </p>
+                </div>
+
+                {authError && (
+                  <div className="mb-4 p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 rounded-lg">
+                    <p className="text-error-700 dark:text-error-400 text-sm font-medium">{authError}</p>
+                  </div>
+                )}
+
+                <form onSubmit={handleCreatePinSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                      Придумайте PIN-код
+                    </label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      value={newPin}
+                      onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
+                      className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
+                      placeholder="••••"
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                      Повторите PIN-код
+                    </label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      value={confirmPin}
+                      onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                      className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
+                      placeholder="••••"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    size="lg"
+                    disabled={newPin.length < 4 || confirmPin.length < 4}
+                    isLoading={loading}
+                  >
+                    Создать и войти
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={handleBackToPhone}
+                    className="w-full text-sm text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-300"
+                  >
+                    ← Другой номер
+                  </button>
+                </form>
+
+                <p className="text-center text-xs text-secondary-500 dark:text-secondary-400 mt-6">
+                  Запомните этот PIN - он понадобится для входа в следующий раз
+                </p>
+              </>
+            )}
           </Card>
         </div>
       </div>
