@@ -11,7 +11,7 @@ import { Modal } from '../components/ui/Modal';
 import { ErrorModal } from '../components/ui/ErrorModal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, User, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Users, Key, Copy, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate, getStatusColor } from '../lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -35,6 +35,7 @@ interface Driver {
   phone: string;
   hire_date: string;
   status: string;
+  pin_code?: string;
   notes?: string;
   created_at?: string;
   updated_at?: string;
@@ -54,6 +55,7 @@ interface DriverStats {
   phone: string;
   hire_date: string;
   status: string;
+  pin_code?: string;
   notes?: string;
   total_trips: number;
   total_payment: number;
@@ -154,6 +156,42 @@ export const Drivers: React.FC = () => {
     setErrorModalOpen(true);
   };
 
+  // Генерация 4-значного PIN-кода
+  const generatePinCode = (): string => {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+  };
+
+  // Копирование PIN в буфер обмена
+  const copyPinToClipboard = async (pin: string, driverName: string) => {
+    try {
+      await navigator.clipboard.writeText(pin);
+      alert(`PIN-код ${pin} для водителя "${driverName}" скопирован!`);
+    } catch {
+      alert(`PIN-код: ${pin}`);
+    }
+  };
+
+  // Регенерация PIN-кода для водителя
+  const regeneratePin = async (driverId: string, driverName: string) => {
+    if (!confirm(`Сгенерировать новый PIN-код для водителя "${driverName}"? Старый PIN перестанет работать.`)) return;
+
+    try {
+      const newPin = generatePinCode();
+      const { error } = await supabase
+        .from('drivers')
+        .update({ pin_code: newPin })
+        .eq('id', driverId);
+
+      if (error) throw error;
+
+      alert(`Новый PIN-код для "${driverName}": ${newPin}`);
+      fetchDrivers();
+    } catch (err) {
+      console.error('Error regenerating PIN:', err);
+      showError('Не удалось сгенерировать новый PIN-код');
+    }
+  };
+
   const getErrorMessage = (err: any): string => {
     if (err?.code === '23505' || err?.message?.includes('duplicate') || err?.message?.includes('unique')) {
       return 'Водитель с таким номером телефона уже существует в системе';
@@ -202,16 +240,16 @@ export const Drivers: React.FC = () => {
         return;
       }
 
-      const driverData = {
-        full_name: data.full_name,
-        phone: data.phone,
-        hire_date: data.hire_date,
-        status: data.status,
-        notes: data.notes || null,
-      };
-
       if (editingDriver) {
-        // Update existing driver
+        // Update existing driver (without changing PIN)
+        const driverData = {
+          full_name: data.full_name,
+          phone: data.phone,
+          hire_date: data.hire_date,
+          status: data.status,
+          notes: data.notes || null,
+        };
+
         const { error } = await supabase
           .from('drivers')
           .update(driverData)
@@ -219,10 +257,23 @@ export const Drivers: React.FC = () => {
 
         if (error) throw error;
       } else {
-        // Create new driver
+        // Create new driver with generated PIN
+        const newPin = generatePinCode();
+        const driverData = {
+          full_name: data.full_name,
+          phone: data.phone,
+          hire_date: data.hire_date,
+          status: data.status,
+          notes: data.notes || null,
+          pin_code: newPin,
+        };
+
         const { error } = await supabase.from('drivers').insert([driverData]);
 
         if (error) throw error;
+
+        // Показываем PIN-код после создания
+        alert(`Водитель "${data.full_name}" создан!\n\nPIN-код для входа: ${newPin}\n\nСообщите этот PIN водителю для доступа к форме отчёта.`);
       }
 
       setIsModalOpen(false);
@@ -350,10 +401,9 @@ export const Drivers: React.FC = () => {
               <TableRow>
                 <TableHead>{t('drivers.name')}</TableHead>
                 <TableHead>{t('drivers.phone')}</TableHead>
-                <TableHead>{t('drivers.hire_date')}</TableHead>
+                <TableHead>PIN</TableHead>
                 <TableHead>{t('drivers.total_trips')}</TableHead>
                 <TableHead>{t('drivers.total_payment')}</TableHead>
-                <TableHead>{t('drivers.avg_profit')}</TableHead>
                 <TableHead>{t('drivers.status')}</TableHead>
                 <TableHead>{t('drivers.actions')}</TableHead>
               </TableRow>
@@ -364,14 +414,47 @@ export const Drivers: React.FC = () => {
                   <TableRow key={driver.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <div className="p-2 bg-primary-100 rounded-lg">
-                          <User size={16} className="text-primary-600" />
+                        <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+                          <User size={16} className="text-primary-600 dark:text-primary-400" />
                         </div>
-                        {driver.full_name}
+                        <div>
+                          <div>{driver.full_name}</div>
+                          <div className="text-xs text-secondary-500">{formatDate(driver.hire_date)}</div>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>{driver.phone}</TableCell>
-                    <TableCell>{formatDate(driver.hire_date)}</TableCell>
+                    <TableCell>
+                      {driver.pin_code ? (
+                        <div className="flex items-center gap-1">
+                          <code className="bg-secondary-100 dark:bg-secondary-700 px-2 py-1 rounded text-sm font-mono font-bold">
+                            {driver.pin_code}
+                          </code>
+                          <button
+                            onClick={() => copyPinToClipboard(driver.pin_code!, driver.full_name)}
+                            className="p-1 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded transition-colors"
+                            title="Копировать PIN"
+                          >
+                            <Copy size={14} className="text-secondary-500" />
+                          </button>
+                          <button
+                            onClick={() => regeneratePin(driver.id, driver.full_name)}
+                            className="p-1 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded transition-colors"
+                            title="Новый PIN"
+                          >
+                            <RefreshCw size={14} className="text-secondary-500" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => regeneratePin(driver.id, driver.full_name)}
+                          className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                        >
+                          <Key size={12} />
+                          Создать PIN
+                        </button>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <span className="font-semibold text-primary-700 dark:text-primary-400">
                         {driver.total_trips || 0}
@@ -380,16 +463,13 @@ export const Drivers: React.FC = () => {
                     <TableCell className="font-mono font-semibold text-success-700 dark:text-success-400">
                       {formatCurrency(driver.total_payment || 0)}
                     </TableCell>
-                    <TableCell className="font-mono text-secondary-700 dark:text-secondary-400">
-                      {formatCurrency(driver.avg_profit_per_trip || 0)}
-                    </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(driver.status)}>
                         {t(`status.${driver.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -412,7 +492,7 @@ export const Drivers: React.FC = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-secondary-500">
+                  <TableCell colSpan={7} className="text-center py-12 text-secondary-500">
                     {t('empty.drivers')}
                   </TableCell>
                 </TableRow>

@@ -16,7 +16,11 @@ import {
   Shield,
   Mail,
   Phone,
-  Calendar
+  Calendar,
+  Send,
+  CheckCircle,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -31,6 +35,8 @@ interface User {
   phone: string | null;
   created_at: string;
   last_sign_in_at: string | null;
+  email_verified: boolean;
+  invite_sent_at: string | null;
 }
 
 export const Users: React.FC = () => {
@@ -50,10 +56,10 @@ export const Users: React.FC = () => {
     phone: '',
   });
 
-  // Верификация email
-  const [verificationStep, setVerificationStep] = useState<'form' | 'verify'>('form');
-  const [generatedCode, setGeneratedCode] = useState('');
-  const [enteredCode, setEnteredCode] = useState('');
+  // Email invite state
+  const [inviteStep, setInviteStep] = useState<'form' | 'sending' | 'success' | 'error'>('form');
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [tempPassword, setTempPassword] = useState('');
 
   useEffect(() => {
     if (isAdmin) {
@@ -113,10 +119,20 @@ export const Users: React.FC = () => {
       full_name: '',
       phone: '',
     });
-    setVerificationStep('form');
-    setGeneratedCode('');
-    setEnteredCode('');
+    setInviteStep('form');
+    setInviteError(null);
+    setTempPassword('');
     setIsModalOpen(true);
+  };
+
+  // Generate secure temporary password
+  const generateTempPassword = (): string => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
   };
 
   const handleEditUser = (user: User) => {
@@ -195,46 +211,13 @@ export const Users: React.FC = () => {
     return null; // OK
   };
 
-  // Генерация кода подтверждения
-  const generateVerificationCode = (): string => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  };
-
-  // Шаг 1: Проверка данных и генерация кода
-  const handleFormSubmit = (e: React.FormEvent) => {
+  // Handle form submit - create user with Supabase Auth and send invite
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!editingUser) {
-      // Валидация email
-      const emailError = validateEmail(formData.email);
-      if (emailError) {
-        alert(emailError);
-        return;
-      }
-
-      // Генерируем код и переходим к верификации
-      const code = generateVerificationCode();
-      setGeneratedCode(code);
-      setVerificationStep('verify');
-    } else {
-      // При редактировании сразу сохраняем
-      handleFinalSubmit();
-    }
-  };
-
-  // Шаг 2: Проверка кода и сохранение
-  const handleVerifyCode = () => {
-    if (enteredCode !== generatedCode) {
-      alert('Неверный код подтверждения!');
-      return;
-    }
-    handleFinalSubmit();
-  };
-
-  const handleFinalSubmit = async () => {
-    try {
-      if (editingUser) {
-        // Обновление существующего пользователя
+    if (editingUser) {
+      // Update existing user
+      try {
         const { error } = await supabase
           .from('profiles')
           .update({
@@ -245,47 +228,127 @@ export const Users: React.FC = () => {
           .eq('id', editingUser.id);
 
         if (error) throw error;
-      } else {
-        // Проверка на дубликат email
-        const { data: existingUser } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', formData.email)
-          .single();
+        setIsModalOpen(false);
+        loadUsers();
+      } catch (error: any) {
+        console.error('Error updating user:', error);
+        alert(error.message || t('users.save_error'));
+      }
+      return;
+    }
 
-        if (existingUser) {
-          alert(t('users.email_exists'));
-          return;
-        }
+    // New user - validate and send invite
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      alert(emailError);
+      return;
+    }
 
-        // Создание нового профиля пользователя
-        // Примечание: пользователь должен будет зарегистрироваться через Auth отдельно
-        const { error } = await supabase
-          .from('profiles')
-          .insert({
-            email: formData.email,
+    setInviteStep('sending');
+    setInviteError(null);
+
+    try {
+      // Check for existing user
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', formData.email)
+        .single();
+
+      if (existingUser) {
+        setInviteError(t('users.email_exists'));
+        setInviteStep('error');
+        return;
+      }
+
+      // Generate temporary password
+      const password = generateTempPassword();
+      setTempPassword(password);
+
+      // Create user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: password,
+        options: {
+          data: {
             role: formData.role,
             full_name: formData.full_name,
             phone: formData.phone,
-          });
+          },
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
 
-        if (error) {
-          // Если ошибка связана с уникальностью email
-          if (error.code === '23505') {
-            alert(t('users.email_exists'));
-            return;
-          }
-          throw error;
+      if (authError) {
+        // Check if user already exists in Auth
+        if (authError.message.includes('already registered')) {
+          setInviteError('Этот email уже зарегистрирован в системе');
+          setInviteStep('error');
+          return;
         }
-
-        alert(t('users.profile_created'));
+        throw authError;
       }
 
-      setIsModalOpen(false);
+      if (!authData.user) {
+        throw new Error('Не удалось создать пользователя');
+      }
+
+      // Create profile in profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          email: formData.email,
+          role: formData.role,
+          full_name: formData.full_name,
+          phone: formData.phone,
+          email_verified: false,
+          invite_sent_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        // Profile might be created by trigger, ignore the error
+      }
+
+      // Send password reset email so user can set their own password
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (resetError) {
+        console.error('Password reset email error:', resetError);
+        // Not critical, user can still use temp password
+      }
+
+      setInviteStep('success');
       loadUsers();
     } catch (error: any) {
-      console.error('Error saving user:', error);
-      alert(error.message || t('users.save_error'));
+      console.error('Error creating user:', error);
+      setInviteError(error.message || 'Ошибка при создании пользователя');
+      setInviteStep('error');
+    }
+  };
+
+  // Resend invite email
+  const resendInvite = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      // Update invite_sent_at
+      await supabase
+        .from('profiles')
+        .update({ invite_sent_at: new Date().toISOString() })
+        .eq('email', email);
+
+      alert('Приглашение отправлено повторно на ' + email);
+    } catch (error: any) {
+      console.error('Error resending invite:', error);
+      alert('Ошибка: ' + error.message);
     }
   };
 
@@ -493,6 +556,15 @@ export const Users: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
+                        {!user.email_verified && (
+                          <button
+                            onClick={() => resendInvite(user.email)}
+                            className="text-warning-600 hover:text-warning-900 dark:text-warning-400 dark:hover:text-warning-300"
+                            title="Отправить приглашение повторно"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleEditUser(user)}
                           className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
@@ -530,16 +602,18 @@ export const Users: React.FC = () => {
       {/* Модальное окно для добавления/редактирования */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setVerificationStep('form'); }}
+        onClose={() => { setIsModalOpen(false); setInviteStep('form'); }}
         title={
           editingUser
             ? t('modal.edit_user')
-            : verificationStep === 'verify'
-              ? 'Подтверждение'
-              : t('users.add')
+            : inviteStep === 'success'
+              ? 'Приглашение отправлено'
+              : inviteStep === 'error'
+                ? 'Ошибка'
+                : t('users.add')
         }
       >
-        {verificationStep === 'form' ? (
+        {inviteStep === 'form' && (
           <form onSubmit={handleFormSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
@@ -551,7 +625,11 @@ export const Users: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 disabled={!!editingUser}
                 required
+                placeholder="user@example.com"
               />
+              <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                На этот email будет отправлено приглашение
+              </p>
             </div>
 
             <div>
@@ -578,6 +656,7 @@ export const Users: React.FC = () => {
                 type="text"
                 value={formData.full_name}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                placeholder="Иван Иванов"
               />
             </div>
 
@@ -589,6 +668,7 @@ export const Users: React.FC = () => {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+996 XXX XXX XXX"
               />
             </div>
 
@@ -596,64 +676,100 @@ export const Users: React.FC = () => {
               <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
                 {t('button.cancel')}
               </Button>
-              <Button type="submit">
-                {editingUser ? t('button.save') : 'Далее →'}
+              <Button type="submit" icon={editingUser ? undefined : <Send className="w-4 h-4" />}>
+                {editingUser ? t('button.save') : 'Отправить приглашение'}
               </Button>
             </div>
           </form>
-        ) : (
+        )}
+
+        {inviteStep === 'sending' && (
+          <div className="py-8 text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-secondary-600 dark:text-secondary-400">
+              Создаём аккаунт и отправляем приглашение...
+            </p>
+          </div>
+        )}
+
+        {inviteStep === 'success' && (
           <div className="space-y-6">
-            {/* Информация о пользователе */}
-            <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4">
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">Email:</p>
-              <p className="font-medium text-secondary-900 dark:text-secondary-100">{formData.email}</p>
-            </div>
-
-            {/* Код подтверждения */}
             <div className="text-center">
-              <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-2">
-                Код подтверждения (сообщите пользователю):
-              </p>
-              <div className="bg-primary-100 dark:bg-primary-900/30 rounded-xl p-4 mb-4">
-                <span className="text-3xl font-mono font-bold text-primary-700 dark:text-primary-300 tracking-widest">
-                  {generatedCode}
-                </span>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-success-100 dark:bg-success-900/30 rounded-full mb-4">
+                <CheckCircle className="w-8 h-8 text-success-600 dark:text-success-400" />
               </div>
-              <p className="text-xs text-secondary-500 dark:text-secondary-400">
-                Попросите пользователя подтвердить этот код
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
+                Пользователь создан!
+              </h3>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+                На email <strong>{formData.email}</strong> отправлено приглашение
               </p>
             </div>
 
-            {/* Ввод кода */}
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                Введите код для подтверждения:
-              </label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                value={enteredCode}
-                onChange={(e) => setEnteredCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="000000"
-                className="text-center text-xl font-mono tracking-widest"
-              />
+            {/* Temporary password info */}
+            <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-700 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-warning-600 dark:text-warning-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-warning-800 dark:text-warning-200 mb-2">
+                    Временный пароль (сохраните!):
+                  </p>
+                  <div className="bg-white dark:bg-secondary-800 rounded px-3 py-2 font-mono text-lg">
+                    {tempPassword}
+                  </div>
+                  <p className="text-xs text-warning-700 dark:text-warning-300 mt-2">
+                    Пользователь сможет войти с этим паролем или использовать ссылку из email для установки своего пароля
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* User details */}
+            <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-secondary-600 dark:text-secondary-400">Email:</span>
+                <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100">{formData.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-secondary-600 dark:text-secondary-400">Роль:</span>
+                <Badge variant={getRoleBadgeVariant(formData.role)}>{getRoleLabel(formData.role)}</Badge>
+              </div>
+              {formData.full_name && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-secondary-600 dark:text-secondary-400">Имя:</span>
+                  <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100">{formData.full_name}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <Button onClick={() => { setIsModalOpen(false); setInviteStep('form'); }}>
+                Готово
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {inviteStep === 'error' && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-error-100 dark:bg-error-900/30 rounded-full mb-4">
+                <AlertTriangle className="w-8 h-8 text-error-600 dark:text-error-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
+                Ошибка создания
+              </h3>
+              <p className="text-sm text-error-600 dark:text-error-400">
+                {inviteError}
+              </p>
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setVerificationStep('form')}
-              >
-                ← Назад
+              <Button variant="ghost" onClick={() => { setIsModalOpen(false); setInviteStep('form'); }}>
+                Закрыть
               </Button>
-              <Button
-                type="button"
-                onClick={handleVerifyCode}
-                disabled={enteredCode.length !== 6}
-              >
-                Подтвердить
+              <Button onClick={() => setInviteStep('form')}>
+                Попробовать снова
               </Button>
             </div>
           </div>

@@ -21,13 +21,11 @@ import { supabase } from '../lib/supabase';
 import { formatCurrency, calculateTripFinancials } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
 
-// Секретный PIN-код для доступа к форме (можно изменить в настройках)
-const DRIVER_FORM_PIN = '2024';
-
 interface Driver {
   id: string;
   full_name: string;
   phone: string;
+  pin_code?: string;
   hire_date: string;
   status: string;
   notes?: string;
@@ -44,7 +42,6 @@ interface Route {
 }
 
 interface DriverTripFormData {
-  driver_name: string;
   trip_date: string;
   route_id: string;
   revenue: number;
@@ -58,15 +55,16 @@ export const DriverForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
 
-  // PIN-код защита
+  // Авторизация по телефону + PIN
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [pinCode, setPinCode] = useState('');
-  const [pinError, setPinError] = useState<string | null>(null);
-  const [pinAttempts, setPinAttempts] = useState(0);
-  const MAX_PIN_ATTEMPTS = 5;
+  const [authPhone, setAuthPhone] = useState('');
+  const [authPin, setAuthPin] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authAttempts, setAuthAttempts] = useState(0);
+  const [authenticatedDriver, setAuthenticatedDriver] = useState<Driver | null>(null);
+  const MAX_AUTH_ATTEMPTS = 5;
 
   const {
     register,
@@ -97,35 +95,108 @@ export const DriverForm: React.FC = () => {
 
   useEffect(() => {
     // Check if already authenticated in this session
-    const savedAuth = sessionStorage.getItem('driverFormAuth');
-    if (savedAuth === 'true') {
-      setIsAuthenticated(true);
-      fetchData();
+    const savedDriverId = sessionStorage.getItem('driverFormDriverId');
+    if (savedDriverId) {
+      // Restore authenticated driver from session
+      restoreSession(savedDriverId);
     } else {
       setLoading(false);
     }
   }, []);
 
-  // Verify PIN code
-  const handlePinSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPinError(null);
+  // Restore session from saved driver ID
+  const restoreSession = async (driverId: string) => {
+    try {
+      setLoading(true);
+      const { data: driver, error } = await supabase
+        .from('drivers')
+        .select('*')
+        .eq('id', driverId)
+        .eq('status', 'active')
+        .single();
 
-    if (pinAttempts >= MAX_PIN_ATTEMPTS) {
-      setPinError(t('driver_form.too_many_attempts') || 'Слишком много попыток. Попробуйте позже.');
+      if (error || !driver) {
+        sessionStorage.removeItem('driverFormDriverId');
+        setLoading(false);
+        return;
+      }
+
+      setAuthenticatedDriver(driver);
+      setIsAuthenticated(true);
+      await fetchData();
+    } catch {
+      sessionStorage.removeItem('driverFormDriverId');
+      setLoading(false);
+    }
+  };
+
+  // Нормализация телефона для сравнения
+  const normalizePhone = (phone: string): string => {
+    return phone.replace(/\D/g, '');
+  };
+
+  // Verify phone + PIN
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+
+    if (authAttempts >= MAX_AUTH_ATTEMPTS) {
+      setAuthError('Слишком много попыток. Попробуйте позже.');
       return;
     }
 
-    if (pinCode === DRIVER_FORM_PIN) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('driverFormAuth', 'true');
-      setLoading(true);
-      fetchData();
-    } else {
-      setPinAttempts(prev => prev + 1);
-      setPinError(t('driver_form.wrong_pin') || `Неверный PIN-код. Осталось попыток: ${MAX_PIN_ATTEMPTS - pinAttempts - 1}`);
-      setPinCode('');
+    if (!authPhone || !authPin) {
+      setAuthError('Введите номер телефона и PIN-код');
+      return;
     }
+
+    try {
+      setLoading(true);
+
+      // Find driver by phone and PIN
+      const { data: allDrivers, error } = await supabase
+        .from('drivers')
+        .select('*')
+        .eq('status', 'active');
+
+      if (error) throw error;
+
+      // Normalize phone for comparison
+      const normalizedInputPhone = normalizePhone(authPhone);
+
+      const driver = allDrivers?.find(d => {
+        const normalizedDriverPhone = normalizePhone(d.phone);
+        return normalizedDriverPhone === normalizedInputPhone && d.pin_code === authPin;
+      });
+
+      if (driver) {
+        setAuthenticatedDriver(driver);
+        setIsAuthenticated(true);
+        sessionStorage.setItem('driverFormDriverId', driver.id);
+        await fetchData();
+      } else {
+        setAuthAttempts(prev => prev + 1);
+        const remaining = MAX_AUTH_ATTEMPTS - authAttempts - 1;
+        setAuthError(`Неверный телефон или PIN-код. Осталось попыток: ${remaining}`);
+        setAuthPin('');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Auth error:', err);
+      setAuthError('Ошибка авторизации. Попробуйте позже.');
+      setLoading(false);
+    }
+  };
+
+  // Logout driver
+  const handleLogout = () => {
+    sessionStorage.removeItem('driverFormDriverId');
+    setIsAuthenticated(false);
+    setAuthenticatedDriver(null);
+    setAuthPhone('');
+    setAuthPin('');
+    setAuthAttempts(0);
+    setAuthError(null);
   };
 
   const fetchData = async () => {
@@ -133,17 +204,15 @@ export const DriverForm: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch drivers and routes in parallel
-      const [driversRes, routesRes] = await Promise.all([
-        supabase.from('drivers').select('*').eq('status', 'active').order('full_name'),
-        supabase.from('routes').select('*').order('name'),
-      ]);
+      // Fetch routes
+      const { data: routesData, error: routesError } = await supabase
+        .from('routes')
+        .select('*')
+        .order('name');
 
-      if (driversRes.error) throw driversRes.error;
-      if (routesRes.error) throw routesRes.error;
+      if (routesError) throw routesError;
 
-      setDrivers(driversRes.data || []);
-      setRoutes(routesRes.data || []);
+      setRoutes(routesData || []);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError(t('driver_form.load_error'));
@@ -158,18 +227,17 @@ export const DriverForm: React.FC = () => {
       setError(null);
       setSuccess(false);
 
+      // Use authenticated driver
+      if (!authenticatedDriver) {
+        throw new Error('Необходимо авторизоваться');
+      }
+
       const calculated = calculateTripFinancials(
         Number(data.revenue),
         Number(data.fuel_cost),
         0, // No maintenance cost
         Number(data.other_costs)
       );
-
-      // Find the driver by name to get the ID
-      const driver = drivers.find((d) => d.full_name === data.driver_name);
-      if (!driver) {
-        throw new Error(t('driver_form.driver_not_found'));
-      }
 
       // For now, we'll use a default vehicle (you might want to add vehicle selection)
       // or handle this differently based on your requirements
@@ -185,7 +253,7 @@ export const DriverForm: React.FC = () => {
 
       const tripData = {
         trip_date: data.trip_date,
-        driver_id: driver.id,
+        driver_id: authenticatedDriver.id,
         vehicle_id: vehicles[0].id, // Use first available vehicle
         route_id: data.route_id,
         revenue: Number(data.revenue),
@@ -197,7 +265,7 @@ export const DriverForm: React.FC = () => {
         driver_payment: calculated.driverPayment,
         owner_payment: calculated.ownerPayment,
         status: 'completed',
-        comment: t('driver_form.created_by_driver'),
+        comment: `Создано водителем: ${authenticatedDriver.full_name}`,
       };
 
       const { error } = await supabase.from('trips').insert([tripData]);
@@ -206,7 +274,6 @@ export const DriverForm: React.FC = () => {
 
       setSuccess(true);
       reset({
-        driver_name: '',
         trip_date: new Date().toISOString().split('T')[0],
         route_id: '',
         revenue: 0,
@@ -232,7 +299,7 @@ export const DriverForm: React.FC = () => {
     );
   }
 
-  // PIN-код экран входа
+  // Экран авторизации по телефону + PIN
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-950 flex items-center justify-center p-4">
@@ -243,58 +310,72 @@ export const DriverForm: React.FC = () => {
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
-                {t('driver_form.access_title') || 'Доступ к форме'}
+                Вход для водителя
               </h1>
               <p className="text-secondary-600 dark:text-secondary-400">
-                {t('driver_form.enter_pin') || 'Введите PIN-код для доступа'}
+                Введите ваш номер телефона и PIN-код
               </p>
             </div>
 
-            {pinError && (
+            {authError && (
               <div className="mb-4 p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 rounded-lg">
-                <p className="text-error-700 dark:text-error-400 text-sm font-medium">{pinError}</p>
+                <p className="text-error-700 dark:text-error-400 text-sm font-medium">{authError}</p>
               </div>
             )}
 
-            {pinAttempts >= MAX_PIN_ATTEMPTS ? (
+            {authAttempts >= MAX_AUTH_ATTEMPTS ? (
               <div className="text-center py-8">
                 <Lock className="w-12 h-12 text-error-500 mx-auto mb-4" />
                 <p className="text-secondary-700 dark:text-secondary-300">
-                  {t('driver_form.blocked') || 'Форма заблокирована. Обратитесь к администратору.'}
+                  Слишком много неудачных попыток. Обратитесь к администратору.
                 </p>
               </div>
             ) : (
-              <form onSubmit={handlePinSubmit} className="space-y-4">
+              <form onSubmit={handleAuthSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                    PIN-код
+                    Номер телефона
+                  </label>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={authPhone}
+                    onChange={(e) => setAuthPhone(e.target.value)}
+                    className="w-full px-4 py-3 text-lg border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
+                    placeholder="+996 XXX XXX XXX"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                    PIN-код (4 цифры)
                   </label>
                   <input
                     type="password"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    maxLength={6}
-                    value={pinCode}
-                    onChange={(e) => setPinCode(e.target.value.replace(/\D/g, ''))}
+                    maxLength={4}
+                    value={authPin}
+                    onChange={(e) => setAuthPin(e.target.value.replace(/\D/g, ''))}
                     className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
                     placeholder="••••"
-                    autoFocus
                   />
                 </div>
                 <Button
                   type="submit"
                   className="w-full"
                   size="lg"
-                  disabled={pinCode.length < 4}
+                  disabled={!authPhone || authPin.length < 4}
+                  isLoading={loading}
                   icon={<Lock size={20} />}
                 >
-                  {t('driver_form.verify') || 'Войти'}
+                  Войти
                 </Button>
               </form>
             )}
 
             <p className="text-center text-xs text-secondary-500 dark:text-secondary-400 mt-6">
-              {t('driver_form.pin_hint') || 'PIN-код предоставляется администратором'}
+              PIN-код предоставляется администратором при регистрации
             </p>
           </Card>
         </div>
@@ -313,6 +394,19 @@ export const DriverForm: React.FC = () => {
           <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
             {t('driver_form.title')}
           </h1>
+          {authenticatedDriver && (
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-lg font-medium text-primary-600 dark:text-primary-400">
+                👋 {authenticatedDriver.full_name}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="text-xs text-secondary-500 hover:text-error-500 underline"
+              >
+                Выйти
+              </button>
+            </div>
+          )}
           <p className="text-secondary-600 dark:text-secondary-400">
             {t('driver_form.subtitle')}
           </p>
@@ -341,17 +435,6 @@ export const DriverForm: React.FC = () => {
         {/* Form */}
         <Card className="shadow-strong">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Driver Selection */}
-            <Select
-              label={t('driver_form.driver')}
-              {...register('driver_name', { required: t('driver_form.select_driver') })}
-              options={drivers.map((d) => ({
-                value: d.full_name,
-                label: d.full_name,
-              }))}
-              error={errors.driver_name?.message}
-            />
-
             {/* Date */}
             <Input
               label={t('driver_form.trip_date')}

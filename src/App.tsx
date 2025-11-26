@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { FontSizeProvider } from './contexts/FontSizeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
+import { ResetPassword } from './pages/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
 import { Trips } from './pages/Trips';
 import { Drivers } from './pages/Drivers';
@@ -47,6 +48,7 @@ function App() {
             <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/driver-form" element={<DriverForm />} />
 
           {/* Protected routes */}
