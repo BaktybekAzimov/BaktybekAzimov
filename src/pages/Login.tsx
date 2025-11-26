@@ -84,15 +84,6 @@ export const Login: React.FC = () => {
             {t('auth.login')}
           </Button>
         </form>
-
-        <div className="mt-6 p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
-          <p className="text-xs text-secondary-600 dark:text-secondary-400 text-center">
-            {t('auth.demo_access')}:<br />
-            admin@demo.com / password ({t('auth.demo_admin')})<br />
-            dispatcher@demo.com / password ({t('auth.demo_dispatcher')})<br />
-            driver@demo.com / password ({t('auth.demo_driver')})
-          </p>
-        </div>
       </Card>
     </div>
   );
